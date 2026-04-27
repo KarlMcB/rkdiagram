@@ -1,0 +1,566 @@
+%%
+%% rkdiagram.sty  —  Reed-Kellogg sentence diagrams for LaTeX
+%% Version 1.0  |  Requires LuaLaTeX or pdfLaTeX + TikZ
+%%
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{rkdiagram}[2026/04/27 v1.0 Reed-Kellogg sentence diagrams]
+
+\RequirePackage{tikz}
+\usetikzlibrary{calc,positioning}
+\RequirePackage{xparse}
+\RequirePackage{etoolbox}
+\RequirePackage{pgfopts}
+
+% Execute a modifier/submod token list, stripping catcode-12 commas first.
+% (Commas are used as cosmetic separators in [mod, mod, ...] lists.)
+% Defined inside \ExplSyntaxOn so expl3 primitives work, but the command
+% name \rk@execmods contains no colon, so it is callable outside expl3 mode.
+\ExplSyntaxOn
+\newcommand{\rk@execmods}[1]{%
+  \tl_set:Nn \l_tmpa_tl {#1}%
+  \tl_remove_all:Nn \l_tmpa_tl {,}%
+  \tl_use:N \l_tmpa_tl
+}
+\ExplSyntaxOff
+
+% ============================================================
+% CONFIGURATION LENGTHS AND FLAGS
+% ============================================================
+
+\newlength{\rk@spacing}    \setlength{\rk@spacing}{1.2cm}
+\newlength{\rk@modDepth}   \setlength{\rk@modDepth}{1.0cm}
+\newlength{\rk@subClDepth} \setlength{\rk@subClDepth}{2.5cm}
+\newlength{\rk@lw}         \setlength{\rk@lw}{0.4pt}
+\newcommand{\rk@color}{black}
+\newcommand{\rk@font}{}
+\newif\ifrk@showroles \rk@showrolesfalse
+
+\pgfkeys{
+  /rkdiagram/.is family, /rkdiagram,
+  font/.code           = {\renewcommand{\rk@font}{#1}},
+  spacing/.code        = {\setlength{\rk@spacing}{#1}},
+  modDepth/.code       = {\setlength{\rk@modDepth}{#1}},
+  subClauseDepth/.code = {\setlength{\rk@subClDepth}{#1}},
+  linewidth/.code      = {\setlength{\rk@lw}{#1}},
+  color/.code          = {\renewcommand{\rk@color}{#1}},
+  showroles/.is if     = rk@showroles,
+}
+
+\ProcessPgfOptions{/rkdiagram}
+
+% \rkset{key=val,...} — override defaults mid-document
+\newcommand{\rkset}[1]{\pgfkeys{/rkdiagram, #1}}
+
+% ============================================================
+% INTERNAL STATE
+% ============================================================
+
+\newlength{\rk@x}      % main baseline x cursor
+\newlength{\rk@ht}     % running max word height (used for divider length)
+
+% Current slot — set by \rk@placeslot
+\newlength{\rk@sl@l}   % left x
+\newlength{\rk@sl@r}   % right x
+\newlength{\rk@sl@d}   % drawn right x (for baseline extension)
+\newlength{\rk@sl@y}   % y level
+
+% Verb slot — saved separately so \rkIObj can attach to it
+\newlength{\rk@vb@l}
+\newlength{\rk@vb@r}
+\newlength{\rk@vb@y}
+
+% Modifier context — saved/restored via \begingroup
+\newlength{\rk@mc@y}    % head y level
+\newlength{\rk@mc@d}    % head drawn-right x
+\newlength{\rk@mc@cur}  % attachment cursor x
+
+% Scratch length registers (\newlength = \newdimen, safe for \pgfextractx)
+\newlength{\rk@ta}
+\newlength{\rk@tb}
+\newlength{\rk@tc}
+\newlength{\rk@halfsep}
+
+% Deferred subclause — used when \rkSubClause appears as a word argument.
+% The drawing is deferred until after the (empty) slot node is placed.
+\newif\ifrk@deferredsc  \rk@deferredscfalse
+\newcommand{\rk@deferredsc@rw}{}
+\newcommand{\rk@deferredsc@body}{}
+\newcommand{\rk@deferred@SubClause}[2][]{%
+  \global\rk@deferredsctrue
+  \gdef\rk@deferredsc@rw{#1}%
+  \gdef\rk@deferredsc@body{#2}%
+}
+
+% ============================================================
+% DRAW SHORTHAND
+% ============================================================
+
+\newcommand{\rk@line}[1]{%
+  \draw[color=\rk@color, line width=\rk@lw] #1;%
+}
+
+% ============================================================
+% PLACE A WORD ON A BASELINE SLOT
+% \rk@placeslot{word}{y}
+% Draws the word node + baseline segment; records slot; advances \rk@x.
+% ============================================================
+
+\newcommand{\rk@placeslot}[2]{%
+  \global\rk@deferredscfalse
+  \setlength{\rk@halfsep}{\rk@spacing}%
+  \divide\rk@halfsep by 2\relax
+  \setlength{\rk@ta}{\rk@x}%
+  \addtolength{\rk@ta}{\rk@halfsep}%
+  % Temporarily replace \rkSubClause with a deferred version so that
+  % structural elements used as word arguments don't call \draw inside text.
+  \begingroup
+    \let\rkSubClause\rk@deferred@SubClause
+    \node[
+      anchor    = base west,
+      inner sep = 0pt,
+      outer sep = 0pt,
+      font      = \rk@font,
+    ] (rk@wnode) at (\the\rk@ta, #2) {#1};%
+  \endgroup
+  % Measure east x and height via \pgfextractx/y (require \dimen registers)
+  \pgfextractx{\rk@tb}{\pgfpointanchor{rk@wnode}{east}}%
+  \addtolength{\rk@tb}{\rk@halfsep}%
+  \pgfextracty{\rk@tc}{\pgfpointanchor{rk@wnode}{north}}%
+  \ifdim\rk@tc>\rk@ht \setlength{\rk@ht}{\rk@tc}\fi
+  % Draw baseline segment
+  \rk@line{(\the\rk@x, #2) -- (\the\rk@tb, #2)}%
+  % Record slot
+  \setlength{\rk@sl@l}{\rk@x}%
+  \setlength{\rk@sl@r}{\rk@tb}%
+  \setlength{\rk@sl@d}{\rk@tb}%
+  \setlength{\rk@sl@y}{#2}%
+  \setlength{\rk@x}{\rk@tb}%
+  % If \rkSubClause was captured as the word, draw it now in slot context
+  \ifrk@deferredsc
+    \rk@slot@to@mc
+    \rk@dosubclause{\rk@deferredsc@rw}{\rk@deferredsc@body}%
+    \global\rk@deferredscfalse
+  \fi
+}
+
+% Set modifier context from current slot (cursor starts at slot left)
+\newcommand{\rk@slot@to@mc}{%
+  \setlength{\rk@mc@y}{\rk@sl@y}%
+  \setlength{\rk@mc@d}{\rk@sl@d}%
+  \setlength{\rk@mc@cur}{\rk@sl@l}%
+}
+
+% ============================================================
+% SHOW ROLE LABEL  (showroles option)
+% ============================================================
+
+\newcommand{\rk@showrole}[1]{%
+  \ifrk@showroles
+    \node[
+      above     = 1pt,
+      font      = \tiny\color{gray},
+      inner sep = 0pt,
+    ] at (rk@wnode.north) {#1};%
+  \fi
+}
+
+% ============================================================
+% DIVIDERS
+% ============================================================
+
+% Full vertical bar  (subject | verb)
+\newcommand{\rk@divfull}{%
+  \setlength{\rk@ta}{\rk@ht}%
+  \addtolength{\rk@ta}{0.18cm}%
+  \rk@line{(\the\rk@x, -0.18cm) -- (\the\rk@x, \the\rk@ta)}%
+}
+
+% Short vertical bar  (verb | direct object)
+\newcommand{\rk@divshort}{%
+  \setlength{\rk@ta}{\rk@ht}%
+  \addtolength{\rk@ta}{0.10cm}%
+  \rk@line{(\the\rk@x, 0pt) -- (\the\rk@x, \the\rk@ta)}%
+}
+
+% Forward diagonal  (verb / predNom or predAdj)
+\newcommand{\rk@divfwd}{%
+  \setlength{\rk@ta}{\rk@ht}%
+  \addtolength{\rk@ta}{0.18cm}%
+  \pgfmathsetlength{\rk@tb}{\the\rk@ta / tan(60)}%
+  \rk@line{(\the\rk@x, -0.10cm) -- ++(\the\rk@tb, \the\rk@ta)}%
+}
+
+% ============================================================
+% MODIFIER DRAWING
+% ============================================================
+
+% \rk@extendbase — draw a baseline extension from drawn edge to cursor.
+\newcommand{\rk@extendbase}{%
+  \ifdim\rk@mc@cur>\rk@mc@d
+    \rk@line{(\the\rk@mc@d, \the\rk@mc@y) -- (\the\rk@mc@cur, \the\rk@mc@y)}%
+    \setlength{\rk@mc@d}{\rk@mc@cur}%
+  \fi
+}
+
+% \rk@domod{word}{submods}
+% Draw one modifier in the current mc context, then recurse into submods.
+\newcommand{\rk@domod}[2]{%
+  % Extend head baseline to attachment cursor if needed
+  \rk@extendbase
+  % Node position: 45 degrees down-right from cursor
+  % x_node = cursor + modDepth,  y_node = head_y - modDepth
+  \setlength{\rk@ta}{\rk@mc@cur}%
+  \addtolength{\rk@ta}{\rk@modDepth}%
+  \setlength{\rk@tb}{\rk@mc@y}%
+  \addtolength{\rk@tb}{-\rk@modDepth}%
+  \node[
+    rotate    = -45,
+    anchor    = base west,
+    inner sep = 0pt,
+    outer sep = 0pt,
+    font      = \rk@font,
+  ] (rk@mnode) at (\the\rk@ta, \the\rk@tb) {#1};%
+  % Slant line: (cursor, y_head) -> east anchor of modifier node
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@mnode}{east}}%
+  \pgfextracty{\rk@tb}{\pgfpointanchor{rk@mnode}{east}}%
+  \rk@line{(\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)}%
+  % Advance cursor for next sibling modifier
+  \setlength{\rk@halfsep}{\rk@spacing}%
+  \divide\rk@halfsep by 2\relax
+  \addtolength{\rk@ta}{\rk@halfsep}%
+  \setlength{\rk@mc@cur}{\rk@ta}%
+  \ifdim\rk@ta>\rk@mc@d \setlength{\rk@mc@d}{\rk@ta}\fi
+  % Recurse into sub-modifiers with new context (east anchor = new head)
+  \ifblank{#2}{}{%
+    \begingroup
+      \pgfextractx{\rk@ta}{\pgfpointanchor{rk@mnode}{east}}%
+      \pgfextracty{\rk@tb}{\pgfpointanchor{rk@mnode}{east}}%
+      \setlength{\rk@mc@y}{\rk@tb}%
+      \setlength{\rk@mc@d}{\rk@ta}%
+      \setlength{\rk@mc@cur}{\rk@ta}%
+      \rk@execmods{#2}%
+    \endgroup
+  }%
+}
+
+% Execute a modifier list (commas are stripped, then tokens run).
+\newcommand{\rk@runmods}[1]{%
+  \ifblank{#1}{}{%
+    \begingroup
+      \rk@execmods{#1}%
+    \endgroup
+  }%
+}
+
+% ============================================================
+% PREP PHRASE DRAWING
+% \rk@doprep{mods-on-obj}{prep}{obj}
+% Called in mc context. Draws diagonal with prep label, then horizontal with obj.
+% ============================================================
+
+\newcommand{\rk@doprep}[3]{%
+  % Extend head baseline to cursor
+  \rk@extendbase
+  % Slant end: (cursor + modDepth, y_head - modDepth)
+  \setlength{\rk@ta}{\rk@mc@cur}%
+  \addtolength{\rk@ta}{\rk@modDepth}%
+  \setlength{\rk@tb}{\rk@mc@y}%
+  \addtolength{\rk@tb}{-\rk@modDepth}%
+  % Prep label on slant (rotated -45, anchored base west at slant end)
+  \node[
+    rotate    = -45,
+    anchor    = base west,
+    inner sep = 0pt,
+    outer sep = 0pt,
+    font      = \rk@font,
+  ] (rk@prepnode) at (\the\rk@ta, \the\rk@tb) {#2};%
+  % Draw slant: cursor to east of prep node
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@prepnode}{east}}%
+  \pgfextracty{\rk@tb}{\pgfpointanchor{rk@prepnode}{east}}%
+  \rk@line{(\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)}%
+  % Object on horizontal line extending from slant end
+  \setlength{\rk@halfsep}{\rk@spacing}%
+  \divide\rk@halfsep by 2\relax
+  \setlength{\rk@tc}{\rk@ta}%
+  \addtolength{\rk@tc}{\rk@halfsep}%
+  \node[
+    anchor    = base west,
+    inner sep = 0pt,
+    outer sep = 0pt,
+    font      = \rk@font,
+  ] (rk@pobjnode) at (\the\rk@tc, \the\rk@tb) {#3};%
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@pobjnode}{east}}%
+  \addtolength{\rk@tc}{\rk@halfsep}%
+  % Draw horizontal: slant end to right of object
+  \rk@line{(\the\rk@ta, \the\rk@tb) -- (\the\rk@tc, \the\rk@tb)}%
+  % Update parent cursor
+  \setlength{\rk@mc@cur}{\rk@tc}%
+  \ifdim\rk@tc>\rk@mc@d \setlength{\rk@mc@d}{\rk@tc}\fi
+  % Process mods on object (hanging below the object horizontal)
+  \ifblank{#1}{}{%
+    \begingroup
+      % Object context: head y = tb (slant end y), cursor/d from pobj node
+      \setlength{\rk@mc@y}{\rk@tb}%
+      \pgfextractx{\rk@ta}{\pgfpointanchor{rk@pobjnode}{west}}%
+      \setlength{\rk@mc@cur}{\rk@ta}%
+      \addtolength{\rk@mc@cur}{-\rk@halfsep}%
+      \pgfextractx{\rk@ta}{\pgfpointanchor{rk@pobjnode}{east}}%
+      \setlength{\rk@mc@d}{\rk@ta}%
+      \addtolength{\rk@mc@d}{\rk@halfsep}%
+      \rk@execmods{#1}%
+    \endgroup
+  }%
+}
+
+% ============================================================
+% INDIRECT OBJECT PLATFORM
+% Draws below the VERB slot: diagonal then horizontal.
+% ============================================================
+
+\newcommand{\rk@doiobj}[2]{%
+  % Attach below the verb slot center.
+  % Save/restore the main context; this does NOT advance \rk@x.
+  \begingroup
+    \setlength{\rk@mc@y}{\rk@vb@y}%
+    \setlength{\rk@mc@d}{\rk@vb@r}%
+    % Attachment x = midpoint of verb slot
+    \setlength{\rk@mc@cur}{\rk@vb@l}%
+    \addtolength{\rk@mc@cur}{\rk@vb@r}%
+    \divide\rk@mc@cur by 2\relax
+    % Draw diagonal platform then horizontal with word
+    \rk@extendbase
+    \setlength{\rk@ta}{\rk@mc@cur}%
+    \addtolength{\rk@ta}{\rk@modDepth}%
+    \setlength{\rk@tb}{\rk@mc@y}%
+    \addtolength{\rk@tb}{-\rk@modDepth}%
+    \rk@line{(\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)}%
+    \setlength{\rk@halfsep}{\rk@spacing}%
+    \divide\rk@halfsep by 2\relax
+    \setlength{\rk@tc}{\rk@ta}%
+    \addtolength{\rk@tc}{\rk@halfsep}%
+    \node[
+      anchor    = base west,
+      inner sep = 0pt,
+      outer sep = 0pt,
+      font      = \rk@font,
+    ] (rk@iobjnode) at (\the\rk@tc, \the\rk@tb) {#2};%
+    \pgfextractx{\rk@tc}{\pgfpointanchor{rk@iobjnode}{east}}%
+    \addtolength{\rk@tc}{\rk@halfsep}%
+    \rk@line{(\the\rk@ta, \the\rk@tb) -- (\the\rk@tc, \the\rk@tb)}%
+    % Mods on indirect object
+    \ifblank{#1}{}{%
+      \begingroup
+        \setlength{\rk@mc@y}{\rk@tb}%
+        \setlength{\rk@mc@cur}{\rk@ta}%
+        \setlength{\rk@mc@d}{\rk@tc}%
+        \rk@execmods{#1}%
+      \endgroup
+    }%
+  \endgroup
+}
+
+% ============================================================
+% APPOSITIVE  (inline, parenthesized, on the current baseline)
+% ============================================================
+
+\newcommand{\rk@doappos}[1]{%
+  % Place in parens to the right of whatever the current drawn edge is
+  \setlength{\rk@halfsep}{\rk@spacing}%
+  \divide\rk@halfsep by 2\relax
+  \setlength{\rk@ta}{\rk@mc@d}%
+  \addtolength{\rk@ta}{\rk@halfsep}%
+  % Inside appositive, disable modifier drawing (just typeset inline)
+  \begingroup
+    \let\rkAdj\rk@inline@mod
+    \let\rkAdv\rk@inline@mod
+    \let\rkPrep\rk@inline@prep
+    \node[
+      anchor    = base west,
+      inner sep = 0pt,
+      outer sep = 0pt,
+      font      = \rk@font,
+    ] (rk@apposnode) at (\the\rk@ta, \the\rk@mc@y) {(#1)};%
+  \endgroup
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@apposnode}{east}}%
+  \addtolength{\rk@ta}{\rk@halfsep}%
+  % Extend baseline to appositive
+  \rk@line{(\the\rk@mc@d, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@mc@y)}%
+  \setlength{\rk@mc@d}{\rk@ta}%
+  \setlength{\rk@mc@cur}{\rk@ta}%
+}
+
+% Inline stubs used inside appositive (suppress drawing)
+\newcommand{\rk@inline@mod}[2][]{{#2}\space}
+\newcommand{\rk@inline@prep}[3][]{#2~#3\space}
+
+% ============================================================
+% SUBORDINATE CLAUSE
+% \rk@dosubclause{rel-word}{body}
+% Called inside modifier list: draws a dashed vertical from head,
+% then a sub-baseline below with the clause body.
+% ============================================================
+
+\newcommand{\rk@dosubclause}[2]{%
+  \rk@extendbase
+  % Attachment x = current cursor on head baseline
+  \setlength{\rk@ta}{\rk@mc@cur}%
+  % Sub-baseline y = head_y - subClDepth
+  \setlength{\rk@tb}{\rk@mc@y}%
+  \addtolength{\rk@tb}{-\rk@subClDepth}%
+  % Dashed vertical connector
+  \draw[color=\rk@color, line width=\rk@lw, dashed]
+    (\the\rk@ta, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb);%
+  % Open a sub-context for the clause body
+  \begingroup
+    % Reset x cursor to the attachment point
+    \setlength{\rk@x}{\rk@ta}%
+    \setlength{\rk@ht}{2.2ex}%
+    \setlength{\rk@mc@y}{\rk@tb}%
+    \setlength{\rk@mc@d}{\rk@ta}%
+    \setlength{\rk@mc@cur}{\rk@ta}%
+    % Place the rel-word (e.g. "who", "that", "because") first if provided
+    \ifblank{#1}{}{%
+      \rk@placeslot{#1}{\the\rk@tb}%
+      \rk@slot@to@mc
+    }%
+    % Execute clause body (\rkSubject, \rkVerb, etc.)
+    #2%
+    % Update parent cursor past the sub-clause extent
+    \setlength{\rk@mc@cur}{\rk@x}%
+    \ifdim\rk@x>\rk@mc@d \setlength{\rk@mc@d}{\rk@x}\fi
+  \endgroup
+}
+
+% ============================================================
+% ENVIRONMENT
+% ============================================================
+
+\NewDocumentEnvironment{rkdiagram}{O{}}{%
+  \ifblank{#1}{}{\pgfkeys{/rkdiagram, #1}}%
+  \setlength{\rk@x}{0pt}%
+  \setlength{\rk@ht}{2.2ex}%
+  % Init modifier context
+  \setlength{\rk@mc@y}{0pt}%
+  \setlength{\rk@mc@d}{0pt}%
+  \setlength{\rk@mc@cur}{0pt}%
+  % Init verb slot
+  \setlength{\rk@vb@l}{0pt}%
+  \setlength{\rk@vb@r}{0pt}%
+  \setlength{\rk@vb@y}{0pt}%
+  \begin{tikzpicture}[
+    line width = \rk@lw,
+    baseline   = (rk@origin),
+  ]%
+  \coordinate (rk@origin) at (0,0);
+}{%
+  \end{tikzpicture}%
+}
+
+% ============================================================
+% BASELINE COMMANDS
+% ============================================================
+
+\NewDocumentCommand{\rkSubject}{O{}m}{%
+  \rk@placeslot{#2}{0pt}%
+  \rk@showrole{subj}%
+  \rk@slot@to@mc
+  \rk@runmods{#1}%
+}
+
+\NewDocumentCommand{\rkVerb}{O{}m}{%
+  \rk@divfull
+  \rk@placeslot{#2}{0pt}%
+  \rk@showrole{vb}%
+  % Save verb slot for \rkIObj
+  \setlength{\rk@vb@l}{\rk@sl@l}%
+  \setlength{\rk@vb@r}{\rk@sl@r}%
+  \setlength{\rk@vb@y}{\rk@sl@y}%
+  \rk@slot@to@mc
+  \rk@runmods{#1}%
+}
+
+\NewDocumentCommand{\rkDObj}{O{}m}{%
+  \rk@divshort
+  \rk@placeslot{#2}{0pt}%
+  \rk@showrole{dobj}%
+  \rk@slot@to@mc
+  \rk@runmods{#1}%
+}
+
+\NewDocumentCommand{\rkPredNom}{O{}m}{%
+  \rk@divfwd
+  \rk@placeslot{#2}{0pt}%
+  \rk@showrole{pnom}%
+  \rk@slot@to@mc
+  \rk@runmods{#1}%
+}
+
+\NewDocumentCommand{\rkPredAdj}{O{}m}{%
+  \rk@divfwd
+  \rk@placeslot{#2}{0pt}%
+  \rk@showrole{padj}%
+  \rk@slot@to@mc
+  \rk@runmods{#1}%
+}
+
+\NewDocumentCommand{\rkIObj}{O{}m}{%
+  % Indirect object: platform below verb, does not advance main cursor
+  \rk@doiobj{#1}{#2}%
+}
+
+% ============================================================
+% MODIFIER COMMANDS
+% ============================================================
+
+\NewDocumentCommand{\rkAdj}{O{}m}{%
+  \rk@domod{#2}{#1}%
+}
+
+\NewDocumentCommand{\rkAdv}{O{}m}{%
+  \rk@domod{#2}{#1}%
+}
+
+% ============================================================
+% PREPOSITIONAL PHRASE
+% \rkPrep[mods-on-obj]{preposition}{object}
+% ============================================================
+
+\NewDocumentCommand{\rkPrep}{O{}mm}{%
+  \rk@doprep{#1}{#2}{#3}%
+}
+
+% ============================================================
+% COMPOUND STRUCTURE
+% \rkCompound[conjunction]{word1}{word2}
+% Simplified: renders as a dashed-underlined compound on the baseline.
+% ============================================================
+
+\NewDocumentCommand{\rkCompound}{O{and}mm}{%
+  \begingroup
+    \let\rkAdj\rk@inline@mod
+    \let\rkAdv\rk@inline@mod
+    \let\rkPrep\rk@inline@prep
+    #3~\textit{#1}~#2%
+  \endgroup
+}
+
+% ============================================================
+% APPOSITIVE
+% \rkAppos{content}
+% ============================================================
+
+\NewDocumentCommand{\rkAppos}{m}{%
+  \rk@doappos{#1}%
+}
+
+% ============================================================
+% SUBORDINATE CLAUSE
+% \rkSubClause[rel-word]{body}
+% ============================================================
+
+\NewDocumentCommand{\rkSubClause}{O{}m}{%
+  \rk@dosubclause{#1}{#2}%
+}
+
+\endinput

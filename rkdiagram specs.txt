@@ -1,0 +1,408 @@
+# Software Specification: Reed-Kellogg LaTeX Package
+
+**Package Name:** `rkdiagram`
+**Version:** 1.0
+**Document Type:** Functional & Technical Specification
+
+---
+
+## 1. Overview
+
+### 1.1 Purpose
+
+A LaTeX package that provides commands for typesetting traditional Reed-Kellogg sentence diagrams. The author manually tags sentence elements using intuitive macros; the package computes layout and renders the diagram as a TikZ picture embedded in the document.
+
+### 1.2 Design Philosophy
+
+- **Author-controlled tagging** — the LaTeX author explicitly assigns grammatical roles. There is no NLP parsing. The package is a *typesetting* tool, not a grammar engine.
+- **TikZ-based rendering** — all lines, nodes, and text are drawn with TikZ/PGF, requiring no external programs.
+- **Composable macros** — simple sentences use simple commands; complex structures are built by nesting and chaining the same primitives.
+- **LuaLaTeX compatible** — the package targets LuaLaTeX (with pdfLaTeX fallback where TikZ features allow).
+
+### 1.3 Target Users
+
+- English and grammar teachers typesetting worksheets and textbooks
+- Linguistics and grammar textbook authors
+- Students submitting grammar assignments in LaTeX
+
+---
+
+## 2. Dependencies
+
+| Dependency | Purpose |
+|---|---|
+| `tikz` | Core drawing engine |
+| `tikz` library `calc` | Coordinate arithmetic for layout |
+| `tikz` library `positioning` | Relative node placement |
+| `xparse` | Rich macro argument syntax |
+| `etoolbox` | Conditional logic in package code |
+| `xstring` | String testing for optional arguments |
+
+No NLP, no external binaries, no shell-escape required.
+
+---
+
+## 3. Grammatical Element Taxonomy
+
+Every sentence element belongs to exactly one **role**. Roles are divided into three tiers:
+
+### Tier 1 — Baseline Elements
+Elements that sit on the main horizontal baseline.
+
+| Role | Tag Command | RK Line Type |
+|---|---|---|
+| Subject | `\rkSubject` | Left of full vertical bar |
+| Verb / Predicate | `\rkVerb` | Right of full vertical bar |
+| Direct Object | `\rkDObj` | Right of short vertical bar |
+| Indirect Object | `\rkIObj` | Below verb on angled platform |
+| Predicate Nominative | `\rkPredNom` | Right of forward-diagonal bar (`/`) |
+| Predicate Adjective | `\rkPredAdj` | Right of forward-diagonal bar (`/`) |
+
+### Tier 2 — Modifier Elements
+Elements that hang below a baseline or other element on a 45° diagonal line.
+
+| Role | Tag Command | Modifies |
+|---|---|---|
+| Adjective / Article | `\rkAdj` | Noun or pronoun |
+| Adverb | `\rkAdv` | Verb, adjective, or adverb |
+| Participial phrase | `\rkPart` | Noun (written on diagonal stem) |
+| Gerund phrase | `\rkGer` | Depends on sentence position |
+
+### Tier 3 — Phrasal & Clause Elements
+Structured multi-word units with their own internal baselines.
+
+| Role | Tag Command | Notes |
+|---|---|---|
+| Prepositional phrase | `\rkPrep{prep}{object}` | Slant line + horizontal extension |
+| Appositive | `\rkAppos` | Parenthesized beside head noun |
+| Compound connector | `\rkConj` | Dashed line with conjunction label |
+| Subordinate clause | `\rkSubClause` | Dashed baseline below main line |
+
+---
+
+## 4. Macro Interface
+
+### 4.1 Document-Level Environment
+
+All diagrams are wrapped in the `rkdiagram` environment:
+
+```latex
+\begin{rkdiagram}
+  % tagging commands go here
+\end{rkdiagram}
+```
+
+The environment opens a TikZ picture, sets up the coordinate system, and draws the baseline after all elements are registered.
+
+An optional argument controls horizontal spacing:
+
+```latex
+\begin{rkdiagram}[spacing=1.4cm]
+```
+
+---
+
+### 4.2 Baseline Tagging Commands
+
+#### Subject
+```latex
+\rkSubject[mods]{word(s)}
+```
+- `{word(s)}` — the subject word or compound subject
+- `[mods]` — optional comma-separated list of modifier tag commands
+
+#### Verb
+```latex
+\rkVerb[mods]{word(s)}
+```
+
+#### Direct Object
+```latex
+\rkDObj[mods]{word(s)}
+```
+
+#### Indirect Object
+```latex
+\rkIObj[mods]{word(s)}
+```
+Rendered on an angled platform beneath the verb, per RK convention.
+
+#### Predicate Nominative / Adjective
+```latex
+\rkPredNom[mods]{word(s)}
+\rkPredAdj[mods]{word(s)}
+```
+Both render with a forward-leaning diagonal divider (`/`) after the verb.
+
+---
+
+### 4.3 Modifier Tagging Commands
+
+Modifiers take the word as their argument and may nest:
+
+```latex
+\rkAdj[mods]{word}       % adjective or article
+\rkAdv[mods]{word}       % adverb
+```
+
+Nesting example — an adverb modifying an adjective:
+
+```latex
+\rkAdj[\rkAdv{very}]{tall}
+```
+
+This renders *tall* on a diagonal below its head, and *very* on a further diagonal below *tall*.
+
+---
+
+### 4.4 Prepositional Phrase
+
+```latex
+\rkPrep[mods-on-object]{preposition}{object}
+```
+
+Renders as:
+- A diagonal line descending from the modified word
+- The preposition written *on* the diagonal
+- A horizontal line extending right
+- The object written *on* the horizontal
+- Any `[mods]` hang below the object
+
+Example:
+
+```latex
+\rkVerb[\rkPrep[\rkAdj{old}]{in}{house}]{ran}
+```
+
+---
+
+### 4.5 Compound Elements
+
+Compound subjects, verbs, or objects are declared with `\rkCompound`:
+
+```latex
+\rkCompound[conjunction]{elementA}{elementB}
+```
+
+This draws a forked dashed line connecting the two elements with the conjunction label on a dotted crossbar.
+
+Example:
+
+```latex
+\rkSubject{%
+  \rkCompound[and]{John}{Mary}%
+}
+```
+
+---
+
+### 4.6 Appositive
+
+```latex
+\rkAppos{word(s)}
+```
+
+Written in parentheses directly to the right of the noun it renames, on the baseline.
+
+---
+
+### 4.7 Subordinate Clause
+
+```latex
+\rkSubClause[rel-word]{%
+  \rkSubject{...}%
+  \rkVerb{...}%
+  ...
+}
+```
+
+Draws a complete sub-baseline below the main baseline, connected by a dashed vertical line from the point of attachment (the relative pronoun or subordinating conjunction).
+
+---
+
+## 5. Complete Usage Examples
+
+### 5.1 Simple Sentence
+*"The old dog barked loudly."*
+
+```latex
+\begin{rkdiagram}
+  \rkSubject[\rkAdj{the}, \rkAdj{old}]{dog}
+  \rkVerb[\rkAdv{loudly}]{barked}
+\end{rkdiagram}
+```
+
+---
+
+### 5.2 Transitive Verb with Prepositional Phrase
+*"She gave him the book on the shelf."*
+
+```latex
+\begin{rkdiagram}
+  \rkSubject{She}
+  \rkVerb{gave}
+  \rkIObj{him}
+  \rkDObj[\rkAdj{the},
+           \rkPrep[\rkAdj{the}]{on}{shelf}]{book}
+\end{rkdiagram}
+```
+
+---
+
+### 5.3 Linking Verb with Predicate Adjective
+*"The soup smells delicious."*
+
+```latex
+\begin{rkdiagram}
+  \rkSubject[\rkAdj{The}]{soup}
+  \rkVerb{smells}
+  \rkPredAdj{delicious}
+\end{rkdiagram}
+```
+
+---
+
+### 5.4 Compound Subject
+*"John and Mary sang beautifully."*
+
+```latex
+\begin{rkdiagram}
+  \rkSubject{\rkCompound[and]{John}{Mary}}
+  \rkVerb[\rkAdv{beautifully}]{sang}
+\end{rkdiagram}
+```
+
+---
+
+### 5.5 Subordinate Clause
+*"The man who wore the hat left."*
+
+```latex
+\begin{rkdiagram}
+  \rkSubject[\rkAdj{The},
+             \rkSubClause[who]{%
+               \rkSubject{who}%
+               \rkVerb{wore}%
+               \rkDObj[\rkAdj{the}]{hat}%
+             }]{man}
+  \rkVerb{left}
+\end{rkdiagram}
+```
+
+---
+
+## 6. Rendering Architecture
+
+### 6.1 Two-Pass Layout
+
+Because TikZ node widths depend on text content, the package uses a **two-pass approach**:
+
+**Pass 1 — Measure:** Each tagged element is rendered invisibly in a `\sbox` to capture its natural width.
+
+**Pass 2 — Place:** The layout engine uses measured widths plus `spacing` to assign absolute TikZ coordinates, then draws all nodes and connecting lines.
+
+### 6.2 Coordinate System
+
+```
+Origin (0,0) = left end of baseline
+
+Baseline   y = 0
+Modifier depth 1:  y = -\rkModDepth        (default: 1.0cm)
+Modifier depth 2:  y = -2 × \rkModDepth
+Subclause baseline: y = -\rkSubClauseDepth  (default: 2.5cm)
+```
+
+Horizontal positions are accumulated left-to-right as elements are registered.
+
+### 6.3 Line Conventions
+
+| Line | TikZ Implementation |
+|---|---|
+| Baseline | `\draw (0,0) -- (totalwidth, 0)` |
+| Full divider (subject/verb) | `\draw (x,0.6) -- (x,-0.3)` vertical |
+| Short divider (verb/dobj) | `\draw (x,0.4) -- (x,-0.1)` vertical |
+| Diagonal divider (pred nom/adj) | `\draw` at 60° angle |
+| Modifier stem | `\draw` at −45° from head midpoint |
+| Prep diagonal | `\draw` at −60° then horizontal extension |
+| Compound dashes | `\draw[dashed]` fork |
+| Subordinate connector | `\draw[dashed]` vertical drop |
+
+---
+
+## 7. Package Options
+
+Declared via `\usepackage[options]{rkdiagram}`:
+
+| Option | Default | Effect |
+|---|---|---|
+| `font=\normalfont` | serif | Font used for all diagram words |
+| `spacing=1.2cm` | 1.2cm | Horizontal gap between baseline elements |
+| `modDepth=1.0cm` | 1.0cm | Vertical drop per modifier level |
+| `subClauseDepth=2.5cm` | 2.5cm | Drop to subordinate clause baseline |
+| `linewidth=0.4pt` | 0.4pt | Thickness of all diagram lines |
+| `color=black` | black | Line and text color |
+| `showroles` | off | Prints role label in gray above each word (for drafting/worksheets) |
+
+The `showroles` option is particularly useful for **teacher answer keys**: it renders the diagram with small gray role annotations (*subj*, *vb*, *dobj*, etc.) above each word.
+
+---
+
+## 8. Package-Level Configuration Commands
+
+Authors can override defaults mid-document:
+
+```latex
+\rkset{spacing=1.5cm, modDepth=1.2cm, color=blue}
+```
+
+---
+
+## 9. File Structure
+
+```
+rkdiagram/
+├── rkdiagram.sty          % main package file
+├── rkdiagram-layout.tex   % layout engine (coordinate calculation)
+├── rkdiagram-draw.tex     % TikZ drawing commands
+├── rkdiagram-tags.tex     % user-facing tagging macros
+├── doc/
+│   ├── rkdiagram.pdf      % compiled documentation
+│   └── rkdiagram.dtx      % literate source (doc + code)
+└── examples/
+    ├── simple.tex
+    ├── compound.tex
+    ├── subordinate.tex
+    └── worksheet-example.tex
+```
+
+---
+
+## 10. Out of Scope (v1.0)
+
+- Gerund/infinitive phrases as subjects or objects
+- Passive voice diagramming
+- Interrogative/imperative sentence forms
+- Absolute phrases
+- Elliptical clauses
+- CTAN submission packaging (v2.0)
+
+---
+
+## 11. Development Phases
+
+| Phase | Tasks | Notes |
+|---|---|---|
+| **1** | Stub `.sty`, load dependencies, define `rkdiagram` environment | Verify TikZ picture opens/closes cleanly |
+| **2** | Implement `\rkSubject`, `\rkVerb` — draw baseline + divider | Hardcoded spacing first |
+| **3** | Add `\rkDObj`, `\rkPredNom`, `\rkPredAdj` with correct divider styles | |
+| **4** | Implement modifier system (`\rkAdj`, `\rkAdv`) with diagonal stems and nesting | Hardest phase |
+| **5** | Implement `\rkPrep` | Second hardest; diagonal + horizontal |
+| **6** | Implement `\rkCompound` and `\rkIObj` | |
+| **7** | Implement `\rkSubClause` | |
+| **8** | Two-pass width measurement; replace hardcoded spacing | |
+| **9** | Package options, `\rkset`, `showroles` mode | |
+| **10** | Documentation (`.dtx`), examples, testing across engines | |
+
+---
+
+This spec is well-suited for someone comfortable with LaTeX macro writing and TikZ. **Phase 4** (modifier nesting) and **Phase 8** (two-pass measurement) are the highest-complexity tasks. Would you like to begin with the `.sty` stub and the baseline drawing code?

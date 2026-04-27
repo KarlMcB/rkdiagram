@@ -1,0 +1,522 @@
+% ============================================================
+%  rk-test.tex
+%  Test suite for the rkdiagram LaTeX package
+%  Tests are organized by structural complexity.
+%  Compile with: lualatex rk-test.tex
+% ============================================================
+
+\documentclass[12pt]{article}
+
+% ---- Package under test ------------------------------------
+\usepackage[
+  spacing   = 1.3cm,
+  modDepth  = 1.0cm,
+  font      = \rmfamily,
+  linewidth = 0.5pt,
+  color     = black
+]{rkdiagram}
+
+% ---- Support packages --------------------------------------
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{xcolor}
+
+% ---- Document styling --------------------------------------
+\newcommand{\testsection}[1]{%
+  \bigskip
+  \noindent\rule{\linewidth}{0.8pt}\\[2pt]
+  {\large\bfseries #1}\\[4pt]
+}
+
+\newcommand{\testcase}[2]{%
+  \medskip
+  \noindent
+  \textbf{Test \thesubsection:} \textit{``#1''}
+  \stepcounter{subsection}
+  \par\smallskip
+  #2
+  \par\medskip
+}
+
+% Manual counter for test numbering
+\newcounter{subsection}
+\setcounter{subsection}{1}
+
+% ============================================================
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries \texttt{rkdiagram} Package Test Suite}\\[6pt]
+  {\large Version 1.0 $\cdot$ Reed-Kellogg Sentence Diagramming}\\[4pt]
+  {\small Compile with \texttt{lualatex}. Each diagram is followed by
+   a notes line describing what structural feature it exercises.}
+\end{center}
+
+\bigskip
+
+% ============================================================
+\testsection{Group 1 — Baseline Only (Subject + Verb)}
+% ============================================================
+% These are the simplest possible diagrams.
+% Expected output: one horizontal baseline, one full vertical divider.
+
+\testcase{Dogs bark.}{%
+  \begin{rkdiagram}
+    \rkSubject{Dogs}
+    \rkVerb{bark}
+  \end{rkdiagram}
+  \par\textit{Tests: bare subject, intransitive verb, no modifiers.}
+}
+
+\testcase{She laughed.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{laughed}
+  \end{rkdiagram}
+  \par\textit{Tests: pronoun subject, simple past verb.}
+}
+
+% ============================================================
+\testsection{Group 2 — Modifiers on Subject and Verb}
+% ============================================================
+% Adjectives hang on diagonals below nouns.
+% Adverbs hang on diagonals below verbs (or adjectives/adverbs).
+
+\testcase{The old dog barked.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{the}, \rkAdj{old}]{dog}
+    \rkVerb{barked}
+  \end{rkdiagram}
+  \par\textit{Tests: article + adjective both modifying same noun.}
+}
+
+\testcase{The dog barked loudly.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{dog}
+    \rkVerb[\rkAdv{loudly}]{barked}
+  \end{rkdiagram}
+  \par\textit{Tests: adverb modifying verb.}
+}
+
+\testcase{The very old dog barked quite loudly.}{%
+  \begin{rkdiagram}
+    \rkSubject[%
+      \rkAdj{The},
+      \rkAdj[\rkAdv{very}]{old}
+    ]{dog}
+    \rkVerb[\rkAdv[\rkAdv{quite}]{loudly}]{barked}
+  \end{rkdiagram}
+  \par\textit{Tests: nested modifiers — adverb modifying adjective; adverb modifying adverb.}
+}
+
+% ============================================================
+\testsection{Group 3 — Transitive Verbs (Direct Object)}
+% ============================================================
+% Direct object sits right of a SHORT vertical divider after the verb.
+
+\testcase{The cat chased the mouse.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{cat}
+    \rkVerb{chased}
+    \rkDObj[\rkAdj{the}]{mouse}
+  \end{rkdiagram}
+  \par\textit{Tests: direct object with article modifier.}
+}
+
+\testcase{Maria writes beautiful letters.}{%
+  \begin{rkdiagram}
+    \rkSubject{Maria}
+    \rkVerb{writes}
+    \rkDObj[\rkAdj{beautiful}]{letters}
+  \end{rkdiagram}
+  \par\textit{Tests: adjective on direct object.}
+}
+
+% ============================================================
+\testsection{Group 4 — Indirect Object}
+% ============================================================
+% Indirect object sits on an angled platform below the verb.
+
+\testcase{She gave him a gift.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{gave}
+    \rkIObj{him}
+    \rkDObj[\rkAdj{a}]{gift}
+  \end{rkdiagram}
+  \par\textit{Tests: indirect object (pronoun) + direct object.}
+}
+
+\testcase{The teacher sent the students a warning.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{teacher}
+    \rkVerb{sent}
+    \rkIObj[\rkAdj{the}]{students}
+    \rkDObj[\rkAdj{a}]{warning}
+  \end{rkdiagram}
+  \par\textit{Tests: indirect object with article modifier.}
+}
+
+% ============================================================
+\testsection{Group 5 — Linking Verbs}
+% ============================================================
+% Predicate nominatives and adjectives use a forward-diagonal (/)
+% divider after the linking verb.
+
+\testcase{The soup smells delicious.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{soup}
+    \rkVerb{smells}
+    \rkPredAdj{delicious}
+  \end{rkdiagram}
+  \par\textit{Tests: predicate adjective after linking verb.}
+}
+
+\testcase{He is a teacher.}{%
+  \begin{rkdiagram}
+    \rkSubject{He}
+    \rkVerb{is}
+    \rkPredNom[\rkAdj{a}]{teacher}
+  \end{rkdiagram}
+  \par\textit{Tests: predicate nominative with article.}
+}
+
+\testcase{The results seem surprisingly accurate.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{results}
+    \rkVerb{seem}
+    \rkPredAdj[\rkAdv{surprisingly}]{accurate}
+  \end{rkdiagram}
+  \par\textit{Tests: predicate adjective modified by adverb.}
+}
+
+% ============================================================
+\testsection{Group 6 — Prepositional Phrases}
+% ============================================================
+% A slant line descends from the modified word; preposition sits
+% ON the slant; object sits on a horizontal extension.
+
+\testcase{The cat sat on the mat.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{cat}
+    \rkVerb[\rkPrep[\rkAdj{the}]{on}{mat}]{sat}
+  \end{rkdiagram}
+  \par\textit{Tests: prepositional phrase modifying verb.}
+}
+
+\testcase{The bird in the tree sang.}{%
+  \begin{rkdiagram}
+    \rkSubject[%
+      \rkAdj{The},
+      \rkPrep[\rkAdj{the}]{in}{tree}
+    ]{bird}
+    \rkVerb{sang}
+  \end{rkdiagram}
+  \par\textit{Tests: prepositional phrase modifying subject noun.}
+}
+
+\testcase{She ran into the old barn near the river.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb[%
+      \rkPrep[\rkAdj{the}, \rkAdj{old}]{into}{barn},
+      \rkPrep[\rkAdj{the}]{near}{river}
+    ]{ran}
+  \end{rkdiagram}
+  \par\textit{Tests: two prepositional phrases modifying the same verb.}
+}
+
+\testcase{The book on the shelf in the corner is mine.}{%
+  \begin{rkdiagram}
+    \rkSubject[%
+      \rkAdj{The},
+      \rkPrep[%
+        \rkAdj{the},
+        \rkPrep[\rkAdj{the}]{in}{corner}
+      ]{on}{shelf}
+    ]{book}
+    \rkVerb{is}
+    \rkPredNom{mine}
+  \end{rkdiagram}
+  \par\textit{Tests: nested prepositional phrases (prep phrase modifying object of another prep).}
+}
+
+% ============================================================
+\testsection{Group 7 — Compound Elements}
+% ============================================================
+% Compound subjects/verbs/objects use a dashed fork with the
+% conjunction label on a dotted crossbar.
+
+\testcase{John and Mary sang.}{%
+  \begin{rkdiagram}
+    \rkSubject{\rkCompound[and]{John}{Mary}}
+    \rkVerb{sang}
+  \end{rkdiagram}
+  \par\textit{Tests: compound subject with coordinating conjunction.}
+}
+
+\testcase{She sang and danced.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{\rkCompound[and]{sang}{danced}}
+  \end{rkdiagram}
+  \par\textit{Tests: compound predicate.}
+}
+
+\testcase{The dog chased cats and birds.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{dog}
+    \rkVerb{chased}
+    \rkDObj{\rkCompound[and]{cats}{birds}}
+  \end{rkdiagram}
+  \par\textit{Tests: compound direct object.}
+}
+
+\testcase{He painted the wall but not the ceiling.}{%
+  \begin{rkdiagram}
+    \rkSubject{He}
+    \rkVerb{painted}
+    \rkDObj{%
+      \rkCompound[but not]{%
+        \rkAdj{the}wall%
+      }{%
+        \rkAdj{the}ceiling%
+      }%
+    }
+  \end{rkdiagram}
+  \par\textit{Tests: compound object with two-word conjunction \textit{but not}.}
+}
+
+% ============================================================
+\testsection{Group 8 — Appositives}
+% ============================================================
+% Appositives appear in parentheses beside the word they rename.
+
+\testcase{My brother, the doctor, arrived.}{%
+  \begin{rkdiagram}
+    \rkSubject[%
+      \rkAdj{My},
+      \rkAppos{\rkAdj{the}doctor}
+    ]{brother}
+    \rkVerb{arrived}
+  \end{rkdiagram}
+  \par\textit{Tests: appositive renaming the subject.}
+}
+
+\testcase{We visited Paris, the city of light.}{%
+  \begin{rkdiagram}
+    \rkSubject{We}
+    \rkVerb{visited}
+    \rkDObj[\rkAppos{\rkAdj{the}city\rkPrep[\rkAdj{}]{of}{light}}]{Paris}
+  \end{rkdiagram}
+  \par\textit{Tests: appositive (with embedded prep phrase) on direct object.}
+}
+
+% ============================================================
+\testsection{Group 9 — Subordinate Clauses}
+% ============================================================
+% A subordinate clause gets its own mini-baseline below the main
+% one, connected by a dashed vertical line.
+
+\testcase{The man who wore the hat left.}{%
+  \begin{rkdiagram}
+    \rkSubject[%
+      \rkAdj{The},
+      \rkSubClause[who]{%
+        \rkSubject{who}%
+        \rkVerb{wore}%
+        \rkDObj[\rkAdj{the}]{hat}%
+      }%
+    ]{man}
+    \rkVerb{left}
+  \end{rkdiagram}
+  \par\textit{Tests: relative clause modifying subject noun.}
+}
+
+\testcase{She knows that he lied.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{knows}
+    \rkDObj{%
+      \rkSubClause[that]{%
+        \rkSubject{he}%
+        \rkVerb{lied}%
+      }%
+    }
+  \end{rkdiagram}
+  \par\textit{Tests: noun clause functioning as direct object.}
+}
+
+\testcase{Because the rain fell, we stayed inside.}{%
+  \begin{rkdiagram}
+    \rkVerb[%
+      \rkSubClause[because]{%
+        \rkSubject[\rkAdj{the}]{rain}%
+        \rkVerb{fell}%
+      }%
+    ]{stayed}
+    \rkSubject{we}
+    \rkDObj{inside}
+  \end{rkdiagram}
+  \par\textit{Tests: adverbial clause (fronted) modifying main verb.}
+}
+
+% ============================================================
+\testsection{Group 10 — Complex Combined Structures}
+% ============================================================
+% These sentences exercise multiple features simultaneously.
+
+\testcase{The tall woman in the red coat gave her young daughter
+          a very old book.}{%
+  \begin{rkdiagram}
+    \rkSubject[%
+      \rkAdj{The},
+      \rkAdj{tall},
+      \rkPrep[\rkAdj{the}, \rkAdj{red}]{in}{coat}
+    ]{woman}
+    \rkVerb{gave}
+    \rkIObj[\rkAdj{her}, \rkAdj{young}]{daughter}
+    \rkDObj[%
+      \rkAdj{a},
+      \rkAdj[\rkAdv{very}]{old}
+    ]{book}
+  \end{rkdiagram}
+  \par\textit{Tests: multiple adjectives, prep phrase on subject, indirect object
+  with modifiers, adverb-modified adjective on direct object.}
+}
+
+\testcase{John and Maria quickly found the lost dog and gently
+          carried it home.}{%
+  \begin{rkdiagram}
+    \rkSubject{\rkCompound[and]{John}{Maria}}
+    \rkVerb{%
+      \rkCompound[and]{%
+        found\rkAdv{quickly}%
+      }{%
+        carried\rkAdv{gently}%
+      }%
+    }
+    \rkDObj[%
+      \rkAdj{the},
+      \rkAdj{lost}
+    ]{dog}
+    \rkDObj{it}
+    \rkAdv{home}
+  \end{rkdiagram}
+  \par\textit{Tests: compound subject + compound predicate, each verb with its
+  own adverb, multiple direct objects.}
+}
+
+% ============================================================
+\testsection{Group 11 — Package Option: \texttt{showroles} Mode}
+% ============================================================
+% The showroles option prints small gray role labels above each word.
+% Useful for teacher answer keys. Redefine \rkset mid-document.
+
+\rkset{showroles=true}
+
+\testcase{The eager students solved the difficult problem
+          carefully.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}, \rkAdj{eager}]{students}
+    \rkVerb[\rkAdv{carefully}]{solved}
+    \rkDObj[\rkAdj{the}, \rkAdj{difficult}]{problem}
+  \end{rkdiagram}
+  \par\textit{Tests: \texttt{showroles=true} — role labels visible above all words.
+  Disable with \texttt{\textbackslash rkset\{showroles=false\}}.}
+}
+
+\rkset{showroles=false}
+
+% ============================================================
+\testsection{Group 12 — Edge Cases and Stress Tests}
+% ============================================================
+
+% 12a — Very short sentence (stress test for baseline minimum width)
+\testcase{Go!}{%
+  \begin{rkdiagram}
+    \rkSubject{(you)}   % implied subject — author inserts it in parens
+    \rkVerb{Go}
+  \end{rkdiagram}
+  \par\textit{Tests: imperative with implied subject in parentheses (author convention).}
+}
+
+% 12b — Sentence with no modifiers at all
+\testcase{Birds fly.}{%
+  \begin{rkdiagram}
+    \rkSubject{Birds}
+    \rkVerb{fly}
+  \end{rkdiagram}
+  \par\textit{Tests: bare minimum diagram — no modifiers, no objects. Baseline
+  and divider only.}
+}
+
+% 12c — Multi-word proper noun as subject
+\testcase{New York City never sleeps.}{%
+  \begin{rkdiagram}
+    \rkSubject{New York City}
+    \rkVerb[\rkAdv{never}]{sleeps}
+  \end{rkdiagram}
+  \par\textit{Tests: multi-word proper noun in subject slot; adverb on verb.}
+}
+
+% 12d — Auxiliary + main verb (verb phrase)
+\testcase{She has been running every morning.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb[\rkPrep[\rkAdj{every}]{---}{morning}]{has been running}
+  \end{rkdiagram}
+  \par\textit{Tests: multi-word verb phrase (auxiliary + participle) in single
+  \texttt{\textbackslash rkVerb} slot; temporal prep phrase.}
+}
+
+% 12e — Negative adverb
+\testcase{He never tells the truth.}{%
+  \begin{rkdiagram}
+    \rkSubject{He}
+    \rkVerb[\rkAdv{never}]{tells}
+    \rkDObj[\rkAdj{the}]{truth}
+  \end{rkdiagram}
+  \par\textit{Tests: negative adverb modifying verb.}
+}
+
+% ============================================================
+\testsection{Regression Checklist}
+% ============================================================
+
+{\small
+\begin{tabular}{llp{8cm}}
+  \toprule
+  \textbf{Test \#} & \textbf{Sentence} & \textbf{Feature(s) Verified} \\
+  \midrule
+  1--2   & Dogs bark / She laughed         & Baseline, divider, no crash on minimal input \\
+  3--5   & Old dog / Loudly / Very quite   & Adjective, adverb, nested modifier chains \\
+  6--7   & Cat chased / Maria writes       & Direct object, short vertical divider \\
+  8--9   & Gave him / Sent students        & Indirect object platform \\
+  10--12 & Soup smells / He is / Accurate  & Pred.\ adj., pred.\ nom., forward diagonal \\
+  13--16 & Cat on mat / Bird in tree / Two preps / Nested preps &
+           Prepositional phrases: verb-mod, noun-mod, multiple, nested \\
+  17--20 & John and Mary / sang and danced / cats and birds / but not &
+           Compound subject, predicate, object, two-word conjunction \\
+  21--22 & Brother the doctor / Paris city of light &
+           Appositive on subject; appositive with embedded prep \\
+  23--25 & Man who / knows that / Because rain &
+           Relative clause, noun clause, adverbial clause \\
+  26--27 & Tall woman \ldots\ book / John and Maria \ldots\ home &
+           Multiple simultaneous features \\
+  28     & Eager students (showroles)      & \texttt{showroles=true} role labels \\
+  29--33 & Go! / Birds fly / NYC / has been running / never &
+           Implied subject, bare minimum, multi-word noun/verb, negation \\
+  \bottomrule
+\end{tabular}
+}
+
+\bigskip
+\noindent\textit{All tests should compile without error. Visual inspection of
+each diagram against the printed sentence is required; no automated output
+comparison is available at this stage.}
+
+\end{document}

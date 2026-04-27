@@ -208,34 +208,24 @@
 \newcommand{\rk@domod}[2]{%
   % Extend head baseline to attachment cursor if needed
   \rk@extendbase
-  % Node position: 45 degrees down-right from cursor
-  % x_node = cursor + modDepth,  y_node = head_y - modDepth
+  % Slant endpoint: one modDepth step diagonally down-right from attachment
   \setlength{\rk@ta}{\rk@mc@cur}%
-  \addtolength{\rk@ta}{\rk@modDepth}%
+  \addtolength{\rk@ta}{\rk@modDepth}%   % endpoint x
   \setlength{\rk@tb}{\rk@mc@y}%
-  \addtolength{\rk@tb}{-\rk@modDepth}%
-  \node[
-    rotate    = -45,
-    anchor    = base west,
-    inner sep = 0pt,
-    outer sep = 0pt,
-    font      = \rk@font,
-  ] (rk@mnode) at (\the\rk@ta, \the\rk@tb) {#1};%
-  % Slant line: (cursor, y_head) -> east anchor of modifier node
-  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@mnode}{east}}%
-  \pgfextracty{\rk@tb}{\pgfpointanchor{rk@mnode}{east}}%
-  \rk@line{(\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)}%
-  % Advance cursor for next sibling modifier
-  \setlength{\rk@halfsep}{\rk@spacing}%
-  \divide\rk@halfsep by 2\relax
-  \addtolength{\rk@ta}{\rk@halfsep}%
-  \setlength{\rk@mc@cur}{\rk@ta}%
-  \ifdim\rk@ta>\rk@mc@d \setlength{\rk@mc@d}{\rk@ta}\fi
-  % Recurse into sub-modifiers with new context (east anchor = new head)
+  \addtolength{\rk@tb}{-\rk@modDepth}%  % endpoint y
+  % Draw slant line; word sits ABOVE the line via sloped path label.
+  % This avoids the line passing through the text.
+  \draw[color=\rk@color, line width=\rk@lw]
+    (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
+    node[midway, above, sloped,
+         inner sep=2pt, outer sep=0pt, font=\rk@font] {#1};%
+  % Advance sibling cursor by fixed modDepth step
+  \addtolength{\rk@mc@cur}{\rk@modDepth}%
+  \ifdim\rk@mc@cur>\rk@mc@d \setlength{\rk@mc@d}{\rk@mc@cur}\fi
+  % Recurse into sub-modifiers from the slant endpoint.
+  % rk@ta / rk@tb still hold the endpoint coords.
   \ifblank{#2}{}{%
     \begingroup
-      \pgfextractx{\rk@ta}{\pgfpointanchor{rk@mnode}{east}}%
-      \pgfextracty{\rk@tb}{\pgfpointanchor{rk@mnode}{east}}%
       \setlength{\rk@mc@y}{\rk@tb}%
       \setlength{\rk@mc@d}{\rk@ta}%
       \setlength{\rk@mc@cur}{\rk@ta}%

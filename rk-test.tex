@@ -411,28 +411,7 @@
 }
 
 % ============================================================
-\testsection{Group 11 — Package Option: \texttt{showroles} Mode}
-% ============================================================
-% The showroles option prints small gray role labels above each word.
-% Useful for teacher answer keys. Redefine \rkset mid-document.
-
-\rkset{showroles=true}
-
-\testcase{The eager students solved the difficult problem
-          carefully.}{%
-  \begin{rkdiagram}
-    \rkSubject[\rkAdj{The}, \rkAdj{eager}]{students}
-    \rkVerb[\rkAdv{carefully}]{solved}
-    \rkDObj[\rkAdj{the}, \rkAdj{difficult}]{problem}
-  \end{rkdiagram}
-  \par\textit{Tests: \texttt{showroles=true} — role labels visible above all words.
-  Disable with \texttt{\textbackslash rkset\{showroles=false\}}.}
-}
-
-\rkset{showroles=false}
-
-% ============================================================
-\testsection{Group 12 — Edge Cases and Stress Tests}
+\testsection{Group 11 — Edge Cases and Stress Tests}
 % ============================================================
 
 % 12a — Very short sentence (stress test for baseline minimum width)
@@ -507,8 +486,7 @@
            Relative clause, noun clause, adverbial clause \\
   26--27 & Tall woman \ldots\ book / John and Maria \ldots\ home &
            Multiple simultaneous features \\
-  28     & Eager students (showroles)      & \texttt{showroles=true} role labels \\
-  29--33 & Go! / Birds fly / NYC / has been running / never &
+  28--32 & Go! / Birds fly / NYC / has been running / never &
            Implied subject, bare minimum, multi-word noun/verb, negation \\
   \bottomrule
 \end{tabular}

@@ -34,7 +34,6 @@
 \newlength{\rk@lw}         \setlength{\rk@lw}{0.4pt}
 \newcommand{\rk@color}{black}
 \newcommand{\rk@font}{}
-\newif\ifrk@showroles \rk@showrolesfalse
 
 \pgfkeys{
   /rkdiagram/.is family, /rkdiagram,
@@ -44,7 +43,6 @@
   subClauseDepth/.code = {\setlength{\rk@subClDepth}{#1}},
   linewidth/.code      = {\setlength{\rk@lw}{#1}},
   color/.code          = {\renewcommand{\rk@color}{#1}},
-  showroles/.is if     = rk@showroles,
 }
 
 \ProcessPgfOptions{/rkdiagram}
@@ -149,20 +147,6 @@
   \setlength{\rk@mc@y}{\rk@sl@y}%
   \setlength{\rk@mc@d}{\rk@sl@d}%
   \setlength{\rk@mc@cur}{\rk@sl@l}%
-}
-
-% ============================================================
-% SHOW ROLE LABEL  (showroles option)
-% ============================================================
-
-\newcommand{\rk@showrole}[1]{%
-  \ifrk@showroles
-    \node[
-      above     = 1pt,
-      font      = \tiny\color{gray},
-      inner sep = 0pt,
-    ] at (rk@wnode.north) {#1};%
-  \fi
 }
 
 % ============================================================
@@ -453,7 +437,6 @@
 
 \NewDocumentCommand{\rkSubject}{O{}m}{%
   \rk@placeslot{#2}{0pt}%
-  \rk@showrole{subj}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
 }
@@ -461,7 +444,6 @@
 \NewDocumentCommand{\rkVerb}{O{}m}{%
   \rk@divfull
   \rk@placeslot{#2}{0pt}%
-  \rk@showrole{vb}%
   % Save verb slot for \rkIObj
   \setlength{\rk@vb@l}{\rk@sl@l}%
   \setlength{\rk@vb@r}{\rk@sl@r}%
@@ -473,7 +455,6 @@
 \NewDocumentCommand{\rkDObj}{O{}m}{%
   \rk@divshort
   \rk@placeslot{#2}{0pt}%
-  \rk@showrole{dobj}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
 }
@@ -481,7 +462,6 @@
 \NewDocumentCommand{\rkPredNom}{O{}m}{%
   \rk@divfwd
   \rk@placeslot{#2}{0pt}%
-  \rk@showrole{pnom}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
 }
@@ -489,7 +469,6 @@
 \NewDocumentCommand{\rkPredAdj}{O{}m}{%
   \rk@divfwd
   \rk@placeslot{#2}{0pt}%
-  \rk@showrole{padj}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
 }

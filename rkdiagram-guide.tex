@@ -1,0 +1,682 @@
+% ============================================================
+%  rkdiagram-guide.tex
+%  User Guide for the rkdiagram LaTeX package
+%  Compile with: lualatex rkdiagram-guide.tex
+% ============================================================
+
+\documentclass[11pt]{article}
+
+\usepackage[
+  spacing   = 1.3cm,
+  modDepth  = 1.0cm,
+  font      = \rmfamily,
+  linewidth = 0.5pt,
+  color     = black
+]{rkdiagram}
+
+\usepackage{geometry}
+\geometry{margin=1.1in, top=1.0in, bottom=1.1in}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{fancyvrb}
+\usepackage{tcolorbox}
+\tcbuselibrary{listings, skins, breakable}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks = true,
+  linkcolor  = black,
+  urlcolor   = black,
+}
+
+% ---- Fonts -------------------------------------------------
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setmonofont{Latin Modern Mono}
+
+% ---- Section styling ---------------------------------------
+\titleformat{\section}
+  {\large\bfseries}{}{0em}{}[\vspace{2pt}\titlerule]
+\titleformat{\subsection}
+  {\normalsize\bfseries}{}{0em}{}
+\titlespacing{\section}{0pt}{18pt}{6pt}
+\titlespacing{\subsection}{0pt}{12pt}{3pt}
+
+% ---- Code box style ----------------------------------------
+\tcbset{
+  codebox/.style={
+    enhanced,
+    colback  = gray!7,
+    colframe = gray!30,
+    arc      = 3pt,
+    boxrule  = 0.4pt,
+    left     = 6pt, right = 6pt,
+    top      = 4pt, bottom = 4pt,
+    fontupper = \small\ttfamily,
+    breakable,
+  }
+}
+
+% ---- Example environment: code on left, diagram on right ---
+% \rkexample{sentence}{latex-code}{diagram-content}
+\newcommand{\rksep}{\par\medskip\noindent\hrulefill\par\medskip}
+
+\newenvironment{rkexample}[1]{%
+  \medskip
+  \noindent\textit{``#1''}\par\smallskip
+  \noindent\begin{minipage}[t]{0.52\linewidth}
+    \begin{tcolorbox}[codebox]
+}{%
+    \end{tcolorbox}
+  \end{minipage}%
+}
+
+\newcommand{\rksidediagram}[1]{%
+  \hfill
+  \begin{minipage}[t]{0.44\linewidth}
+    \vspace{4pt}
+    #1
+  \end{minipage}
+  \par\medskip
+}
+
+% Inline command display
+\newcommand{\cmd}[1]{\texttt{\textbackslash #1}}
+\newcommand{\opt}[1]{\texttt{#1}}
+
+% ============================================================
+\begin{document}
+
+% ---- Title block -------------------------------------------
+\begin{center}
+  {\LARGE\bfseries The \texttt{rkdiagram} Package}\\[6pt]
+  {\large Reed-Kellogg Sentence Diagrams for \LaTeX}\\[4pt]
+  {\small Version 1.0 \quad\textbullet\quad
+   Requires Lua\LaTeX}
+\end{center}
+
+\bigskip
+
+% ---- Introduction ------------------------------------------
+\section{Introduction}
+
+The \texttt{rkdiagram} package lets you typeset traditional Reed-Kellogg sentence diagrams directly in \LaTeX. You tag each word with a command that describes its grammatical role; the package computes the layout and draws the diagram using Ti\textit{k}Z.
+
+\textbf{What the package does:}
+\begin{itemize}\setlength\itemsep{2pt}
+  \item Draws baselines, dividers, and modifier stems automatically.
+  \item Handles subjects, verbs, objects, modifiers, prepositional phrases, appositives, compound structures, and subordinate clauses.
+  \item Produces properly scaled Ti\textit{k}Z output that fits inline with surrounding text.
+\end{itemize}
+
+\textbf{What you provide:}
+\begin{itemize}\setlength\itemsep{2pt}
+  \item The grammatical analysis—you tag each word with the appropriate command.
+  \item No natural-language processing is done automatically.
+\end{itemize}
+
+\medskip
+\textbf{Requirements:} Lua\LaTeX, plus the packages \texttt{tikz} (with \texttt{calc} and \texttt{positioning} libraries), \texttt{xparse}, \texttt{etoolbox}, and \texttt{pgfopts}. All are included in a standard TeX Live or MiKTeX installation.
+
+% ---- Setup -------------------------------------------------
+\section{Loading the Package}
+
+Load \texttt{rkdiagram} in your preamble with optional settings:
+
+\begin{tcolorbox}[codebox]
+\begin{Verbatim}
+\usepackage[
+  spacing        = 1.3cm,
+  modDepth       = 1.0cm,
+  subClauseDepth = 2.5cm,
+  linewidth      = 0.5pt,
+  font           = \rmfamily,
+  color          = black,
+]{rkdiagram}
+\end{Verbatim}
+\end{tcolorbox}
+
+All options are optional—the values shown above are the defaults. Options can also be changed mid-document with \cmd{rkset}:
+
+\begin{tcolorbox}[codebox]
+\verb|\rkset{spacing=1.5cm, color=blue}|
+\end{tcolorbox}
+
+\subsection*{Package options}
+
+\begin{tabular}{@{}lll@{}}
+  \toprule
+  Option & Default & Effect \\
+  \midrule
+  \opt{spacing}        & \opt{1.2cm} & Horizontal gap between baseline elements \\
+  \opt{modDepth}       & \opt{1.0cm} & Vertical drop per modifier level \\
+  \opt{subClauseDepth} & \opt{2.5cm} & Drop to subordinate clause baseline \\
+  \opt{linewidth}      & \opt{0.4pt} & Thickness of all diagram lines \\
+  \opt{font}           & \opt{\textbackslash relax} & Font applied to all diagram words \\
+  \opt{color}          & \opt{black} & Line and text colour \\
+  \bottomrule
+\end{tabular}
+
+% ---- Environment -------------------------------------------
+\section{The \texttt{rkdiagram} Environment}
+
+Every diagram lives inside an \texttt{rkdiagram} environment, which opens and closes a Ti\textit{k}Z picture:
+
+\begin{tcolorbox}[codebox]
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject{word}
+  \rkVerb{word}
+\end{rkdiagram}
+\end{Verbatim}
+\end{tcolorbox}
+
+The environment accepts a single optional argument to override options for that one diagram:
+
+\begin{tcolorbox}[codebox]
+\verb|\begin{rkdiagram}[spacing=1.5cm]|
+\end{tcolorbox}
+
+The diagram sits on the text baseline and can appear inline or in its own paragraph.
+
+% ---- Baseline elements -------------------------------------
+\section{Baseline Elements}
+
+Baseline elements sit on the main horizontal line. They are placed left to right in the order you write them.
+
+\subsection{Subject and Verb}
+
+\cmd{rkSubject} and \cmd{rkVerb} are the core of every diagram. A full vertical bar separates them.
+
+\medskip
+\begin{rkexample}{Dogs bark.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject{Dogs}
+  \rkVerb{bark}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject{Dogs}
+    \rkVerb{bark}
+  \end{rkdiagram}
+}
+
+Auxiliary and modal verbs are written together in a single \cmd{rkVerb} slot:
+
+\medskip
+\begin{rkexample}{She might have been sleeping.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject{She}
+  \rkVerb{might have been sleeping}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{might have been sleeping}
+  \end{rkdiagram}
+}
+
+\subsection{Direct Object}
+
+\cmd{rkDObj} places a short vertical bar (not crossing the baseline) after the verb, then the object word.
+
+\medskip
+\begin{rkexample}{The cat chased the mouse.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject[\rkAdj{The}]{cat}
+  \rkVerb{chased}
+  \rkDObj[\rkAdj{the}]{mouse}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{cat}
+    \rkVerb{chased}
+    \rkDObj[\rkAdj{the}]{mouse}
+  \end{rkdiagram}
+}
+
+\subsection{Indirect Object}
+
+\cmd{rkIObj} draws a platform below the verb—a diagonal line descending from the verb's midpoint, then a horizontal line on which the indirect object sits.
+
+\medskip
+\begin{rkexample}{She gave him a gift.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject{She}
+  \rkVerb{gave}
+  \rkIObj{him}
+  \rkDObj[\rkAdj{a}]{gift}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{gave}
+    \rkIObj{him}
+    \rkDObj[\rkAdj{a}]{gift}
+  \end{rkdiagram}
+}
+
+\subsection{Predicate Nominative and Predicate Adjective}
+
+After a linking verb, a forward-leaning diagonal divider introduces either a predicate nominative (\cmd{rkPredNom}) or a predicate adjective (\cmd{rkPredAdj}).
+
+\medskip
+\begin{rkexample}{He is a teacher.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject{He}
+  \rkVerb{is}
+  \rkPredNom[\rkAdj{a}]{teacher}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject{He}
+    \rkVerb{is}
+    \rkPredNom[\rkAdj{a}]{teacher}
+  \end{rkdiagram}
+}
+
+\medskip
+\begin{rkexample}{The soup smells delicious.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject[\rkAdj{The}]{soup}
+  \rkVerb{smells}
+  \rkPredAdj{delicious}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{soup}
+    \rkVerb{smells}
+    \rkPredAdj{delicious}
+  \end{rkdiagram}
+}
+
+% ---- Modifiers ---------------------------------------------
+\section{Modifiers}
+
+Modifiers hang below the word they modify on a 45° diagonal line. Use \cmd{rkAdj} for adjectives and articles, and \cmd{rkAdv} for adverbs.
+
+Modifiers are passed as the \emph{optional first argument} of the word they modify, in a comma-separated list:
+
+\begin{tcolorbox}[codebox]
+\verb|\rkSubject[\rkAdj{The}, \rkAdj{old}]{dog}|
+\end{tcolorbox}
+
+\medskip
+\begin{rkexample}{The very old dog barked quite loudly.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject[
+    \rkAdj{The},
+    \rkAdj[\rkAdv{very}]{old}
+  ]{dog}
+  \rkVerb[\rkAdv[\rkAdv{quite}]{loudly}]{barked}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}[spacing=1.1cm]
+    \rkSubject[
+      \rkAdj{The},
+      \rkAdj[\rkAdv{very}]{old}
+    ]{dog}
+    \rkVerb[\rkAdv[\rkAdv{quite}]{loudly}]{barked}
+  \end{rkdiagram}
+}
+
+\subsection*{Modifier nesting}
+
+A modifier can itself take modifiers via its own optional argument. This creates a chain of diagonals, each hanging below the previous:
+
+\begin{tcolorbox}[codebox]
+\verb|\rkAdj[\rkAdv{very}]{old}|
+\quad — \textit{very} modifies \textit{old}, which modifies the head noun.
+\end{tcolorbox}
+
+% ---- Prepositional phrases ---------------------------------
+\section{Prepositional Phrases}
+
+\cmd{rkPrep} takes the preposition as its second argument and the object as its third. It draws a diagonal with the preposition written on it, then a horizontal line for the object. An optional first argument attaches modifiers to the object.
+
+\begin{tcolorbox}[codebox]
+\verb|\rkPrep[mods-on-object]{preposition}{object}|
+\end{tcolorbox}
+
+A prepositional phrase is placed in the modifier list of the word it modifies:
+
+\medskip
+\begin{rkexample}{The cat sat on the mat.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject[\rkAdj{The}]{cat}
+  \rkVerb[\rkPrep[\rkAdj{the}]{on}{mat}]{sat}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{cat}
+    \rkVerb[\rkPrep[\rkAdj{the}]{on}{mat}]{sat}
+  \end{rkdiagram}
+}
+
+Prepositional phrases can modify nouns as well as verbs:
+
+\medskip
+\begin{rkexample}{The bird in the tree sang.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject[
+    \rkAdj{The},
+    \rkPrep[\rkAdj{the}]{in}{tree}
+  ]{bird}
+  \rkVerb{sang}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject[
+      \rkAdj{The},
+      \rkPrep[\rkAdj{the}]{in}{tree}
+    ]{bird}
+    \rkVerb{sang}
+  \end{rkdiagram}
+}
+
+Prepositional phrases can be nested—a prep phrase modifying the object of another:
+
+\medskip
+\begin{rkexample}{The book on the shelf in the corner is mine.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject[
+    \rkAdj{The},
+    \rkPrep[
+      \rkAdj{the},
+      \rkPrep[\rkAdj{the}]{in}{corner}
+    ]{on}{shelf}
+  ]{book}
+  \rkVerb{is}
+  \rkPredNom{mine}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}[spacing=1.1cm]
+    \rkSubject[
+      \rkAdj{The},
+      \rkPrep[
+        \rkAdj{the},
+        \rkPrep[\rkAdj{the}]{in}{corner}
+      ]{on}{shelf}
+    ]{book}
+    \rkVerb{is}
+    \rkPredNom{mine}
+  \end{rkdiagram}
+}
+
+% ---- Compound structures -----------------------------------
+\section{Compound Structures}
+
+\cmd{rkCompound} joins two words or phrases with a conjunction. It can be used as the content of any baseline slot—subject, verb, or object.
+
+\begin{tcolorbox}[codebox]
+\verb|\rkCompound[conjunction]{word1}{word2}|
+\end{tcolorbox}
+
+The conjunction defaults to \textit{and} if omitted.
+
+\medskip
+\begin{rkexample}{John and Mary sang beautifully.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject{\rkCompound[and]{John}{Mary}}
+  \rkVerb[\rkAdv{beautifully}]{sang}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject{\rkCompound[and]{John}{Mary}}
+    \rkVerb[\rkAdv{beautifully}]{sang}
+  \end{rkdiagram}
+}
+
+\medskip
+\begin{rkexample}{She sang and danced.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject{She}
+  \rkVerb{\rkCompound[and]{sang}{danced}}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{\rkCompound[and]{sang}{danced}}
+  \end{rkdiagram}
+}
+
+% ---- Appositives -------------------------------------------
+\section{Appositives}
+
+\cmd{rkAppos} places an appositive in parentheses on the baseline, directly to the right of the word it renames. It appears in the modifier list of the head noun.
+
+\medskip
+\begin{rkexample}{My brother, the doctor, arrived.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject[
+    \rkAdj{My},
+    \rkAppos{\rkAdj{the}doctor}
+  ]{brother}
+  \rkVerb{arrived}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject[
+      \rkAdj{My},
+      \rkAppos{\rkAdj{the}doctor}
+    ]{brother}
+    \rkVerb{arrived}
+  \end{rkdiagram}
+}
+
+Inside \cmd{rkAppos}, modifier commands like \cmd{rkAdj} and \cmd{rkPrep} are rendered inline (without drawing diagonals), since the appositive is a compact notation.
+
+% ---- Subordinate clauses -----------------------------------
+\section{Subordinate Clauses}
+
+\cmd{rkSubClause} draws a complete sub-baseline below the main one, connected by a dashed vertical line. It appears in the modifier list of the word it modifies. An optional first argument places the relative word (who, that, because, etc.) at the start of the sub-baseline.
+
+\begin{tcolorbox}[codebox]
+\verb|\rkSubClause[rel-word]{body}|
+\end{tcolorbox}
+
+The body is a sequence of baseline commands (\cmd{rkSubject}, \cmd{rkVerb}, etc.) just like a regular diagram.
+
+\medskip
+\begin{rkexample}{The man who wore the hat left.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject[
+    \rkAdj{The},
+    \rkSubClause[who]{
+      \rkSubject{who}
+      \rkVerb{wore}
+      \rkDObj[\rkAdj{the}]{hat}
+    }
+  ]{man}
+  \rkVerb{left}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}[spacing=1.1cm]
+    \rkSubject[
+      \rkAdj{The},
+      \rkSubClause[who]{
+        \rkSubject{who}
+        \rkVerb{wore}
+        \rkDObj[\rkAdj{the}]{hat}
+      }
+    ]{man}
+    \rkVerb{left}
+  \end{rkdiagram}
+}
+
+A noun clause functioning as a direct object:
+
+\medskip
+\begin{rkexample}{She knows that he lied.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject{She}
+  \rkVerb{knows}
+  \rkDObj{
+    \rkSubClause[that]{
+      \rkSubject{he}
+      \rkVerb{lied}
+    }
+  }
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{knows}
+    \rkDObj{
+      \rkSubClause[that]{
+        \rkSubject{he}
+        \rkVerb{lied}
+      }
+    }
+  \end{rkdiagram}
+}
+
+% ---- Complete example --------------------------------------
+\section{Complete Example}
+
+The following sentence exercises most features simultaneously:
+
+\textit{``The tall woman in the red coat gave her young daughter a very old book.''}
+
+\medskip
+\begin{tcolorbox}[codebox]
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject[
+    \rkAdj{The},
+    \rkAdj{tall},
+    \rkPrep[\rkAdj{the}, \rkAdj{red}]{in}{coat}
+  ]{woman}
+  \rkVerb{gave}
+  \rkIObj[\rkAdj{her}, \rkAdj{young}]{daughter}
+  \rkDObj[
+    \rkAdj{a},
+    \rkAdj[\rkAdv{very}]{old}
+  ]{book}
+\end{rkdiagram}
+\end{Verbatim}
+\end{tcolorbox}
+
+\medskip
+\begin{rkdiagram}[spacing=1.3cm]
+  \rkSubject[
+    \rkAdj{The},
+    \rkAdj{tall},
+    \rkPrep[\rkAdj{the}, \rkAdj{red}]{in}{coat}
+  ]{woman}
+  \rkVerb{gave}
+  \rkIObj[\rkAdj{her}, \rkAdj{young}]{daughter}
+  \rkDObj[
+    \rkAdj{a},
+    \rkAdj[\rkAdv{very}]{old}
+  ]{book}
+\end{rkdiagram}
+
+% ---- Command reference -------------------------------------
+\section{Command Reference}
+
+\subsection*{Baseline commands}
+
+All baseline commands share the same signature:
+\begin{tcolorbox}[codebox]
+\verb|\rkXxx[modifier-list]{word(s)}|
+\end{tcolorbox}
+The optional \texttt{[modifier-list]} is a comma-separated list of \cmd{rkAdj}, \cmd{rkAdv}, \cmd{rkPrep}, \cmd{rkAppos}, or \cmd{rkSubClause} calls.
+
+\medskip
+\begin{tabular}{@{}lp{9cm}@{}}
+  \toprule
+  Command & Role \\
+  \midrule
+  \cmd{rkSubject[mods]\{word\}}  & Subject noun; left of the full vertical divider \\
+  \cmd{rkVerb[mods]\{word\}}     & Predicate verb; right of the full vertical divider \\
+  \cmd{rkDObj[mods]\{word\}}     & Direct object; right of the short vertical divider \\
+  \cmd{rkIObj[mods]\{word\}}     & Indirect object; on a diagonal platform below the verb \\
+  \cmd{rkPredNom[mods]\{word\}}  & Predicate nominative; right of the forward diagonal \\
+  \cmd{rkPredAdj[mods]\{word\}}  & Predicate adjective; right of the forward diagonal \\
+  \bottomrule
+\end{tabular}
+
+\subsection*{Modifier commands}
+
+\medskip
+\begin{tabular}{@{}lp{9cm}@{}}
+  \toprule
+  Command & Role \\
+  \midrule
+  \cmd{rkAdj[mods]\{word\}}              & Adjective or article; diagonal below modified noun \\
+  \cmd{rkAdv[mods]\{word\}}              & Adverb; diagonal below modified verb/adj/adv \\
+  \cmd{rkPrep[obj-mods]\{prep\}\{obj\}}  & Prepositional phrase; diagonal with prep, horizontal with object \\
+  \cmd{rkAppos\{content\}}               & Appositive; parenthesized on the baseline \\
+  \cmd{rkSubClause[rel]\{body\}}         & Subordinate clause; dashed connector to sub-baseline \\
+  \cmd{rkCompound[conj]\{w1\}\{w2\}}     & Compound element; two words joined by a conjunction \\
+  \bottomrule
+\end{tabular}
+
+\subsection*{Configuration}
+
+\medskip
+\begin{tabular}{@{}lp{9cm}@{}}
+  \toprule
+  Command & Effect \\
+  \midrule
+  \cmd{rkset\{key=val,\ldots\}} & Override any package option mid-document \\
+  \bottomrule
+\end{tabular}
+
+\bigskip
+\noindent\rule{\linewidth}{0.4pt}
+\smallskip
+\noindent{\small
+Compile with \texttt{lualatex}. Source and test suite: \texttt{rk-test.tex}.
+Specification: \texttt{rkdiagram specs.txt}.}
+
+\end{document}

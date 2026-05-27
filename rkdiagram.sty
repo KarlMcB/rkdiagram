@@ -68,6 +68,9 @@
 \newlength{\rk@vb@r}
 \newlength{\rk@vb@y}
 
+% Right edge of the indirect-object platform (global; checked after \rk@doiobj)
+\newlength{\rk@iobj@xmax}
+
 % Modifier context — saved/restored via \begingroup
 \newlength{\rk@mc@y}    % head y level
 \newlength{\rk@mc@d}    % head drawn-right x
@@ -294,7 +297,7 @@
 
 \newcommand{\rk@doiobj}[2]{%
   % Attach below the verb slot center.
-  % Save/restore the main context; this does NOT advance \rk@x.
+  % Advances \rk@x if the platform extends past the current cursor.
   \begingroup
     \setlength{\rk@mc@y}{\rk@vb@y}%
     \setlength{\rk@mc@d}{\rk@vb@r}%
@@ -322,6 +325,7 @@
     \pgfextractx{\rk@tc}{\pgfpointanchor{rk@iobjnode}{east}}%
     \addtolength{\rk@tc}{\rk@halfsep}%
     \rk@line{(\the\rk@ta, \the\rk@tb) -- (\the\rk@tc, \the\rk@tb)}%
+    \global\rk@iobj@xmax=\rk@tc\relax
     % Mods on indirect object
     \ifblank{#1}{}{%
       \begingroup
@@ -332,6 +336,12 @@
       \endgroup
     }%
   \endgroup
+  % Push main cursor past IObj platform to prevent DObj modifier collision.
+  % Also extend the baseline so the line stays continuous.
+  \ifdim\rk@iobj@xmax>\rk@x
+    \rk@line{(\the\rk@x, \the\rk@vb@y) -- (\the\rk@iobj@xmax, \the\rk@vb@y)}%
+    \setlength{\rk@x}{\rk@iobj@xmax}%
+  \fi
 }
 
 % ============================================================
@@ -422,6 +432,7 @@
   \setlength{\rk@vb@l}{0pt}%
   \setlength{\rk@vb@r}{0pt}%
   \setlength{\rk@vb@y}{0pt}%
+  \setlength{\rk@iobj@xmax}{0pt}%
   \begin{tikzpicture}[
     line width = \rk@lw,
     baseline   = (rk@origin),

@@ -233,9 +233,20 @@
   % rk@ta / rk@tb still hold the endpoint coords.
   \ifblank{#2}{}{%
     \begingroup
+      % Draw a short horizontal at the slant endpoint.  This creates a
+      % visible "elbow" so each sub-modifier appears on its own separate
+      % slant rather than as a collinear continuation of this one.
+      \setlength{\rk@halfsep}{\rk@spacing}%
+      \divide\rk@halfsep by 2\relax
+      \setlength{\rk@tc}{\rk@ta}%
+      \addtolength{\rk@tc}{\rk@halfsep}%
+      \rk@line{(\the\rk@ta, \the\rk@tb) -- (\the\rk@tc, \the\rk@tb)}%
+      % Sub-modifier context: cursor at end of horizontal so the child slant
+      % starts from there, not from the same point the parent ended.
+      % This makes each level visually distinct (true stair-step).
       \setlength{\rk@mc@y}{\rk@tb}%
-      \setlength{\rk@mc@d}{\rk@ta}%
-      \setlength{\rk@mc@cur}{\rk@ta}%
+      \setlength{\rk@mc@cur}{\rk@tc}%
+      \setlength{\rk@mc@d}{\rk@tc}%
       \rk@execmods{#2}%
     \endgroup
   }%

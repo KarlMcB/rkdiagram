@@ -100,6 +100,20 @@
   \gdef\rk@deferredsc@body{#2}%
 }
 
+% Deferred compound — used when \rkCompound appears as a word argument.
+% \rk@cmpdir is set by each slot command before calling \rk@placeslot.
+\newif\ifrk@deferredcmp  \rk@deferredcmpfalse
+\newcommand{\rk@deferredcmp@conj}{and}
+\newcommand{\rk@deferredcmp@worda}{}
+\newcommand{\rk@deferredcmp@wordb}{}
+\NewDocumentCommand{\rk@deferred@Compound}{O{and}mm}{%
+  \global\rk@deferredcmptrue
+  \gdef\rk@deferredcmp@conj{#1}%
+  \gdef\rk@deferredcmp@worda{#2}%
+  \gdef\rk@deferredcmp@wordb{#3}%
+}
+\def\rk@cmpdir{l}   % default; overridden by each slot command
+
 % ============================================================
 % DRAW SHORTHAND
 % ============================================================
@@ -116,14 +130,15 @@
 
 \newcommand{\rk@placeslot}[2]{%
   \global\rk@deferredscfalse
+  \global\rk@deferredcmpfalse
   \setlength{\rk@halfsep}{\rk@spacing}%
   \divide\rk@halfsep by 2\relax
   \setlength{\rk@ta}{\rk@x}%
   \addtolength{\rk@ta}{\rk@halfsep}%
-  % Temporarily replace \rkSubClause with a deferred version so that
-  % structural elements used as word arguments don't call \draw inside text.
+  % Capture \rkSubClause / \rkCompound so they don't call \draw inside node text.
   \begingroup
     \let\rkSubClause\rk@deferred@SubClause
+    \let\rkCompound\rk@deferred@Compound
     \node[
       anchor    = base west,
       inner sep = 0pt,
@@ -131,24 +146,28 @@
       font      = \rk@font,
     ] (rk@wnode) at (\the\rk@ta, #2) {#1};%
   \endgroup
-  % Measure east x and height via \pgfextractx/y (require \dimen registers)
-  \pgfextractx{\rk@tb}{\pgfpointanchor{rk@wnode}{east}}%
-  \addtolength{\rk@tb}{\rk@halfsep}%
-  \pgfextracty{\rk@tc}{\pgfpointanchor{rk@wnode}{north}}%
-  \ifdim\rk@tc>\rk@ht \setlength{\rk@ht}{\rk@tc}\fi
-  % Draw baseline segment
-  \rk@line{(\the\rk@x, #2) -- (\the\rk@tb, #2)}%
-  % Record slot
-  \setlength{\rk@sl@l}{\rk@x}%
-  \setlength{\rk@sl@r}{\rk@tb}%
-  \setlength{\rk@sl@d}{\rk@tb}%
-  \setlength{\rk@sl@y}{#2}%
-  \setlength{\rk@x}{\rk@tb}%
-  % If \rkSubClause was captured as the word, draw it now in slot context
-  \ifrk@deferredsc
-    \rk@slot@to@mc
-    \rk@dosubclause{\rk@deferredsc@rw}{\rk@deferredsc@body}%
-    \global\rk@deferredscfalse
+  \ifrk@deferredcmp
+    % Compound: discard the empty placeholder node; draw compound structure.
+    \rk@docompound{\rk@cmpdir}%
+      {\rk@deferredcmp@conj}{\rk@deferredcmp@worda}{\rk@deferredcmp@wordb}%
+    \global\rk@deferredcmpfalse
+  \else
+    % Normal word: measure, draw baseline, record slot.
+    \pgfextractx{\rk@tb}{\pgfpointanchor{rk@wnode}{east}}%
+    \addtolength{\rk@tb}{\rk@halfsep}%
+    \pgfextracty{\rk@tc}{\pgfpointanchor{rk@wnode}{north}}%
+    \ifdim\rk@tc>\rk@ht \setlength{\rk@ht}{\rk@tc}\fi
+    \rk@line{(\the\rk@x, #2) -- (\the\rk@tb, #2)}%
+    \setlength{\rk@sl@l}{\rk@x}%
+    \setlength{\rk@sl@r}{\rk@tb}%
+    \setlength{\rk@sl@d}{\rk@tb}%
+    \setlength{\rk@sl@y}{#2}%
+    \setlength{\rk@x}{\rk@tb}%
+    \ifrk@deferredsc
+      \rk@slot@to@mc
+      \rk@dosubclause{\rk@deferredsc@rw}{\rk@deferredsc@body}%
+      \global\rk@deferredscfalse
+    \fi
   \fi
 }
 
@@ -508,6 +527,7 @@
 % ============================================================
 
 \NewDocumentCommand{\rkSubject}{O{}m}{%
+  \def\rk@cmpdir{r}%
   \rk@placeslot{#2}{0pt}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
@@ -515,6 +535,7 @@
 
 \NewDocumentCommand{\rkVerb}{O{}m}{%
   \rk@divfull
+  \def\rk@cmpdir{l}%
   \rk@placeslot{#2}{0pt}%
   % Save verb slot for \rkIObj
   \setlength{\rk@vb@l}{\rk@sl@l}%
@@ -526,6 +547,7 @@
 
 \NewDocumentCommand{\rkDObj}{O{}m}{%
   \rk@divshort
+  \def\rk@cmpdir{l}%
   \rk@placeslot{#2}{0pt}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
@@ -533,6 +555,7 @@
 
 \NewDocumentCommand{\rkPredNom}{O{}m}{%
   \rk@divfwd
+  \def\rk@cmpdir{l}%
   \rk@placeslot{#2}{0pt}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
@@ -540,6 +563,7 @@
 
 \NewDocumentCommand{\rkPredAdj}{O{}m}{%
   \rk@divfwd
+  \def\rk@cmpdir{l}%
   \rk@placeslot{#2}{0pt}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
@@ -574,9 +598,97 @@
 % ============================================================
 % COMPOUND STRUCTURE
 % \rkCompound[conjunction]{word1}{word2}
-% Simplified: renders as a dashed-underlined compound on the baseline.
+% Inside \rkSubject/\rkVerb/\rkDObj etc., intercepted by \rk@deferred@Compound
+% and rendered as a proper forked compound via \rk@docompound.
+% Outside a diagram context the inline fallback applies.
 % ============================================================
 
+% \rk@docompound{dir}{conj}{worda}{wordb}
+%   dir = r  subject  (convergence RIGHT, dashed bar on LEFT)
+%   dir = l  verb/obj (convergence LEFT,  dashed bar on RIGHT)
+\newcommand{\rk@docompound}[4]{%
+  % rk@ta = csep  (vertical half-gap between platforms; also horizontal slant size)
+  \setlength{\rk@ta}{\rk@ht}%
+  \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
+  % Measure word widths in inline-mod context (inline \rkAdj etc.)
+  \begingroup
+    \let\rkAdj\rk@inline@mod\let\rkAdv\rk@inline@mod\let\rkPrep\rk@inline@prep
+    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@cmpA)at(0,0){#3};%
+    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@cmpB)at(0,0){#4};%
+  \endgroup
+  \pgfextractx{\rk@effmod}{\pgfpointanchor{rk@cmpA}{east}}%
+  \pgfextractx{\rk@tb}    {\pgfpointanchor{rk@cmpA}{west}}%
+  \addtolength{\rk@effmod}{-\rk@tb}%           rk@effmod = width_A
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@cmpB}{east}}%
+  \pgfextractx{\rk@tb}{\pgfpointanchor{rk@cmpB}{west}}%
+  \addtolength{\rk@tc}{-\rk@tb}%               rk@tc = width_B
+  \ifdim\rk@tc>\rk@effmod\setlength{\rk@effmod}{\rk@tc}\fi
+  % rk@effmod = max word width; platform width = max + full spacing margin
+  \addtolength{\rk@effmod}{\rk@spacing}%
+  %
+  \if r#1%  %----- SUBJECT: convergence RIGHT --------------------------
+    % plat_l = rk@x,  plat_r = rk@x + effmod,  conv_x = plat_r + csep
+    \setlength{\rk@tb}{\rk@x}\addtolength{\rk@tb}{\rk@effmod}%  rk@tb = plat_r
+    \setlength{\rk@tc}{\rk@tb}\addtolength{\rk@tc}{\rk@ta}%     rk@tc = conv_x
+    % text_x = plat_l + halfsep  (reuse rk@sl@l as scratch)
+    \setlength{\rk@sl@l}{\rk@x}\addtolength{\rk@sl@l}{\rk@halfsep}%
+    % Place word nodes (inline-mod context prevents \rkAdj etc. from calling \draw)
+    \begingroup
+      \let\rkAdj\rk@inline@mod\let\rkAdv\rk@inline@mod\let\rkPrep\rk@inline@prep
+      \node[anchor=base west,inner sep=0pt,outer sep=0pt,font=\rk@font]
+        (rk@cmpAN)at(\the\rk@sl@l, \the\rk@ta){#3};%
+      \node[anchor=base west,inner sep=0pt,outer sep=0pt,font=\rk@font]
+        (rk@cmpBN)at(\the\rk@sl@l,-\the\rk@ta){#4};%
+    \endgroup
+    % Platform baselines
+    \rk@line{(\the\rk@x, \the\rk@ta)--(\the\rk@tb, \the\rk@ta)}%
+    \rk@line{(\the\rk@x,-\the\rk@ta)--(\the\rk@tb,-\the\rk@ta)}%
+    % Dashed vertical + conjunction label on the left (open) end
+    \draw[color=\rk@color,line width=\rk@lw,dashed]
+      (\the\rk@x, \the\rk@ta)--(\the\rk@x,-\the\rk@ta)
+      node[midway,right,inner sep=2pt,font=\rk@font]{\textit{#2}};%
+    % Convergence slants on the right (connecting) end
+    \rk@line{(\the\rk@tb, \the\rk@ta)--(\the\rk@tc,0pt)}%
+    \rk@line{(\the\rk@tb,-\the\rk@ta)--(\the\rk@tc,0pt)}%
+    % Update rk@ht so the subsequent divider is tall enough
+    \pgfextracty{\rk@tb}{\pgfpointanchor{rk@cmpAN}{north}}%
+    \ifdim\rk@tb>\rk@ht\setlength{\rk@ht}{\rk@tb}\fi
+    % Slot registers
+    \setlength{\rk@sl@l}{\rk@x}%
+    \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%
+    \setlength{\rk@sl@y}{0pt}\setlength{\rk@x}{\rk@tc}%
+  \else%   %----- VERB / OBJ: convergence LEFT --------------------------
+    % conv_x = rk@x,  plat_l = rk@x + csep,  plat_r = plat_l + effmod
+    \setlength{\rk@tb}{\rk@x}\addtolength{\rk@tb}{\rk@ta}%   rk@tb = plat_l
+    \setlength{\rk@tc}{\rk@tb}\addtolength{\rk@tc}{\rk@effmod}% rk@tc = plat_r
+    % text_x = plat_l + halfsep
+    \setlength{\rk@sl@l}{\rk@tb}\addtolength{\rk@sl@l}{\rk@halfsep}%
+    % Place word nodes (inline-mod context)
+    \begingroup
+      \let\rkAdj\rk@inline@mod\let\rkAdv\rk@inline@mod\let\rkPrep\rk@inline@prep
+      \node[anchor=base west,inner sep=0pt,outer sep=0pt,font=\rk@font]
+        (rk@cmpAN)at(\the\rk@sl@l, \the\rk@ta){#3};%
+      \node[anchor=base west,inner sep=0pt,outer sep=0pt,font=\rk@font]
+        (rk@cmpBN)at(\the\rk@sl@l,-\the\rk@ta){#4};%
+    \endgroup
+    % Platform baselines
+    \rk@line{(\the\rk@tb, \the\rk@ta)--(\the\rk@tc, \the\rk@ta)}%
+    \rk@line{(\the\rk@tb,-\the\rk@ta)--(\the\rk@tc,-\the\rk@ta)}%
+    % Convergence slants on the left (connecting) end
+    \rk@line{(\the\rk@x,0pt)--(\the\rk@tb, \the\rk@ta)}%
+    \rk@line{(\the\rk@x,0pt)--(\the\rk@tb,-\the\rk@ta)}%
+    % Dashed vertical + conjunction label on the right (open) end
+    \draw[color=\rk@color,line width=\rk@lw,dashed]
+      (\the\rk@tc, \the\rk@ta)--(\the\rk@tc,-\the\rk@ta)
+      node[midway,right,inner sep=2pt,font=\rk@font]{\textit{#2}};%
+    % Slot registers
+    \setlength{\rk@sl@l}{\rk@x}%
+    \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%
+    \setlength{\rk@sl@y}{0pt}\setlength{\rk@x}{\rk@tc}%
+  \fi
+}
+
+% Inline fallback (used outside diagram context or as a safety net)
 \NewDocumentCommand{\rkCompound}{O{and}mm}{%
   \begingroup
     \let\rkAdj\rk@inline@mod

@@ -85,9 +85,6 @@
 \newlength{\rk@tc}
 \newlength{\rk@halfsep}
 
-% Direction flag: true = modifiers go leftward (subject side)
-\newif\ifrk@mc@left  \rk@mc@leftfalse
-
 % Deferred subclause — used when \rkSubClause appears as a word argument.
 % The drawing is deferred until after the (empty) slot node is placed.
 \newif\ifrk@deferredsc  \rk@deferredscfalse
@@ -189,83 +186,68 @@
 % ============================================================
 
 % \rk@extendbase — draw a baseline extension from drawn edge to cursor.
-% Direction-aware: leftward contexts extend toward smaller x, rightward toward larger x.
 \newcommand{\rk@extendbase}{%
-  \ifrk@mc@left
-    \ifdim\rk@mc@cur<\rk@mc@d
-      \rk@line{(\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@mc@d, \the\rk@mc@y)}%
-      \setlength{\rk@mc@d}{\rk@mc@cur}%
-    \fi
-  \else
-    \ifdim\rk@mc@cur>\rk@mc@d
-      \rk@line{(\the\rk@mc@d, \the\rk@mc@y) -- (\the\rk@mc@cur, \the\rk@mc@y)}%
-      \setlength{\rk@mc@d}{\rk@mc@cur}%
-    \fi
+  \ifdim\rk@mc@cur>\rk@mc@d
+    \rk@line{(\the\rk@mc@d, \the\rk@mc@y) -- (\the\rk@mc@cur, \the\rk@mc@y)}%
+    \setlength{\rk@mc@d}{\rk@mc@cur}%
   \fi
 }
 
 % \rk@domod{word}{submods}
-% Draw one modifier in the current mc context, then recurse into submods.
-% Direction is controlled by \ifrk@mc@left:
-%   false (default) — slant goes down-right; label placed above, sloped
-%   true  (subject) — slant goes down-left;  label placed below, sloped
+% Draw one modifier slant (always down-right), then recurse into sub-modifiers.
+%
+% Sub-modifier geometry (matching example: adjective (0,0)→(10,−10),
+% connector (2,−2)→(0,−4), adverb (0,−4)→(8,−12)):
+%   • The connector branches off the parent slant at 20% of the way along
+%     (i.e., at x_s + 0.2·E, y_s − 0.2·E) and goes diagonally down-left
+%     back to the parent's starting x (x_s, y_s − 0.4·E).
+%   • The child slant then continues down-right from (x_s, y_s − 0.4·E).
 \newcommand{\rk@domod}[2]{%
-  % Extend head baseline to attachment cursor if needed
   \rk@extendbase
-  % Measure the word to find the minimum slant length.
   \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
     (rk@modmsr) at (0,0) {#1};%
-  % Measure width (east - west)
+  % Measure width (east − west)
   \pgfextractx{\rk@tc}{\pgfpointanchor{rk@modmsr}{east}}%
   \pgfextractx{\rk@ta}{\pgfpointanchor{rk@modmsr}{west}}%
-  \addtolength{\rk@tc}{-\rk@ta}%  % rk@tc = nodeWidth
-  % Measure height (north - south)
+  \addtolength{\rk@tc}{-\rk@ta}%   % rk@tc = nodeWidth
+  % Measure height (north − south)
   \pgfextracty{\rk@tb}{\pgfpointanchor{rk@modmsr}{north}}%
   \pgfextracty{\rk@ta}{\pgfpointanchor{rk@modmsr}{south}}%
-  \addtolength{\rk@tb}{-\rk@ta}%  % rk@tb = nodeHeight
+  \addtolength{\rk@tb}{-\rk@ta}%   % rk@tb = nodeHeight
   \pgfmathsetlength{\rk@effmod}{max(\the\rk@modDepth, (\the\rk@tc + \the\rk@tb) / 1.41422 + 6pt)}%
-  \ifrk@mc@left
-    %% ---- LEFTWARD (subject side): slant goes down-left ----
-    \setlength{\rk@ta}{\rk@mc@cur}%
-    \addtolength{\rk@ta}{-\rk@effmod}%  % endpoint x (leftward)
-    \setlength{\rk@tb}{\rk@mc@y}%
-    \addtolength{\rk@tb}{-\rk@effmod}%  % endpoint y (downward)
-    % For a path going down-left, "below, sloped" places the label
-    % between the slant and the parent baseline (visually above the line).
-    \draw[color=\rk@color, line width=\rk@lw]
-      (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
-      node[midway, below, sloped,
-           inner sep=2pt, outer sep=0pt, font=\rk@font] {#1};%
-    \addtolength{\rk@mc@cur}{-\rk@effmod}%
-    \ifdim\rk@mc@cur<\rk@mc@d \setlength{\rk@mc@d}{\rk@mc@cur}\fi
-  \else
-    %% ---- RIGHTWARD (verb/object side): slant goes down-right ----
-    \setlength{\rk@ta}{\rk@mc@cur}%
-    \addtolength{\rk@ta}{\rk@effmod}%   % endpoint x (rightward)
-    \setlength{\rk@tb}{\rk@mc@y}%
-    \addtolength{\rk@tb}{-\rk@effmod}%  % endpoint y (downward)
-    \draw[color=\rk@color, line width=\rk@lw]
-      (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
-      node[midway, above, sloped,
-           inner sep=2pt, outer sep=0pt, font=\rk@font] {#1};%
-    \addtolength{\rk@mc@cur}{\rk@effmod}%
-    \ifdim\rk@mc@cur>\rk@mc@d \setlength{\rk@mc@d}{\rk@mc@cur}\fi
-  \fi
-  % Recurse into sub-modifiers from the slant endpoint (rk@ta, rk@tb).
+  % Slant: (mc@cur, mc@y) → (mc@cur + E, mc@y − E)
+  \setlength{\rk@ta}{\rk@mc@cur}%
+  \addtolength{\rk@ta}{\rk@effmod}%    % rk@ta = endpoint x = x_s + E
+  \setlength{\rk@tb}{\rk@mc@y}%
+  \addtolength{\rk@tb}{-\rk@effmod}%   % rk@tb = endpoint y = y_s − E
+  \draw[color=\rk@color, line width=\rk@lw]
+    (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
+    node[midway, above, sloped,
+         inner sep=2pt, outer sep=0pt, font=\rk@font] {#1};%
+  % Advance sibling cursor
+  \addtolength{\rk@mc@cur}{\rk@effmod}%
+  \ifdim\rk@mc@cur>\rk@mc@d \setlength{\rk@mc@d}{\rk@mc@cur}\fi
+  % Sub-modifiers: connector branches off at 20% along the parent slant,
+  % goes diagonally down-left back to the parent's start x, then child
+  % slants continue down-right from that lower anchor point.
   \ifblank{#2}{}{%
     \begingroup
-      % Short horizontal elbow at the slant endpoint — direction matches parent.
-      % This creates a visible stair-step so each level is on its own slant.
-      \setlength{\rk@halfsep}{\rk@spacing}%
-      \divide\rk@halfsep by 2\relax
-      \setlength{\rk@tc}{\rk@ta}%
-      \ifrk@mc@left
-        \addtolength{\rk@tc}{-\rk@halfsep}%  % elbow goes left
-      \else
-        \addtolength{\rk@tc}{\rk@halfsep}%   % elbow goes right
-      \fi
-      \rk@line{(\the\rk@ta, \the\rk@tb) -- (\the\rk@tc, \the\rk@tb)}%
-      \setlength{\rk@mc@y}{\rk@tb}%
+      % a = 0.2 * E  (step size; connector attachment is at 20% of parent slant)
+      \pgfmathsetlength{\rk@halfsep}{0.2 * \the\rk@effmod}%
+      % x_s = parent start x = (mc@cur after advance) − E
+      \setlength{\rk@tc}{\rk@mc@cur}%
+      \addtolength{\rk@tc}{-\rk@effmod}%      % rk@tc = x_s
+      % Connector attachment on parent slant: (x_s + a, y_s − a)
+      \setlength{\rk@ta}{\rk@tc}%
+      \addtolength{\rk@ta}{\rk@halfsep}%      % attachment x = x_s + a
+      \setlength{\rk@tb}{\rk@mc@y}%
+      \addtolength{\rk@tb}{-\rk@halfsep}%     % attachment y = y_s − a
+      % Connector endpoint (= child anchor): (x_s, y_s − 2a)
+      \addtolength{\rk@mc@y}{-\rk@halfsep}%
+      \addtolength{\rk@mc@y}{-\rk@halfsep}%   % mc@y = y_s − 2a
+      % Draw connector: (x_s+a, y_s−a) → (x_s, y_s−2a)  [down-left]
+      \rk@line{(\the\rk@ta, \the\rk@tb) -- (\the\rk@tc, \the\rk@mc@y)}%
+      % Child context: cursor at x_s, level at y_s − 2a
       \setlength{\rk@mc@cur}{\rk@tc}%
       \setlength{\rk@mc@d}{\rk@tc}%
       \rk@execmods{#2}%
@@ -480,7 +462,6 @@
   \setlength{\rk@mc@y}{0pt}%
   \setlength{\rk@mc@d}{0pt}%
   \setlength{\rk@mc@cur}{0pt}%
-  \rk@mc@leftfalse
   % Init verb slot
   \setlength{\rk@vb@l}{0pt}%
   \setlength{\rk@vb@r}{0pt}%
@@ -502,15 +483,10 @@
 \NewDocumentCommand{\rkSubject}{O{}m}{%
   \rk@placeslot{#2}{0pt}%
   \rk@slot@to@mc
-  % Subject modifiers hang down-left from the right edge of the subject slot.
-  \rk@mc@lefttrue
-  \setlength{\rk@mc@cur}{\rk@sl@r}%   % start cursor at right edge
-  \setlength{\rk@mc@d}{\rk@sl@l}%     % leftmost already-drawn x = left edge
   \rk@runmods{#1}%
 }
 
 \NewDocumentCommand{\rkVerb}{O{}m}{%
-  \rk@mc@leftfalse
   \rk@divfull
   \rk@placeslot{#2}{0pt}%
   % Save verb slot for \rkIObj
@@ -527,7 +503,6 @@
 }
 
 \NewDocumentCommand{\rkDObj}{O{}m}{%
-  \rk@mc@leftfalse
   \rk@divshort
   \rk@placeslot{#2}{0pt}%
   \rk@slot@to@mc
@@ -535,7 +510,6 @@
 }
 
 \NewDocumentCommand{\rkPredNom}{O{}m}{%
-  \rk@mc@leftfalse
   \rk@divfwd
   \rk@placeslot{#2}{0pt}%
   \rk@slot@to@mc
@@ -543,7 +517,6 @@
 }
 
 \NewDocumentCommand{\rkPredAdj}{O{}m}{%
-  \rk@mc@leftfalse
   \rk@divfwd
   \rk@placeslot{#2}{0pt}%
   \rk@slot@to@mc

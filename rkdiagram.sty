@@ -173,6 +173,7 @@
 % the divider and the verb slot sit to the right of all noun modifier slants.
 \newcommand{\rk@divfull}{%
   \ifdim\rk@nounmodright>\rk@x
+    \rk@line{(\the\rk@x, 0pt) -- (\the\rk@nounmodright, 0pt)}%
     \setlength{\rk@x}{\rk@nounmodright}%
   \fi
   \setlength{\rk@ta}{\rk@ht}%

@@ -169,15 +169,15 @@
 % ============================================================
 
 % Full vertical bar  (subject | verb) — symmetric around baseline.
-% Upper half is at rk@x (the noun-verb boundary).
-% Lower half is shifted to the right of the noun's modifier extent
-% so it does not overlap the modifier slants.
+% Advances rk@x past any noun modifier overhang before drawing, so both
+% the divider and the verb slot sit to the right of all noun modifier slants.
 \newcommand{\rk@divfull}{%
+  \ifdim\rk@nounmodright>\rk@x
+    \setlength{\rk@x}{\rk@nounmodright}%
+  \fi
   \setlength{\rk@ta}{\rk@ht}%
   \addtolength{\rk@ta}{0.18cm}%
-  \rk@line{(\the\rk@x, 0pt) -- (\the\rk@x, \the\rk@ta)}%
-  \pgfmathsetlength{\rk@tb}{max(\the\rk@x, \the\rk@nounmodright)}%
-  \rk@line{(\the\rk@tb, 0pt) -- (\the\rk@tb, -\the\rk@ta)}%
+  \rk@line{(\the\rk@x, -\the\rk@ta) -- (\the\rk@x, \the\rk@ta)}%
 }
 
 % Short vertical bar  (verb | direct object)

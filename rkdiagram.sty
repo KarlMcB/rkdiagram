@@ -88,6 +88,7 @@
 % Deferred subclause — used when \rkSubClause appears as a word argument.
 % The drawing is deferred until after the (empty) slot node is placed.
 \newif\ifrk@deferredsc  \rk@deferredscfalse
+\newif\ifrk@extendbl    \rk@extendblfalse   % true only while processing word-level mods
 \newcommand{\rk@deferredsc@rw}{}
 \newcommand{\rk@deferredsc@body}{}
 \newcommand{\rk@deferred@SubClause}[2][]{%
@@ -164,11 +165,11 @@
 % DIVIDERS
 % ============================================================
 
-% Full vertical bar  (subject | verb)
+% Full vertical bar  (subject | verb) — symmetric around baseline
 \newcommand{\rk@divfull}{%
   \setlength{\rk@ta}{\rk@ht}%
   \addtolength{\rk@ta}{0.18cm}%
-  \rk@line{(\the\rk@x, 0pt) -- (\the\rk@x, \the\rk@ta)}%
+  \rk@line{(\the\rk@x, -\the\rk@ta) -- (\the\rk@x, \the\rk@ta)}%
 }
 
 % Short vertical bar  (verb | direct object)
@@ -229,9 +230,9 @@
     (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
     node[midway, above, sloped,
          inner sep=2pt, outer sep=0pt, font=\rk@font] {#1};%
-  % Advance sibling cursor, then extend parent baseline to this attachment point
+  % Advance sibling cursor; extend word baseline only at word-level mod context
   \addtolength{\rk@mc@cur}{\rk@effmod}%
-  \rk@extendbase
+  \ifrk@extendbl \rk@extendbase \fi
   % Sub-modifiers: connector branches off at 20% along the parent slant,
   % goes diagonally down-left back to the parent's start x, then child
   % slants continue down-right from that lower anchor point.
@@ -257,9 +258,10 @@
       \addtolength{\rk@mc@y}{-\rk@halfsep}%   % mc@y = y_s − 2a
       % Draw connector: (x_s+a, y_s−a) → (x_s, y_s−2a)  [down-left]
       \rk@line{(\the\rk@ta, \the\rk@tb) -- (\the\rk@tc, \the\rk@mc@y)}%
-      % Child context: cursor at x_s, level at y_s − 2a
+      % Child context: cursor at x_s, level at y_s − 2a; disable baseline extension
       \setlength{\rk@mc@cur}{\rk@tc}%
       \setlength{\rk@mc@d}{\rk@tc}%
+      \rk@extendblfalse
       \rk@execmods{#2}%
     \endgroup
   }%
@@ -269,6 +271,7 @@
 \newcommand{\rk@runmods}[1]{%
   \ifblank{#1}{}{%
     \begingroup
+      \rk@extendbltrue   % word-level: baseline extension enabled
       \rk@execmods{#1}%
     \endgroup
   }%

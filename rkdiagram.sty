@@ -148,11 +148,16 @@
   \fi
 }
 
-% Set modifier context from current slot (cursor starts at slot left)
+% Set modifier context from current slot.
+% First modifier attaches 10% along the word's baseline (not at the very start).
 \newcommand{\rk@slot@to@mc}{%
   \setlength{\rk@mc@y}{\rk@sl@y}%
   \setlength{\rk@mc@d}{\rk@sl@d}%
+  \setlength{\rk@ta}{\rk@sl@r}%
+  \addtolength{\rk@ta}{-\rk@sl@l}%      % rk@ta = slot width
+  \divide\rk@ta by 10\relax              % rk@ta = 10% of slot width
   \setlength{\rk@mc@cur}{\rk@sl@l}%
+  \addtolength{\rk@mc@cur}{\rk@ta}%     % mc@cur = sl@l + 10%
 }
 
 % ============================================================
@@ -163,7 +168,7 @@
 \newcommand{\rk@divfull}{%
   \setlength{\rk@ta}{\rk@ht}%
   \addtolength{\rk@ta}{0.18cm}%
-  \rk@line{(\the\rk@x, -0.18cm) -- (\the\rk@x, \the\rk@ta)}%
+  \rk@line{(\the\rk@x, 0pt) -- (\the\rk@x, \the\rk@ta)}%
 }
 
 % Short vertical bar  (verb | direct object)
@@ -494,11 +499,6 @@
   \setlength{\rk@vb@r}{\rk@sl@r}%
   \setlength{\rk@vb@y}{\rk@sl@y}%
   \rk@slot@to@mc
-  % Shift modifier attachment to the verb slot midpoint so the first modifier's
-  % slant does not start at the divider.  (\rk@mc@cur is now \rk@sl@l; adding
-  % \rk@sl@r and halving gives (\rk@sl@l + \rk@sl@r)/2.)
-  \addtolength{\rk@mc@cur}{\rk@sl@r}%
-  \divide\rk@mc@cur by 2\relax
   \rk@runmods{#1}%
 }
 

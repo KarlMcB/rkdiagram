@@ -643,10 +643,10 @@
     % Platform baselines
     \rk@line{(\the\rk@x, \the\rk@ta)--(\the\rk@tb, \the\rk@ta)}%
     \rk@line{(\the\rk@x,-\the\rk@ta)--(\the\rk@tb,-\the\rk@ta)}%
-    % Dashed vertical + conjunction label on the left (open) end
+    % Dashed vertical + conjunction label at the platform/slant junction (plat_r)
     \draw[color=\rk@color,line width=\rk@lw,dashed]
-      (\the\rk@x, \the\rk@ta)--(\the\rk@x,-\the\rk@ta)
-      node[midway,right,inner sep=2pt,font=\rk@font]{\textit{#2}};%
+      (\the\rk@tb, \the\rk@ta)--(\the\rk@tb,-\the\rk@ta)
+      node[midway,inner sep=2pt,font=\rk@font,rotate=90]{\textit{#2}};%
     % Convergence slants on the right (connecting) end
     \rk@line{(\the\rk@tb, \the\rk@ta)--(\the\rk@tc,0pt)}%
     \rk@line{(\the\rk@tb,-\the\rk@ta)--(\the\rk@tc,0pt)}%
@@ -677,10 +677,10 @@
     % Convergence slants on the left (connecting) end
     \rk@line{(\the\rk@x,0pt)--(\the\rk@tb, \the\rk@ta)}%
     \rk@line{(\the\rk@x,0pt)--(\the\rk@tb,-\the\rk@ta)}%
-    % Dashed vertical + conjunction label on the right (open) end
+    % Dashed vertical + conjunction label at the slant/platform junction (plat_l)
     \draw[color=\rk@color,line width=\rk@lw,dashed]
-      (\the\rk@tc, \the\rk@ta)--(\the\rk@tc,-\the\rk@ta)
-      node[midway,right,inner sep=2pt,font=\rk@font]{\textit{#2}};%
+      (\the\rk@tb, \the\rk@ta)--(\the\rk@tb,-\the\rk@ta)
+      node[midway,inner sep=2pt,font=\rk@font,rotate=90]{\textit{#2}};%
     % Slot registers
     \setlength{\rk@sl@l}{\rk@x}%
     \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%

@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.24.0 (TeX Live 2026)  (format=lualatex 2026.3.27)  27 MAY 2026 11:29
+This is LuaHBTeX, Version 1.24.0 (TeX Live 2026)  (format=lualatex 2026.3.27)  27 MAY 2026 19:40
  restricted system commands enabled.
 **rk-test.tex
 (./rk-test.tex
@@ -420,13 +420,14 @@ Package: pgfopts 2014/07/10 v2.1a LaTeX package options with pgfkeys
 \rk@vb@r=\skip62
 \rk@vb@y=\skip63
 \rk@iobj@xmax=\skip64
-\rk@mc@y=\skip65
-\rk@mc@d=\skip66
-\rk@mc@cur=\skip67
-\rk@ta=\skip68
-\rk@tb=\skip69
-\rk@tc=\skip70
-\rk@halfsep=\skip71
+\rk@effmod=\skip65
+\rk@mc@y=\skip66
+\rk@mc@d=\skip67
+\rk@mc@cur=\skip68
+\rk@ta=\skip69
+\rk@tb=\skip70
+\rk@tc=\skip71
+\rk@halfsep=\skip72
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/geometry/geometry.sty
 Package: geometry 2026/03/07 v6.0 Page Geometry
@@ -492,7 +493,7 @@ Lua module: microtype 2026/03/01 v3.2d microtype module.
 Module microtype Info: overwriting function `keepligature' on input line 63
 LaTeX Info: Redefining \lsstyle on input line 779.
 LaTeX Info: Redefining \lslig on input line 779.
-\MT@outer@space=\skip72
+\MT@outer@space=\skip73
 )
 Package microtype Info: Loading configuration file microtype.cfg.
 
@@ -725,15 +726,15 @@ L3 programming layer <2026-01-19>
 )
 
 Here is how much of LuaTeX's memory you used:
- 15801 strings out of 476076
+ 15836 strings out of 476076
  125086,794899 words of node,token memory allocated
  528 words of node memory still in use:
    4 hlist, 1 vlist, 1 rule, 1 local_par, 5 glue, 4 kern, 1 penalty, 1 margin_ke
 rn, 4 glyph, 9 attribute, 54 glue_spec, 9 attribute_list, 2 write nodes
-   avail lists: 2:2603,3:1445,4:82,5:208,6:41,7:3381,8:1,9:577,10:16,11:180
- 37839 multiletter control sequences out of 65536+600000
+   avail lists: 2:3200,3:1757,4:79,5:222,6:45,7:3683,8:1,9:715,10:16,11:180
+ 37874 multiletter control sequences out of 65536+600000
  45 fonts using 3337335 bytes
- 117i,8n,114p,1003b,1006s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 117i,8n,114p,1003b,1026s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lmroman10-bold.otf>
 </usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lmmono10-italic.otf
 ></usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lmroman12-italic.o
@@ -744,7 +745,7 @@ egular.otf></usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lmroman1
 2-bold.otf></usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lmmonolt
 10-bold.otf></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/c
 msy10.pfb>
-Output written on rk-test.pdf (9 pages, 64358 bytes).
+Output written on rk-test.pdf (9 pages, 66874 bytes).
 
 PDF statistics: 95 PDF objects out of 1000 (max. 8388607)
  58 compressed objects within 1 object stream

@@ -295,23 +295,26 @@
 \newcommand{\rk@doprep}[3]{%
   % Extend head baseline to cursor
   \rk@extendbase
-  % Slant end: (cursor + modDepth, y_head - modDepth)
+  % Measure prep label to size the slant (same formula as \rk@domod)
+  \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
+    (rk@prepmsr) at (0,0) {#2};%
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@prepmsr}{east}}%
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@prepmsr}{west}}%
+  \addtolength{\rk@tc}{-\rk@ta}%   % rk@tc = nodeWidth
+  \pgfextracty{\rk@tb}{\pgfpointanchor{rk@prepmsr}{north}}%
+  \pgfextracty{\rk@ta}{\pgfpointanchor{rk@prepmsr}{south}}%
+  \addtolength{\rk@tb}{-\rk@ta}%   % rk@tb = nodeHeight
+  \pgfmathsetlength{\rk@effmod}{max(\the\rk@modDepth, (\the\rk@tc + \the\rk@tb) / 1.41422 + 6pt)}%
+  % Slant end: (cursor + effmod, y_head - effmod)
   \setlength{\rk@ta}{\rk@mc@cur}%
-  \addtolength{\rk@ta}{\rk@modDepth}%
+  \addtolength{\rk@ta}{\rk@effmod}%
   \setlength{\rk@tb}{\rk@mc@y}%
-  \addtolength{\rk@tb}{-\rk@modDepth}%
-  % Prep label on slant (rotated -45, anchored base west at slant end)
-  \node[
-    rotate    = -45,
-    anchor    = base west,
-    inner sep = 0pt,
-    outer sep = 0pt,
-    font      = \rk@font,
-  ] (rk@prepnode) at (\the\rk@ta, \the\rk@tb) {#2};%
-  % Draw slant: cursor to east of prep node
-  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@prepnode}{east}}%
-  \pgfextracty{\rk@tb}{\pgfpointanchor{rk@prepnode}{east}}%
-  \rk@line{(\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)}%
+  \addtolength{\rk@tb}{-\rk@effmod}%
+  % Draw slant with prep label above it at midpoint
+  \draw[color=\rk@color, line width=\rk@lw]
+    (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
+    node[midway, above, sloped,
+         inner sep=2pt, outer sep=0pt, font=\rk@font] {#2};%
   % Object on horizontal line extending from slant end
   \setlength{\rk@halfsep}{\rk@spacing}%
   \divide\rk@halfsep by 2\relax

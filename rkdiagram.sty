@@ -85,6 +85,9 @@
 \newlength{\rk@tc}
 \newlength{\rk@halfsep}
 
+% Direction flag: true = modifiers go leftward (subject side)
+\newif\ifrk@mc@left  \rk@mc@leftfalse
+
 % Deferred subclause — used when \rkSubClause appears as a word argument.
 % The drawing is deferred until after the (empty) slot node is placed.
 \newif\ifrk@deferredsc  \rk@deferredscfalse
@@ -186,64 +189,82 @@
 % ============================================================
 
 % \rk@extendbase — draw a baseline extension from drawn edge to cursor.
+% Direction-aware: leftward contexts extend toward smaller x, rightward toward larger x.
 \newcommand{\rk@extendbase}{%
-  \ifdim\rk@mc@cur>\rk@mc@d
-    \rk@line{(\the\rk@mc@d, \the\rk@mc@y) -- (\the\rk@mc@cur, \the\rk@mc@y)}%
-    \setlength{\rk@mc@d}{\rk@mc@cur}%
+  \ifrk@mc@left
+    \ifdim\rk@mc@cur<\rk@mc@d
+      \rk@line{(\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@mc@d, \the\rk@mc@y)}%
+      \setlength{\rk@mc@d}{\rk@mc@cur}%
+    \fi
+  \else
+    \ifdim\rk@mc@cur>\rk@mc@d
+      \rk@line{(\the\rk@mc@d, \the\rk@mc@y) -- (\the\rk@mc@cur, \the\rk@mc@y)}%
+      \setlength{\rk@mc@d}{\rk@mc@cur}%
+    \fi
   \fi
 }
 
 % \rk@domod{word}{submods}
 % Draw one modifier in the current mc context, then recurse into submods.
+% Direction is controlled by \ifrk@mc@left:
+%   false (default) — slant goes down-right; label placed above, sloped
+%   true  (subject) — slant goes down-left;  label placed below, sloped
 \newcommand{\rk@domod}[2]{%
   % Extend head baseline to attachment cursor if needed
   \rk@extendbase
   % Measure the word to find the minimum slant length.
-  % The slant is 45 deg, so line_length = effmod * sqrt(2).
-  % For the label to fit: line_length >= node_width, i.e. effmod >= node_width/sqrt(2).
   \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
     (rk@modmsr) at (0,0) {#1};%
   % Measure width (east - west)
   \pgfextractx{\rk@tc}{\pgfpointanchor{rk@modmsr}{east}}%
   \pgfextractx{\rk@ta}{\pgfpointanchor{rk@modmsr}{west}}%
-  \addtolength{\rk@tc}{-\rk@ta}%  % rk@tc = nodeWidth (text + 2*inner sep)
+  \addtolength{\rk@tc}{-\rk@ta}%  % rk@tc = nodeWidth
   % Measure height (north - south)
   \pgfextracty{\rk@tb}{\pgfpointanchor{rk@modmsr}{north}}%
   \pgfextracty{\rk@ta}{\pgfpointanchor{rk@modmsr}{south}}%
-  \addtolength{\rk@tb}{-\rk@ta}%  % rk@tb = nodeHeight (text + 2*inner sep)
-  % With "above, sloped" at 45 deg, the label's upper-left corner is at
-  % y_attach + (nodeHeight + nodeWidth)/(2*sqrt2) - effmod/2.
-  % To keep it below the attachment baseline: effmod > (nodeWidth+nodeHeight)/sqrt2.
-  % Adding 6pt gives ~3pt of vertical clearance below the baseline.
+  \addtolength{\rk@tb}{-\rk@ta}%  % rk@tb = nodeHeight
   \pgfmathsetlength{\rk@effmod}{max(\the\rk@modDepth, (\the\rk@tc + \the\rk@tb) / 1.41422 + 6pt)}%
-  % Slant endpoint: one effmod step diagonally down-right from attachment
-  \setlength{\rk@ta}{\rk@mc@cur}%
-  \addtolength{\rk@ta}{\rk@effmod}%   % endpoint x
-  \setlength{\rk@tb}{\rk@mc@y}%
-  \addtolength{\rk@tb}{-\rk@effmod}%  % endpoint y
-  % Draw slant line; word sits ABOVE the line via sloped path label.
-  \draw[color=\rk@color, line width=\rk@lw]
-    (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
-    node[midway, above, sloped,
-         inner sep=2pt, outer sep=0pt, font=\rk@font] {#1};%
-  % Advance sibling cursor by effmod step
-  \addtolength{\rk@mc@cur}{\rk@effmod}%
-  \ifdim\rk@mc@cur>\rk@mc@d \setlength{\rk@mc@d}{\rk@mc@cur}\fi
-  % Recurse into sub-modifiers from the slant endpoint.
-  % rk@ta / rk@tb still hold the endpoint coords.
+  \ifrk@mc@left
+    %% ---- LEFTWARD (subject side): slant goes down-left ----
+    \setlength{\rk@ta}{\rk@mc@cur}%
+    \addtolength{\rk@ta}{-\rk@effmod}%  % endpoint x (leftward)
+    \setlength{\rk@tb}{\rk@mc@y}%
+    \addtolength{\rk@tb}{-\rk@effmod}%  % endpoint y (downward)
+    % For a path going down-left, "below, sloped" places the label
+    % between the slant and the parent baseline (visually above the line).
+    \draw[color=\rk@color, line width=\rk@lw]
+      (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
+      node[midway, below, sloped,
+           inner sep=2pt, outer sep=0pt, font=\rk@font] {#1};%
+    \addtolength{\rk@mc@cur}{-\rk@effmod}%
+    \ifdim\rk@mc@cur<\rk@mc@d \setlength{\rk@mc@d}{\rk@mc@cur}\fi
+  \else
+    %% ---- RIGHTWARD (verb/object side): slant goes down-right ----
+    \setlength{\rk@ta}{\rk@mc@cur}%
+    \addtolength{\rk@ta}{\rk@effmod}%   % endpoint x (rightward)
+    \setlength{\rk@tb}{\rk@mc@y}%
+    \addtolength{\rk@tb}{-\rk@effmod}%  % endpoint y (downward)
+    \draw[color=\rk@color, line width=\rk@lw]
+      (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
+      node[midway, above, sloped,
+           inner sep=2pt, outer sep=0pt, font=\rk@font] {#1};%
+    \addtolength{\rk@mc@cur}{\rk@effmod}%
+    \ifdim\rk@mc@cur>\rk@mc@d \setlength{\rk@mc@d}{\rk@mc@cur}\fi
+  \fi
+  % Recurse into sub-modifiers from the slant endpoint (rk@ta, rk@tb).
   \ifblank{#2}{}{%
     \begingroup
-      % Draw a short horizontal at the slant endpoint.  This creates a
-      % visible "elbow" so each sub-modifier appears on its own separate
-      % slant rather than as a collinear continuation of this one.
+      % Short horizontal elbow at the slant endpoint — direction matches parent.
+      % This creates a visible stair-step so each level is on its own slant.
       \setlength{\rk@halfsep}{\rk@spacing}%
       \divide\rk@halfsep by 2\relax
       \setlength{\rk@tc}{\rk@ta}%
-      \addtolength{\rk@tc}{\rk@halfsep}%
+      \ifrk@mc@left
+        \addtolength{\rk@tc}{-\rk@halfsep}%  % elbow goes left
+      \else
+        \addtolength{\rk@tc}{\rk@halfsep}%   % elbow goes right
+      \fi
       \rk@line{(\the\rk@ta, \the\rk@tb) -- (\the\rk@tc, \the\rk@tb)}%
-      % Sub-modifier context: cursor at end of horizontal so the child slant
-      % starts from there, not from the same point the parent ended.
-      % This makes each level visually distinct (true stair-step).
       \setlength{\rk@mc@y}{\rk@tb}%
       \setlength{\rk@mc@cur}{\rk@tc}%
       \setlength{\rk@mc@d}{\rk@tc}%
@@ -459,6 +480,7 @@
   \setlength{\rk@mc@y}{0pt}%
   \setlength{\rk@mc@d}{0pt}%
   \setlength{\rk@mc@cur}{0pt}%
+  \rk@mc@leftfalse
   % Init verb slot
   \setlength{\rk@vb@l}{0pt}%
   \setlength{\rk@vb@r}{0pt}%
@@ -480,10 +502,15 @@
 \NewDocumentCommand{\rkSubject}{O{}m}{%
   \rk@placeslot{#2}{0pt}%
   \rk@slot@to@mc
+  % Subject modifiers hang down-left from the right edge of the subject slot.
+  \rk@mc@lefttrue
+  \setlength{\rk@mc@cur}{\rk@sl@r}%   % start cursor at right edge
+  \setlength{\rk@mc@d}{\rk@sl@l}%     % leftmost already-drawn x = left edge
   \rk@runmods{#1}%
 }
 
 \NewDocumentCommand{\rkVerb}{O{}m}{%
+  \rk@mc@leftfalse
   \rk@divfull
   \rk@placeslot{#2}{0pt}%
   % Save verb slot for \rkIObj
@@ -500,6 +527,7 @@
 }
 
 \NewDocumentCommand{\rkDObj}{O{}m}{%
+  \rk@mc@leftfalse
   \rk@divshort
   \rk@placeslot{#2}{0pt}%
   \rk@slot@to@mc
@@ -507,6 +535,7 @@
 }
 
 \NewDocumentCommand{\rkPredNom}{O{}m}{%
+  \rk@mc@leftfalse
   \rk@divfwd
   \rk@placeslot{#2}{0pt}%
   \rk@slot@to@mc
@@ -514,6 +543,7 @@
 }
 
 \NewDocumentCommand{\rkPredAdj}{O{}m}{%
+  \rk@mc@leftfalse
   \rk@divfwd
   \rk@placeslot{#2}{0pt}%
   \rk@slot@to@mc

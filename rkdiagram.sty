@@ -627,8 +627,10 @@
   \addtolength{\rk@effmod}{\rk@spacing}%
   %
   \if r#1%  %----- SUBJECT: convergence RIGHT --------------------------
-    % plat_l = rk@x,  plat_r = rk@x + effmod,  conv_x = plat_r + csep
-    \setlength{\rk@tb}{\rk@x}\addtolength{\rk@tb}{\rk@effmod}%  rk@tb = plat_r
+    % plat_l = rk@x,  bar_x = rk@x + effmod + gap,  conv_x = bar_x + csep
+    % gap = rk@halfsep separates the text platform end from the dashed bar
+    \setlength{\rk@tb}{\rk@x}\addtolength{\rk@tb}{\rk@effmod}%  rk@tb = text end x
+    \addtolength{\rk@tb}{\rk@halfsep}%                           rk@tb = bar_x (+ gap)
     \setlength{\rk@tc}{\rk@tb}\addtolength{\rk@tc}{\rk@ta}%     rk@tc = conv_x
     % text_x = plat_l + halfsep  (reuse rk@sl@l as scratch)
     \setlength{\rk@sl@l}{\rk@x}\addtolength{\rk@sl@l}{\rk@halfsep}%
@@ -658,28 +660,30 @@
     \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%
     \setlength{\rk@sl@y}{0pt}\setlength{\rk@x}{\rk@tc}%
   \else%   %----- VERB / OBJ: convergence LEFT --------------------------
-    % conv_x = rk@x,  plat_l = rk@x + csep,  plat_r = plat_l + effmod
-    \setlength{\rk@tb}{\rk@x}\addtolength{\rk@tb}{\rk@ta}%   rk@tb = plat_l
-    \setlength{\rk@tc}{\rk@tb}\addtolength{\rk@tc}{\rk@effmod}% rk@tc = plat_r
-    % text_x = plat_l + halfsep
-    \setlength{\rk@sl@l}{\rk@tb}\addtolength{\rk@sl@l}{\rk@halfsep}%
+    % conv_x = rk@x,  junc_x = rk@x + csep,  bar_x = junc_x + gap,  plat_r = bar_x + effmod
+    % gap = rk@halfsep separates the dashed bar from the slant endpoints
+    \setlength{\rk@tb}{\rk@x}\addtolength{\rk@tb}{\rk@ta}%      rk@tb = junc_x (slant end)
+    \setlength{\rk@sl@l}{\rk@tb}\addtolength{\rk@sl@l}{\rk@halfsep}% rk@sl@l = bar_x (temp)
+    \setlength{\rk@tc}{\rk@sl@l}\addtolength{\rk@tc}{\rk@effmod}%   rk@tc = plat_r
+    % text_x = bar_x + halfsep  (reuse rk@effmod as scratch — no longer needed for widths)
+    \setlength{\rk@effmod}{\rk@sl@l}\addtolength{\rk@effmod}{\rk@halfsep}%
     % Place word nodes (inline-mod context)
     \begingroup
       \let\rkAdj\rk@inline@mod\let\rkAdv\rk@inline@mod\let\rkPrep\rk@inline@prep
       \node[anchor=base west,inner sep=0pt,outer sep=0pt,font=\rk@font]
-        (rk@cmpAN)at(\the\rk@sl@l, \the\rk@ta){#3};%
+        (rk@cmpAN)at(\the\rk@effmod, \the\rk@ta){#3};%
       \node[anchor=base west,inner sep=0pt,outer sep=0pt,font=\rk@font]
-        (rk@cmpBN)at(\the\rk@sl@l,-\the\rk@ta){#4};%
+        (rk@cmpBN)at(\the\rk@effmod,-\the\rk@ta){#4};%
     \endgroup
-    % Platform baselines
+    % Platform baselines: from junc_x all the way to plat_r (covers the gap visually)
     \rk@line{(\the\rk@tb, \the\rk@ta)--(\the\rk@tc, \the\rk@ta)}%
     \rk@line{(\the\rk@tb,-\the\rk@ta)--(\the\rk@tc,-\the\rk@ta)}%
     % Convergence slants on the left (connecting) end
     \rk@line{(\the\rk@x,0pt)--(\the\rk@tb, \the\rk@ta)}%
     \rk@line{(\the\rk@x,0pt)--(\the\rk@tb,-\the\rk@ta)}%
-    % Dashed vertical + conjunction label at the slant/platform junction (plat_l)
+    % Dashed vertical + conjunction label at bar_x (pushed away from slant junction)
     \draw[color=\rk@color,line width=\rk@lw,dashed]
-      (\the\rk@tb, \the\rk@ta)--(\the\rk@tb,-\the\rk@ta)
+      (\the\rk@sl@l, \the\rk@ta)--(\the\rk@sl@l,-\the\rk@ta)
       node[midway,inner sep=2pt,font=\rk@font,rotate=90]{\textit{#2}};%
     % Slot registers
     \setlength{\rk@sl@l}{\rk@x}%

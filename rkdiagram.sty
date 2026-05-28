@@ -229,16 +229,21 @@
     (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
     node[midway, above, sloped,
          inner sep=2pt, outer sep=0pt, font=\rk@font] {#1};%
-  % Advance sibling cursor
+  % Advance sibling cursor, then extend parent baseline to this attachment point
   \addtolength{\rk@mc@cur}{\rk@effmod}%
-  \ifdim\rk@mc@cur>\rk@mc@d \setlength{\rk@mc@d}{\rk@mc@cur}\fi
+  \rk@extendbase
   % Sub-modifiers: connector branches off at 20% along the parent slant,
   % goes diagonally down-left back to the parent's start x, then child
   % slants continue down-right from that lower anchor point.
   \ifblank{#2}{}{%
     \begingroup
-      % a = 0.2 * E  (step size; connector attachment is at 20% of parent slant)
-      \pgfmathsetlength{\rk@halfsep}{0.2 * \the\rk@effmod}%
+      % a = max(cap-height, 0.2·E) so child level is always at least one cap-height below parent
+      \node[opacity=0, inner sep=0pt, outer sep=0pt, font=\rk@font]
+        (rk@capmsr) at (0,0) {M};%
+      \pgfextracty{\rk@halfsep}{\pgfpointanchor{rk@capmsr}{north}}%
+      \pgfextracty{\rk@ta}{\pgfpointanchor{rk@capmsr}{south}}%
+      \addtolength{\rk@halfsep}{-\rk@ta}%   % rk@halfsep = cap-height of font
+      \pgfmathsetlength{\rk@halfsep}{max(\the\rk@halfsep, 0.2 * \the\rk@effmod)}%
       % x_s = parent start x = (mc@cur after advance) − E
       \setlength{\rk@tc}{\rk@mc@cur}%
       \addtolength{\rk@tc}{-\rk@effmod}%      % rk@tc = x_s

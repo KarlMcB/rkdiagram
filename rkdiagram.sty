@@ -79,6 +79,9 @@
 \newlength{\rk@mc@d}    % head drawn-right x
 \newlength{\rk@mc@cur}  % attachment cursor x
 
+% Rightmost x reached by the most recent \rk@runmods call (global; used by \rk@divfull)
+\newlength{\rk@nounmodright}
+
 % Scratch length registers (\newlength = \newdimen, safe for \pgfextractx)
 \newlength{\rk@ta}
 \newlength{\rk@tb}
@@ -165,11 +168,16 @@
 % DIVIDERS
 % ============================================================
 
-% Full vertical bar  (subject | verb) — symmetric around baseline
+% Full vertical bar  (subject | verb) — symmetric around baseline.
+% Upper half is at rk@x (the noun-verb boundary).
+% Lower half is shifted to the right of the noun's modifier extent
+% so it does not overlap the modifier slants.
 \newcommand{\rk@divfull}{%
   \setlength{\rk@ta}{\rk@ht}%
   \addtolength{\rk@ta}{0.18cm}%
-  \rk@line{(\the\rk@x, -\the\rk@ta) -- (\the\rk@x, \the\rk@ta)}%
+  \rk@line{(\the\rk@x, 0pt) -- (\the\rk@x, \the\rk@ta)}%
+  \pgfmathsetlength{\rk@tb}{max(\the\rk@x, \the\rk@nounmodright)}%
+  \rk@line{(\the\rk@tb, 0pt) -- (\the\rk@tb, -\the\rk@ta)}%
 }
 
 % Short vertical bar  (verb | direct object)
@@ -273,6 +281,7 @@
     \begingroup
       \rk@extendbltrue   % word-level: baseline extension enabled
       \rk@execmods{#1}%
+      \global\rk@nounmodright=\rk@mc@d  % expose rightmost extent before group closes
     \endgroup
   }%
 }
@@ -480,6 +489,7 @@
   \setlength{\rk@vb@r}{0pt}%
   \setlength{\rk@vb@y}{0pt}%
   \setlength{\rk@iobj@xmax}{0pt}%
+  \setlength{\rk@nounmodright}{0pt}%
   \begin{tikzpicture}[
     line width = \rk@lw,
     baseline   = (rk@origin),

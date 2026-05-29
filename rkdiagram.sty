@@ -30,6 +30,7 @@
 
 \newlength{\rk@spacing}    \setlength{\rk@spacing}{1.2cm}
 \newlength{\rk@modDepth}   \setlength{\rk@modDepth}{1.0cm}
+\newlength{\rk@modgap}     \setlength{\rk@modgap}{0.25cm}
 \newlength{\rk@subClDepth} \setlength{\rk@subClDepth}{2.5cm}
 \newlength{\rk@lw}         \setlength{\rk@lw}{0.4pt}
 \newcommand{\rk@color}{black}
@@ -40,6 +41,7 @@
   font/.code           = {\renewcommand{\rk@font}{#1}},
   spacing/.code        = {\setlength{\rk@spacing}{#1}},
   modDepth/.code       = {\setlength{\rk@modDepth}{#1}},
+  modgap/.code         = {\setlength{\rk@modgap}{#1}},
   subClauseDepth/.code = {\setlength{\rk@subClDepth}{#1}},
   linewidth/.code      = {\setlength{\rk@lw}{#1}},
   color/.code          = {\renewcommand{\rk@color}{#1}},
@@ -88,6 +90,14 @@
 \newlength{\rk@tc}
 \newlength{\rk@halfsep}
 
+% Saved compound modifier context (text start x, platform right x, csep)
+\newlength{\rk@cmp@textx}
+\newlength{\rk@cmp@platright}
+\newlength{\rk@cmp@csep}
+
+% Current baseline y-level; 0pt on the main baseline, overridden in sub-clauses
+\newlength{\rk@base@y}
+
 % Word-lift: distance to raise word nodes above their platform line
 % so descenders never touch the line.  Measured once per rkdiagram.
 \newlength{\rk@wordlift}
@@ -109,13 +119,18 @@
 % \rk@cmpdir is set by each slot command before calling \rk@placeslot.
 \newif\ifrk@deferredcmp  \rk@deferredcmpfalse
 \newcommand{\rk@deferredcmp@conj}{and}
+\newcommand{\rk@deferredcmp@modsa}{}
 \newcommand{\rk@deferredcmp@worda}{}
+\newcommand{\rk@deferredcmp@modsb}{}
 \newcommand{\rk@deferredcmp@wordb}{}
-\NewDocumentCommand{\rk@deferred@Compound}{O{and}mm}{%
+% Signature: [conj][mods_a]{word_a}[mods_b]{word_b}
+\NewDocumentCommand{\rk@deferred@Compound}{O{and} O{} m O{} m}{%
   \global\rk@deferredcmptrue
   \gdef\rk@deferredcmp@conj{#1}%
-  \gdef\rk@deferredcmp@worda{#2}%
-  \gdef\rk@deferredcmp@wordb{#3}%
+  \gdef\rk@deferredcmp@modsa{#2}%
+  \gdef\rk@deferredcmp@worda{#3}%
+  \gdef\rk@deferredcmp@modsb{#4}%
+  \gdef\rk@deferredcmp@wordb{#5}%
 }
 \def\rk@cmpdir{l}   % default; overridden by each slot command
 
@@ -156,7 +171,9 @@
   \ifrk@deferredcmp
     % Compound: discard the empty placeholder node; draw compound structure.
     \rk@docompound{\rk@cmpdir}%
-      {\rk@deferredcmp@conj}{\rk@deferredcmp@worda}{\rk@deferredcmp@wordb}%
+      {\rk@deferredcmp@conj}%
+      {\rk@deferredcmp@modsa}{\rk@deferredcmp@worda}%
+      {\rk@deferredcmp@modsb}{\rk@deferredcmp@wordb}%
     \global\rk@deferredcmpfalse
   \else
     % Normal word: measure, draw baseline, record slot.
@@ -199,27 +216,30 @@
 % the divider and the verb slot sit to the right of all noun modifier slants.
 \newcommand{\rk@divfull}{%
   \ifdim\rk@nounmodright>\rk@x
-    \rk@line{(\the\rk@x, 0pt) -- (\the\rk@nounmodright, 0pt)}%
+    \rk@line{(\the\rk@x, \the\rk@base@y) -- (\the\rk@nounmodright, \the\rk@base@y)}%
     \setlength{\rk@x}{\rk@nounmodright}%
   \fi
   \setlength{\rk@ta}{\rk@ht}%
   \addtolength{\rk@ta}{0.18cm}%
-  \rk@line{(\the\rk@x, -\the\rk@ta) -- (\the\rk@x, \the\rk@ta)}%
+  \setlength{\rk@tc}{\rk@base@y}\addtolength{\rk@tc}{\rk@ta}%
+  \setlength{\rk@tb}{\rk@base@y}\addtolength{\rk@tb}{-\rk@ta}%
+  \rk@line{(\the\rk@x, \the\rk@tb) -- (\the\rk@x, \the\rk@tc)}%
 }
 
 % Short vertical bar  (verb | direct object)
 \newcommand{\rk@divshort}{%
   \setlength{\rk@ta}{\rk@ht}%
   \addtolength{\rk@ta}{0.10cm}%
-  \rk@line{(\the\rk@x, 0pt) -- (\the\rk@x, \the\rk@ta)}%
+  \addtolength{\rk@ta}{\rk@base@y}%
+  \rk@line{(\the\rk@x, \the\rk@base@y) -- (\the\rk@x, \the\rk@ta)}%
 }
 
-% Forward diagonal  (verb / predNom or predAdj)
+% Back diagonal  (verb \ predNom or predAdj) — bottom touches baseline, slants up-left
 \newcommand{\rk@divfwd}{%
   \setlength{\rk@ta}{\rk@ht}%
   \addtolength{\rk@ta}{0.18cm}%
-  \pgfmathsetlength{\rk@tb}{\the\rk@ta / tan(60)}%
-  \rk@line{(\the\rk@x, -0.10cm) -- ++(\the\rk@tb, \the\rk@ta)}%
+  \pgfmathsetlength{\rk@tb}{\the\rk@ta / tan(45)}%
+  \rk@line{(\the\rk@x, \the\rk@base@y) -- ++(-\the\rk@tb, \the\rk@ta)}%
 }
 
 % ============================================================
@@ -280,6 +300,7 @@
       \pgfextracty{\rk@ta}{\pgfpointanchor{rk@capmsr}{south}}%
       \addtolength{\rk@halfsep}{-\rk@ta}%   % rk@halfsep = cap-height of font
       \pgfmathsetlength{\rk@halfsep}{max(\the\rk@halfsep, 0.2 * \the\rk@effmod)}%
+      \addtolength{\rk@halfsep}{\rk@modgap}% extra headspace between modifier levels
       % x_s = parent start x = (mc@cur after advance) − E
       \setlength{\rk@tc}{\rk@mc@cur}%
       \addtolength{\rk@tc}{-\rk@effmod}%      % rk@tc = x_s
@@ -288,12 +309,14 @@
       \addtolength{\rk@ta}{\rk@halfsep}%      % attachment x = x_s + a
       \setlength{\rk@tb}{\rk@mc@y}%
       \addtolength{\rk@tb}{-\rk@halfsep}%     % attachment y = y_s − a
-      % Connector endpoint (= child anchor): (x_s, y_s − 2a)
+      % Connector endpoint (= child anchor): (x_s + modgap, y_s − 2a)
+      % modgap shifts child right so it clears the previous sibling's slant region
       \addtolength{\rk@mc@y}{-\rk@halfsep}%
       \addtolength{\rk@mc@y}{-\rk@halfsep}%   % mc@y = y_s − 2a
-      % Draw connector: (x_s+a, y_s−a) → (x_s, y_s−2a)  [down-left]
+      \addtolength{\rk@tc}{\rk@modgap}%        % rk@tc = x_s + modgap
+      % Draw connector: (x_s+a, y_s−a) → (x_s+modgap, y_s−2a)
       \rk@line{(\the\rk@ta, \the\rk@tb) -- (\the\rk@tc, \the\rk@mc@y)}%
-      % Child context: cursor at x_s, level at y_s − 2a; disable baseline extension
+      % Child context: cursor at x_s + modgap, level at y_s − 2a; disable baseline extension
       \setlength{\rk@mc@cur}{\rk@tc}%
       \setlength{\rk@mc@d}{\rk@tc}%
       \rk@extendblfalse
@@ -477,7 +500,9 @@
 \newcommand{\rk@dosubclause}[2]{%
   \rk@extendbase
   % Attachment x = current cursor on head baseline
-  \setlength{\rk@ta}{\rk@mc@cur}%
+  % Attachment x = current modifier cursor + halfsep gap
+  \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
+  \setlength{\rk@ta}{\rk@mc@cur}\addtolength{\rk@ta}{\rk@halfsep}%
   % Sub-baseline y = head_y - subClDepth
   \setlength{\rk@tb}{\rk@mc@y}%
   \addtolength{\rk@tb}{-\rk@subClDepth}%
@@ -486,15 +511,17 @@
     (\the\rk@ta, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb);%
   % Open a sub-context for the clause body
   \begingroup
-    % Reset x cursor to the attachment point
+    % Reset x cursor and baseline y to the sub-clause level
     \setlength{\rk@x}{\rk@ta}%
     \setlength{\rk@ht}{2.2ex}%
+    \setlength{\rk@base@y}{\rk@tb}%
     \setlength{\rk@mc@y}{\rk@tb}%
     \setlength{\rk@mc@d}{\rk@ta}%
     \setlength{\rk@mc@cur}{\rk@ta}%
+    \rk@nounmodright=\rk@x  % reset so outer overhang doesn't bleed in
     % Place the rel-word (e.g. "who", "that", "because") first if provided
     \ifblank{#1}{}{%
-      \rk@placeslot{#1}{\the\rk@tb}%
+      \rk@placeslot{#1}{\the\rk@base@y}%
       \rk@slot@to@mc
     }%
     % Execute clause body (\rkSubject, \rkVerb, etc.)
@@ -523,6 +550,7 @@
   \setlength{\rk@vb@y}{0pt}%
   \setlength{\rk@iobj@xmax}{0pt}%
   \setlength{\rk@nounmodright}{0pt}%
+  \setlength{\rk@base@y}{0pt}%
   \begin{tikzpicture}[
     line width = \rk@lw,
     baseline   = (rk@origin),
@@ -545,7 +573,7 @@
 
 \NewDocumentCommand{\rkSubject}{O{}m}{%
   \def\rk@cmpdir{r}%
-  \rk@placeslot{#2}{0pt}%
+  \rk@placeslot{#2}{\the\rk@base@y}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
 }
@@ -553,7 +581,7 @@
 \NewDocumentCommand{\rkVerb}{O{}m}{%
   \rk@divfull
   \def\rk@cmpdir{l}%
-  \rk@placeslot{#2}{0pt}%
+  \rk@placeslot{#2}{\the\rk@base@y}%
   % Save verb slot for \rkIObj
   \setlength{\rk@vb@l}{\rk@sl@l}%
   \setlength{\rk@vb@r}{\rk@sl@r}%
@@ -565,7 +593,7 @@
 \NewDocumentCommand{\rkDObj}{O{}m}{%
   \rk@divshort
   \def\rk@cmpdir{l}%
-  \rk@placeslot{#2}{0pt}%
+  \rk@placeslot{#2}{\the\rk@base@y}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
 }
@@ -573,7 +601,7 @@
 \NewDocumentCommand{\rkPredNom}{O{}m}{%
   \rk@divfwd
   \def\rk@cmpdir{l}%
-  \rk@placeslot{#2}{0pt}%
+  \rk@placeslot{#2}{\the\rk@base@y}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
 }
@@ -581,7 +609,7 @@
 \NewDocumentCommand{\rkPredAdj}{O{}m}{%
   \rk@divfwd
   \def\rk@cmpdir{l}%
-  \rk@placeslot{#2}{0pt}%
+  \rk@placeslot{#2}{\the\rk@base@y}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
 }
@@ -620,10 +648,11 @@
 % Outside a diagram context the inline fallback applies.
 % ============================================================
 
-% \rk@docompound{dir}{conj}{worda}{wordb}
+% \rk@docompound{dir}{conj}{modsa}{worda}{modsb}{wordb}
 %   dir = r  subject  (convergence RIGHT, dashed bar on LEFT)
 %   dir = l  verb/obj (convergence LEFT,  dashed bar on RIGHT)
-\newcommand{\rk@docompound}[4]{%
+%   modsa/modsb = optional modifier lists (e.g. \rkAdj{the}) for each word
+\newcommand{\rk@docompound}[6]{%
   % rk@ta = csep  (vertical half-gap between platforms; also horizontal slant size)
   \setlength{\rk@ta}{\rk@ht}%
   \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
@@ -637,11 +666,11 @@
   \divide\rk@tc by 2\relax%
   \addtolength{\rk@tc}{4pt}%        rk@tc = half-width + small padding
   \ifdim\rk@tc>\rk@ta\setlength{\rk@ta}{\rk@tc}\fi%  csep = max(rk@ht, conj_half+pad)
-  % Measure word widths in inline-mod context (inline \rkAdj etc.)
+  % Measure word widths (inline-mod context suppresses any embedded modifier draws)
   \begingroup
     \let\rkAdj\rk@inline@mod\let\rkAdv\rk@inline@mod\let\rkPrep\rk@inline@prep
-    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@cmpA)at(0,0){#3};%
-    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@cmpB)at(0,0){#4};%
+    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@cmpA)at(0,0){#4};%
+    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@cmpB)at(0,0){#6};%
   \endgroup
   \pgfextractx{\rk@effmod}{\pgfpointanchor{rk@cmpA}{east}}%
   \pgfextractx{\rk@tb}    {\pgfpointanchor{rk@cmpA}{west}}%
@@ -663,16 +692,19 @@
     \addtolength{\rk@tc}{\rk@halfsep}%                           rk@tc = conv_x (wider)
     % text_x = plat_l + halfsep  (reuse rk@sl@l as scratch)
     \setlength{\rk@sl@l}{\rk@x}\addtolength{\rk@sl@l}{\rk@halfsep}%
+    % Save context for modifier running (before registers get reused)
+    \setlength{\rk@cmp@textx}{\rk@sl@l}%
+    \setlength{\rk@cmp@csep}{\rk@ta}%
     % Lifted y values: +csep+lift for upper platform, −csep+lift for lower platform
     \setlength{\rk@wlevel}{\rk@ta}\addtolength{\rk@wlevel}{\rk@wordlift}%
-    % Place word nodes (inline-mod context prevents \rkAdj etc. from calling \draw)
+    % Place word nodes (inline-mod context for any embedded modifiers in word text)
     \begingroup
       \let\rkAdj\rk@inline@mod\let\rkAdv\rk@inline@mod\let\rkPrep\rk@inline@prep
       \node[anchor=base west,inner sep=0pt,outer sep=0pt,font=\rk@font]
-        (rk@cmpAN)at(\the\rk@sl@l, \the\rk@wlevel){#3};%
+        (rk@cmpAN)at(\the\rk@sl@l, \the\rk@wlevel){#4};%
       \setlength{\rk@wlevel}{-\rk@ta}\addtolength{\rk@wlevel}{\rk@wordlift}%
       \node[anchor=base west,inner sep=0pt,outer sep=0pt,font=\rk@font]
-        (rk@cmpBN)at(\the\rk@sl@l, \the\rk@wlevel){#4};%
+        (rk@cmpBN)at(\the\rk@sl@l, \the\rk@wlevel){#6};%
     \endgroup
     % Platform baselines
     \rk@line{(\the\rk@x, \the\rk@ta)--(\the\rk@tb, \the\rk@ta)}%
@@ -686,6 +718,8 @@
     % Convergence slants on the right (connecting) end
     \rk@line{(\the\rk@tb, \the\rk@ta)--(\the\rk@tc,0pt)}%
     \rk@line{(\the\rk@tb,-\the\rk@ta)--(\the\rk@tc,0pt)}%
+    % Save platform right x (= bar_x = rk@tb) before rk@tb is reused for ht
+    \setlength{\rk@cmp@platright}{\rk@tb}%
     % Update rk@ht so the subsequent divider is tall enough
     \pgfextracty{\rk@tb}{\pgfpointanchor{rk@cmpAN}{north}}%
     \ifdim\rk@tb>\rk@ht\setlength{\rk@ht}{\rk@tb}\fi
@@ -702,16 +736,19 @@
     \setlength{\rk@tc}{\rk@sl@l}\addtolength{\rk@tc}{\rk@effmod}%   rk@tc = plat_r
     % text_x = bar_x + halfsep  (reuse rk@effmod as scratch — no longer needed for widths)
     \setlength{\rk@effmod}{\rk@sl@l}\addtolength{\rk@effmod}{\rk@halfsep}%
+    % Save context for modifier running (before registers get reused)
+    \setlength{\rk@cmp@textx}{\rk@effmod}%
+    \setlength{\rk@cmp@csep}{\rk@ta}%
     % Lifted y values: +csep+lift for upper platform, −csep+lift for lower
     \setlength{\rk@wlevel}{\rk@ta}\addtolength{\rk@wlevel}{\rk@wordlift}%
-    % Place word nodes (inline-mod context)
+    % Place word nodes (inline-mod context for any embedded modifiers in word text)
     \begingroup
       \let\rkAdj\rk@inline@mod\let\rkAdv\rk@inline@mod\let\rkPrep\rk@inline@prep
       \node[anchor=base west,inner sep=0pt,outer sep=0pt,font=\rk@font]
-        (rk@cmpAN)at(\the\rk@effmod, \the\rk@wlevel){#3};%
+        (rk@cmpAN)at(\the\rk@effmod, \the\rk@wlevel){#4};%
       \setlength{\rk@wlevel}{-\rk@ta}\addtolength{\rk@wlevel}{\rk@wordlift}%
       \node[anchor=base west,inner sep=0pt,outer sep=0pt,font=\rk@font]
-        (rk@cmpBN)at(\the\rk@effmod, \the\rk@wlevel){#4};%
+        (rk@cmpBN)at(\the\rk@effmod, \the\rk@wlevel){#6};%
     \endgroup
     % Platform baselines: from junc_x all the way to plat_r (covers the gap visually)
     \rk@line{(\the\rk@tb, \the\rk@ta)--(\the\rk@tc, \the\rk@ta)}%
@@ -725,20 +762,51 @@
     % Conjunction label beside bar, on the side facing the convergence (left)
     \node[rotate=90,anchor=south,inner sep=2pt,font=\rk@font]
       at (\the\rk@sl@l, 0pt) {\textit{#2}};%
+    % Save platform right x (= plat_r = rk@tc)
+    \setlength{\rk@cmp@platright}{\rk@tc}%
     % Slot registers
     \setlength{\rk@sl@l}{\rk@x}%
     \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%
     \setlength{\rk@sl@y}{0pt}\setlength{\rk@x}{\rk@tc}%
   \fi
+  % Run modifier/slot extensions for each compound word in its platform context.
+  % rk@base@y and rk@x are set so that \rkDObj etc. draw on the correct platform.
+  \ifblank{#3}{}{%
+    \begingroup
+      \setlength{\rk@base@y}{\rk@cmp@csep}%
+      \setlength{\rk@mc@y}{\rk@cmp@csep}%
+      \setlength{\rk@mc@cur}{\rk@cmp@textx}%
+      \setlength{\rk@mc@d}{\rk@cmp@textx}%
+      \setlength{\rk@x}{\rk@cmp@platright}%
+      \setlength{\rk@ht}{2.2ex}%
+      \rk@extendblfalse
+      \rk@execmods{#3}%
+    \endgroup
+  }%
+  \ifblank{#5}{}{%
+    \begingroup
+      \setlength{\rk@base@y}{\rk@cmp@csep}%
+      \multiply\rk@base@y by -1\relax%
+      \setlength{\rk@mc@y}{\rk@cmp@csep}%
+      \multiply\rk@mc@y by -1\relax%
+      \setlength{\rk@mc@cur}{\rk@cmp@textx}%
+      \setlength{\rk@mc@d}{\rk@cmp@textx}%
+      \setlength{\rk@x}{\rk@cmp@platright}%
+      \setlength{\rk@ht}{2.2ex}%
+      \rk@extendblfalse
+      \rk@execmods{#5}%
+    \endgroup
+  }%
 }
 
 % Inline fallback (used outside diagram context or as a safety net)
-\NewDocumentCommand{\rkCompound}{O{and}mm}{%
+% Signature: [conj][mods_a]{word_a}[mods_b]{word_b}
+\NewDocumentCommand{\rkCompound}{O{and} O{} m O{} m}{%
   \begingroup
     \let\rkAdj\rk@inline@mod
     \let\rkAdv\rk@inline@mod
     \let\rkPrep\rk@inline@prep
-    #3~\textit{#1}~#2%
+    #3~\textit{#1}~#5%
   \endgroup
 }
 

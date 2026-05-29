@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.28)  29 MAY 2026 11:25
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.28)  29 MAY 2026 13:23
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -373,29 +373,34 @@ Package: pgfopts 2014/07/10 v2.1a LaTeX package options with pgfkeys
 )
 \rk@spacing=\skip51
 \rk@modDepth=\skip52
-\rk@subClDepth=\skip53
-\rk@lw=\skip54
-\rk@x=\skip55
-\rk@ht=\skip56
-\rk@sl@l=\skip57
-\rk@sl@r=\skip58
-\rk@sl@d=\skip59
-\rk@sl@y=\skip60
-\rk@vb@l=\skip61
-\rk@vb@r=\skip62
-\rk@vb@y=\skip63
-\rk@iobj@xmax=\skip64
-\rk@effmod=\skip65
-\rk@mc@y=\skip66
-\rk@mc@d=\skip67
-\rk@mc@cur=\skip68
-\rk@nounmodright=\skip69
-\rk@ta=\skip70
-\rk@tb=\skip71
-\rk@tc=\skip72
-\rk@halfsep=\skip73
-\rk@wordlift=\skip74
-\rk@wlevel=\skip75
+\rk@modgap=\skip53
+\rk@subClDepth=\skip54
+\rk@lw=\skip55
+\rk@x=\skip56
+\rk@ht=\skip57
+\rk@sl@l=\skip58
+\rk@sl@r=\skip59
+\rk@sl@d=\skip60
+\rk@sl@y=\skip61
+\rk@vb@l=\skip62
+\rk@vb@r=\skip63
+\rk@vb@y=\skip64
+\rk@iobj@xmax=\skip65
+\rk@effmod=\skip66
+\rk@mc@y=\skip67
+\rk@mc@d=\skip68
+\rk@mc@cur=\skip69
+\rk@nounmodright=\skip70
+\rk@ta=\skip71
+\rk@tb=\skip72
+\rk@tc=\skip73
+\rk@halfsep=\skip74
+\rk@cmp@textx=\skip75
+\rk@cmp@platright=\skip76
+\rk@cmp@csep=\skip77
+\rk@base@y=\skip78
+\rk@wordlift=\skip79
+\rk@wlevel=\skip80
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/geometry/geometry.sty
 Package: geometry 2026/03/07 v6.0 Page Geometry
@@ -459,7 +464,7 @@ File: microtype-pdftex.def 2026/03/01 v3.2d Definitions specific to pdftex (RS)
 
 LaTeX Info: Redefining \lsstyle on input line 944.
 LaTeX Info: Redefining \lslig on input line 944.
-\MT@outer@space=\skip76
+\MT@outer@space=\skip81
 )
 Package microtype Info: Loading configuration file microtype.cfg.
 
@@ -585,22 +590,26 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 
 {/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2] [3]
  [4]
-[5] [6] [7]
+[5] [6]
+Missing character: There is no , in font nullfont!
+Missing character: There is no , in font nullfont!
+Missing character: There is no , in font nullfont!
+[7]
 LaTeX Font Info:    Trying to load font information for OMS+cmtt on input line 
-449.
-LaTeX Font Info:    No file OMScmtt.fd. on input line 449.
+436.
+LaTeX Font Info:    No file OMScmtt.fd. on input line 436.
 
 
 LaTeX Font Warning: Font shape `OMS/cmtt/m/it' undefined
 (Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbackslash' on input line 449.
+(Font)              for symbol `textbackslash' on input line 436.
 
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <10.95> on input line 466.
+(Font)              <10.95> on input line 453.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 466.
+(Font)              <8> on input line 453.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 466.
+(Font)              <6> on input line 453.
 [8] [9] (./rk-test.aux)
  ***********
 LaTeX2e <2025-11-01>
@@ -612,10 +621,10 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 15749 strings out of 467340
- 315424 string characters out of 5415339
- 767125 words of memory out of 5000000
- 44539 multiletter control sequences out of 15000+600000
+ 15758 strings out of 467340
+ 315578 string characters out of 5415339
+ 768473 words of memory out of 5000000
+ 44548 multiletter control sequences out of 15000+600000
  636183 words of font info for 94 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  117i,8n,121p,1004b,1008s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -628,7 +637,7 @@ r/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr
 /local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/
 local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/l
 ocal/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on rk-test.pdf (9 pages, 140307 bytes).
+Output written on rk-test.pdf (9 pages, 140622 bytes).
 PDF statistics:
  82 PDF objects out of 1000 (max. 8388607)
  52 compressed objects within 1 object stream

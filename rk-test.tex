@@ -276,11 +276,7 @@
     \rkSubject{He}
     \rkVerb{painted}
     \rkDObj{%
-      \rkCompound[but not]{%
-        \rkAdj{the}wall%
-      }{%
-        \rkAdj{the}ceiling%
-      }%
+      \rkCompound[but not][\rkAdj{the}]{wall}[\rkAdj{the}]{ceiling}%
     }
   \end{rkdiagram}
   \par\textit{Tests: compound object with two-word conjunction \textit{but not}.}
@@ -322,7 +318,6 @@
     \rkSubject[%
       \rkAdj{The},
       \rkSubClause[who]{%
-        \rkSubject{who}%
         \rkVerb{wore}%
         \rkDObj[\rkAdj{the}]{hat}%
       }%
@@ -389,18 +384,10 @@
   \begin{rkdiagram}
     \rkSubject{\rkCompound[and]{John}{Maria}}
     \rkVerb{%
-      \rkCompound[and]{%
-        found\rkAdv{quickly}%
-      }{%
-        carried\rkAdv{gently}%
-      }%
+      \rkCompound[and]%
+        [\rkAdv{quickly},\rkDObj[\rkAdj{the},\rkAdj{lost}]{dog}]{found}%
+        [\rkAdv{gently},\rkDObj{it},\rkAdv{home}]{carried}%
     }
-    \rkDObj[%
-      \rkAdj{the},
-      \rkAdj{lost}
-    ]{dog}
-    \rkDObj{it}
-    \rkAdv{home}
   \end{rkdiagram}
   \par\textit{Tests: compound subject + compound predicate, each verb with its
   own adverb, multiple direct objects.}

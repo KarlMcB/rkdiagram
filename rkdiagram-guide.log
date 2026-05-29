@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.24.0 (TeX Live 2026)  (format=lualatex 2026.5.28)  29 MAY 2026 11:27
+This is LuaHBTeX, Version 1.24.0 (TeX Live 2026)  (format=lualatex 2026.5.28)  29 MAY 2026 11:44
  restricted system commands enabled.
 **rkdiagram-guide.tex
 (./rkdiagram-guide.tex
@@ -408,29 +408,30 @@ Package: pgfopts 2014/07/10 v2.1a LaTeX package options with pgfkeys
 )
 \rk@spacing=\skip51
 \rk@modDepth=\skip52
-\rk@subClDepth=\skip53
-\rk@lw=\skip54
-\rk@x=\skip55
-\rk@ht=\skip56
-\rk@sl@l=\skip57
-\rk@sl@r=\skip58
-\rk@sl@d=\skip59
-\rk@sl@y=\skip60
-\rk@vb@l=\skip61
-\rk@vb@r=\skip62
-\rk@vb@y=\skip63
-\rk@iobj@xmax=\skip64
-\rk@effmod=\skip65
-\rk@mc@y=\skip66
-\rk@mc@d=\skip67
-\rk@mc@cur=\skip68
-\rk@nounmodright=\skip69
-\rk@ta=\skip70
-\rk@tb=\skip71
-\rk@tc=\skip72
-\rk@halfsep=\skip73
-\rk@wordlift=\skip74
-\rk@wlevel=\skip75
+\rk@modgap=\skip53
+\rk@subClDepth=\skip54
+\rk@lw=\skip55
+\rk@x=\skip56
+\rk@ht=\skip57
+\rk@sl@l=\skip58
+\rk@sl@r=\skip59
+\rk@sl@d=\skip60
+\rk@sl@y=\skip61
+\rk@vb@l=\skip62
+\rk@vb@r=\skip63
+\rk@vb@y=\skip64
+\rk@iobj@xmax=\skip65
+\rk@effmod=\skip66
+\rk@mc@y=\skip67
+\rk@mc@d=\skip68
+\rk@mc@cur=\skip69
+\rk@nounmodright=\skip70
+\rk@ta=\skip71
+\rk@tb=\skip72
+\rk@tc=\skip73
+\rk@halfsep=\skip74
+\rk@wordlift=\skip75
+\rk@wlevel=\skip76
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/geometry/geometry.sty
 Package: geometry 2026/03/07 v6.0 Page Geometry
@@ -476,7 +477,7 @@ Lua module: microtype 2026/03/01 v3.2d microtype module.
 Module microtype Info: overwriting function `keepligature' on input line 63
 LaTeX Info: Redefining \lsstyle on input line 779.
 LaTeX Info: Redefining \lslig on input line 779.
-\MT@outer@space=\skip76
+\MT@outer@space=\skip77
 )
 Package microtype Info: Loading configuration file microtype.cfg.
 
@@ -523,8 +524,8 @@ Package: array 2025/09/25 v2.6n Tabular extension package (FMi)
 \ar@mcellbox=\box65
 \extrarowheight=\dimen281
 \NC@list=\toks35
-\extratabsurround=\skip77
-\backup@length=\skip78
+\extratabsurround=\skip78
+\backup@length=\skip79
 \ar@cellbox=\box66
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/fancyvrb/fancyvrb.sty
@@ -645,8 +646,8 @@ Package: ifluatex 2019/10/25 v1.5 ifluatex legacy package. Use iftex instead.
 (/usr/local/texlive/2026/texmf-dist/tex/latex/titlesec/titlesec.sty
 Package: titlesec 2025/01/04 v2.17 Sectioning titles
 \ttl@box=\box83
-\beforetitleunit=\skip79
-\aftertitleunit=\skip80
+\beforetitleunit=\skip80
+\aftertitleunit=\skip81
 \ttl@plus=\dimen289
 \ttl@minus=\dimen290
 \ttl@toksa=\toks40
@@ -757,7 +758,7 @@ Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 84.
 )
-\Hy@SectionHShift=\skip81
+\Hy@SectionHShift=\skip82
 )
 Package hyperref Info: Option `colorlinks' set `true' on input line 33.
  (/usr/local/texlive/2026/texmf-dist/tex/latex/fontspec/fontspec.sty
@@ -1036,110 +1037,110 @@ LaTeX Font Info:    External font `cmex10' loaded for size
  [1
 
 {/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (13.86797pt too wide) in paragraph at lines 226--226
+Overfull \hbox (13.86797pt too wide) in paragraph at lines 227--227
 [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 226--226
+Underfull \hbox (badness 10000) in paragraph at lines 227--227
 
  []
 
 [2]
-Underfull \hbox (badness 10000) in paragraph at lines 248--248
+Underfull \hbox (badness 10000) in paragraph at lines 249--249
 [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 248--248
+Underfull \hbox (badness 10000) in paragraph at lines 249--249
 
  []
 
 
-Overfull \hbox (24.4786pt too wide) in paragraph at lines 272--272
+Overfull \hbox (24.4786pt too wide) in paragraph at lines 273--273
 [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 272--272
+Underfull \hbox (badness 10000) in paragraph at lines 273--273
 
  []
 
 [3]
-Overfull \hbox (13.79797pt too wide) in paragraph at lines 312--312
+Overfull \hbox (13.79797pt too wide) in paragraph at lines 313--313
 [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 312--312
+Underfull \hbox (badness 10000) in paragraph at lines 313--313
 
  []
 
 
 Package tcolorbox Warning: The upper box part has become overfull on input line
- 375.
+ 376.
 
 
 Package tcolorbox Warning: The upper box part has become overfull on input line
- 375.
+ 376.
 
 
 Package tcolorbox Warning: The upper box part has become overfull on input line
- 375.
+ 376.
 
 
 Package tcolorbox Warning: The upper box part has become overfull on input line
- 375.
+ 376.
 
 [4]
-Overfull \hbox (21.74673pt too wide) in paragraph at lines 437--437
+Overfull \hbox (21.74673pt too wide) in paragraph at lines 438--438
 [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 437--437
+Underfull \hbox (badness 10000) in paragraph at lines 438--438
 
  []
 
 [5
 
 ]
-Overfull \hbox (2.84259pt too wide) in paragraph at lines 466--466
+Overfull \hbox (2.84259pt too wide) in paragraph at lines 467--467
 [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 466--466
+Underfull \hbox (badness 10000) in paragraph at lines 467--467
 
  []
 
 
-Overfull \hbox (47.81415pt too wide) in paragraph at lines 509--509
+Overfull \hbox (47.81415pt too wide) in paragraph at lines 510--510
 [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 509--509
+Underfull \hbox (badness 10000) in paragraph at lines 510--510
 
  []
 
 [6]
-Overfull \hbox (49.17384pt too wide) in paragraph at lines 552--552
+Overfull \hbox (49.17384pt too wide) in paragraph at lines 553--553
 [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 552--552
+Underfull \hbox (badness 10000) in paragraph at lines 553--553
 
  []
 
 
-Overfull \hbox (85.76347pt too wide) in paragraph at lines 582--582
+Overfull \hbox (85.76347pt too wide) in paragraph at lines 583--583
 [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 582--582
+Underfull \hbox (badness 10000) in paragraph at lines 583--583
 
  []
 
@@ -1157,14 +1158,14 @@ Package rerunfilecheck Info: File `rkdiagram-guide.out' has not changed.
 )
 
 Here is how much of LuaTeX's memory you used:
- 30593 strings out of 475891
+ 30595 strings out of 475891
  125086,1144653 words of node,token memory allocated
- 527 words of node memory still in use:
+ 532 words of node memory still in use:
    4 hlist, 1 vlist, 1 rule, 1 local_par, 4 glue, 3 kern, 1 penalty, 3 glyph, 7 
-attribute, 60 glue_spec, 7 attribute_list, 2 write nodes
-   avail lists: 1:4,2:4390,3:2430,4:165,5:426,6:59,7:5746,8:3,9:1080,10:6,11:320
+attribute, 61 glue_spec, 7 attribute_list, 2 write nodes
+   avail lists: 1:4,2:4390,3:2430,4:165,5:434,6:59,7:5837,8:3,9:1080,10:6,11:327
 
- 52554 multiletter control sequences out of 65536+600000
+ 52556 multiletter control sequences out of 65536+600000
  71 fonts using 6511759 bytes
  117i,9n,114p,1203b,1166s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lmmono10-italic.otf
@@ -1178,7 +1179,7 @@ regular.otf></usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lmroman
 12-regular.otf></usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lmmo
 no12-regular.otf></usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lm
 roman12-bold.otf>
-Output written on rkdiagram-guide.pdf (9 pages, 71275 bytes).
+Output written on rkdiagram-guide.pdf (9 pages, 71305 bytes).
 
 PDF statistics: 180 PDF objects out of 1000 (max. 8388607)
  137 compressed objects within 2 object streams

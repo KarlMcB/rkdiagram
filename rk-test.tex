@@ -27,22 +27,19 @@
 % ---- Document styling --------------------------------------
 \newcommand{\testsection}[1]{%
   \bigskip
-  \noindent\rule{\linewidth}{0.8pt}\\[2pt]
-  {\large\bfseries #1}\\[4pt]
+  \noindent\rule{\linewidth}{0.8pt}\par\vspace{2pt}%
+  {\noindent\raggedright\large\bfseries #1\par}\vspace{4pt}%
 }
 
 \newcommand{\testcase}[2]{%
   \medskip
-  \noindent
-  \textbf{Test \thesubsection:} \textit{``#1''}
-  \stepcounter{subsection}
-  \par\smallskip
+  {\noindent\raggedright\textbf{Test \thesubsection:} \textit{``#1''}\par}%
+  \stepcounter{subsection}\smallskip
   #2
   \par\medskip
 }
 
-% Manual counter for test numbering
-\newcounter{subsection}
+% Manual counter for test numbering (subsection already defined by article class)
 \setcounter{subsection}{1}
 
 % ============================================================
@@ -466,7 +463,7 @@
 % ============================================================
 
 {\small
-\begin{tabular}{llp{8cm}}
+\begin{tabular}{lp{5.5cm}p{7cm}}
   \toprule
   \textbf{Test \#} & \textbf{Sentence} & \textbf{Feature(s) Verified} \\
   \midrule

@@ -343,14 +343,14 @@
 
 \testcase{Because the rain fell, we stayed inside.}{%
   \begin{rkdiagram}
+    \rkSubject{we}
     \rkVerb[%
+      \rkAdv{inside},
       \rkSubClause[because]{%
         \rkSubject[\rkAdj{the}]{rain}%
         \rkVerb{fell}%
       }%
     ]{stayed}
-    \rkSubject{we}
-    \rkDObj{inside}
   \end{rkdiagram}
   \par\textit{Tests: adverbial clause (fronted) modifying main verb.}
 }
@@ -479,5 +479,67 @@
 \noindent\textit{All tests should compile without error. Visual inspection of
 each diagram against the printed sentence is required; no automated output
 comparison is available at this stage.}
+
+% ============================================================
+\testsection{Group 12 — Mark Twain Stress Test}
+% ============================================================
+
+% Compound sentence (two independent clauses joined by ``and'').
+% Diagrammed as two stacked baselines.
+\testcase{A swarm of swarthy, noisy, lying, shoulder-shrugging, gesticulating
+Portuguese boatmen, with brass rings in their ears and fraud in their hearts,
+climbed the ship's sides, and various parties of us contracted with them to
+take us ashore at so much a head, silver coin of any country.}{%
+  % ------ Clause 1: A swarm … climbed the ship's sides ------
+  \begin{rkdiagram}[spacing=1.0cm,modDepth=0.9cm]
+    \rkSubject[%
+      \rkAdj{A},
+      \rkPrep[%
+        \rkAdj{swarthy},
+        \rkAdj{noisy},
+        \rkAdj{lying},
+        \rkAdj{shoulder-shrugging},
+        \rkAdj{gesticulating},
+        \rkAdj{Portuguese},
+        \rkPrep[%
+          \rkAdj{brass},
+          \rkPrep[\rkAdj{their}]{in}{ears}%
+        ]{with}{rings},
+        \rkPrep[%
+          \rkPrep[\rkAdj{their}]{in}{hearts}%
+        ]{with}{fraud}%
+      ]{of}{boatmen}%
+    ]{swarm}
+    \rkVerb{climbed}
+    \rkDObj[\rkAdj{the},\rkAdj{ship's}]{sides}
+  \end{rkdiagram}
+
+  \medskip
+  \hspace{1.5cm}\textit{and}
+  \medskip
+
+  % ------ Clause 2: various parties … contracted … ------
+  \begin{rkdiagram}[spacing=1.0cm,modDepth=0.9cm]
+    \rkSubject[%
+      \rkAdj{various},
+      \rkPrep{of}{us}%
+    ]{parties}
+    \rkVerb[%
+      \rkPrep{with}{them},
+      \rkSubClause[to]{%
+        \rkVerb[%
+          \rkAdv{ashore},
+          \rkPrep[%
+            \rkAdj{so~much},
+            \rkAdj{a},
+            \rkAppos{silver coin of any country}%
+          ]{at}{head}%
+        ]{take}
+        \rkDObj{us}%
+      }%
+    ]{contracted}
+  \end{rkdiagram}
+  \par\textit{(Mark Twain, \textit{The Innocents Abroad}, 1869)}
+}
 
 \end{document}

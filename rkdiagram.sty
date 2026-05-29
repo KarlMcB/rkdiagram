@@ -88,6 +88,11 @@
 \newlength{\rk@tc}
 \newlength{\rk@halfsep}
 
+% Word-lift: distance to raise word nodes above their platform line
+% so descenders never touch the line.  Measured once per rkdiagram.
+\newlength{\rk@wordlift}
+\newlength{\rk@wlevel}   % scratch: line_y + wordlift, used at each word placement
+
 % Deferred subclause — used when \rkSubClause appears as a word argument.
 % The drawing is deferred until after the (empty) slot node is placed.
 \newif\ifrk@deferredsc  \rk@deferredscfalse
@@ -135,6 +140,8 @@
   \divide\rk@halfsep by 2\relax
   \setlength{\rk@ta}{\rk@x}%
   \addtolength{\rk@ta}{\rk@halfsep}%
+  % Lift word above the baseline line so descenders clear it.
+  \setlength{\rk@wlevel}{#2}\addtolength{\rk@wlevel}{\rk@wordlift}%
   % Capture \rkSubClause / \rkCompound so they don't call \draw inside node text.
   \begingroup
     \let\rkSubClause\rk@deferred@SubClause
@@ -144,7 +151,7 @@
       inner sep = 0pt,
       outer sep = 0pt,
       font      = \rk@font,
-    ] (rk@wnode) at (\the\rk@ta, #2) {#1};%
+    ] (rk@wnode) at (\the\rk@ta, \the\rk@wlevel) {#1};%
   \endgroup
   \ifrk@deferredcmp
     % Compound: discard the empty placeholder node; draw compound structure.
@@ -340,12 +347,13 @@
   \divide\rk@halfsep by 2\relax
   \setlength{\rk@tc}{\rk@ta}%
   \addtolength{\rk@tc}{\rk@halfsep}%
+  \setlength{\rk@wlevel}{\rk@tb}\addtolength{\rk@wlevel}{\rk@wordlift}%
   \node[
     anchor    = base west,
     inner sep = 0pt,
     outer sep = 0pt,
     font      = \rk@font,
-  ] (rk@pobjnode) at (\the\rk@tc, \the\rk@tb) {#3};%
+  ] (rk@pobjnode) at (\the\rk@tc, \the\rk@wlevel) {#3};%
   \pgfextractx{\rk@tc}{\pgfpointanchor{rk@pobjnode}{east}}%
   \addtolength{\rk@tc}{\rk@halfsep}%
   % Draw horizontal: slant end to right of object
@@ -395,12 +403,13 @@
     \divide\rk@halfsep by 2\relax
     \setlength{\rk@tc}{\rk@ta}%
     \addtolength{\rk@tc}{\rk@halfsep}%
+    \setlength{\rk@wlevel}{\rk@tb}\addtolength{\rk@wlevel}{\rk@wordlift}%
     \node[
       anchor    = base west,
       inner sep = 0pt,
       outer sep = 0pt,
       font      = \rk@font,
-    ] (rk@iobjnode) at (\the\rk@tc, \the\rk@tb) {#2};%
+    ] (rk@iobjnode) at (\the\rk@tc, \the\rk@wlevel) {#2};%
     \pgfextractx{\rk@tc}{\pgfpointanchor{rk@iobjnode}{east}}%
     \addtolength{\rk@tc}{\rk@halfsep}%
     \rk@line{(\the\rk@ta, \the\rk@tb) -- (\the\rk@tc, \the\rk@tb)}%
@@ -434,6 +443,7 @@
   \setlength{\rk@ta}{\rk@mc@d}%
   \addtolength{\rk@ta}{\rk@halfsep}%
   % Inside appositive, disable modifier drawing (just typeset inline)
+  \setlength{\rk@wlevel}{\rk@mc@y}\addtolength{\rk@wlevel}{\rk@wordlift}%
   \begingroup
     \let\rkAdj\rk@inline@mod
     \let\rkAdv\rk@inline@mod
@@ -443,7 +453,7 @@
       inner sep = 0pt,
       outer sep = 0pt,
       font      = \rk@font,
-    ] (rk@apposnode) at (\the\rk@ta, \the\rk@mc@y) {(#1)};%
+    ] (rk@apposnode) at (\the\rk@ta, \the\rk@wlevel) {(#1)};%
   \endgroup
   \pgfextractx{\rk@ta}{\pgfpointanchor{rk@apposnode}{east}}%
   \addtolength{\rk@ta}{\rk@halfsep}%
@@ -518,6 +528,13 @@
     baseline   = (rk@origin),
   ]%
   \coordinate (rk@origin) at (0,0);
+  % Measure descender depth so placed word nodes clear the baseline lines.
+  % Place an invisible "g" at baseline, extract how far south goes below it.
+  \node[anchor=base,opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font]
+    (rk@descmsr) at (0,0) {g};%
+  \pgfextracty{\rk@wordlift}{\pgfpointanchor{rk@descmsr}{south}}%
+  \setlength{\rk@wordlift}{-\rk@wordlift}%   south y is negative → negate
+  \addtolength{\rk@wordlift}{1pt}%            add 1 pt gap above line
 }{%
   \end{tikzpicture}%
 }
@@ -634,13 +651,16 @@
     \setlength{\rk@tc}{\rk@tb}\addtolength{\rk@tc}{\rk@ta}%     rk@tc = conv_x
     % text_x = plat_l + halfsep  (reuse rk@sl@l as scratch)
     \setlength{\rk@sl@l}{\rk@x}\addtolength{\rk@sl@l}{\rk@halfsep}%
+    % Lifted y values: +csep+lift for upper platform, −csep+lift for lower platform
+    \setlength{\rk@wlevel}{\rk@ta}\addtolength{\rk@wlevel}{\rk@wordlift}%
     % Place word nodes (inline-mod context prevents \rkAdj etc. from calling \draw)
     \begingroup
       \let\rkAdj\rk@inline@mod\let\rkAdv\rk@inline@mod\let\rkPrep\rk@inline@prep
       \node[anchor=base west,inner sep=0pt,outer sep=0pt,font=\rk@font]
-        (rk@cmpAN)at(\the\rk@sl@l, \the\rk@ta){#3};%
+        (rk@cmpAN)at(\the\rk@sl@l, \the\rk@wlevel){#3};%
+      \setlength{\rk@wlevel}{-\rk@ta}\addtolength{\rk@wlevel}{\rk@wordlift}%
       \node[anchor=base west,inner sep=0pt,outer sep=0pt,font=\rk@font]
-        (rk@cmpBN)at(\the\rk@sl@l,-\the\rk@ta){#4};%
+        (rk@cmpBN)at(\the\rk@sl@l, \the\rk@wlevel){#4};%
     \endgroup
     % Platform baselines
     \rk@line{(\the\rk@x, \the\rk@ta)--(\the\rk@tb, \the\rk@ta)}%
@@ -667,13 +687,16 @@
     \setlength{\rk@tc}{\rk@sl@l}\addtolength{\rk@tc}{\rk@effmod}%   rk@tc = plat_r
     % text_x = bar_x + halfsep  (reuse rk@effmod as scratch — no longer needed for widths)
     \setlength{\rk@effmod}{\rk@sl@l}\addtolength{\rk@effmod}{\rk@halfsep}%
+    % Lifted y values: +csep+lift for upper platform, −csep+lift for lower
+    \setlength{\rk@wlevel}{\rk@ta}\addtolength{\rk@wlevel}{\rk@wordlift}%
     % Place word nodes (inline-mod context)
     \begingroup
       \let\rkAdj\rk@inline@mod\let\rkAdv\rk@inline@mod\let\rkPrep\rk@inline@prep
       \node[anchor=base west,inner sep=0pt,outer sep=0pt,font=\rk@font]
-        (rk@cmpAN)at(\the\rk@effmod, \the\rk@ta){#3};%
+        (rk@cmpAN)at(\the\rk@effmod, \the\rk@wlevel){#3};%
+      \setlength{\rk@wlevel}{-\rk@ta}\addtolength{\rk@wlevel}{\rk@wordlift}%
       \node[anchor=base west,inner sep=0pt,outer sep=0pt,font=\rk@font]
-        (rk@cmpBN)at(\the\rk@effmod,-\the\rk@ta){#4};%
+        (rk@cmpBN)at(\the\rk@effmod, \the\rk@wlevel){#4};%
     \endgroup
     % Platform baselines: from junc_x all the way to plat_r (covers the gap visually)
     \rk@line{(\the\rk@tb, \the\rk@ta)--(\the\rk@tc, \the\rk@ta)}%

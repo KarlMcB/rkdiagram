@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.28)  29 MAY 2026 11:07
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.28)  29 MAY 2026 11:25
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -614,7 +614,7 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 Here is how much of TeX's memory you used:
  15749 strings out of 467340
  315424 string characters out of 5415339
- 767116 words of memory out of 5000000
+ 767125 words of memory out of 5000000
  44539 multiletter control sequences out of 15000+600000
  636183 words of font info for 94 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -628,7 +628,7 @@ r/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr
 /local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/
 local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/l
 ocal/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on rk-test.pdf (9 pages, 140330 bytes).
+Output written on rk-test.pdf (9 pages, 140307 bytes).
 PDF statistics:
  82 PDF objects out of 1000 (max. 8388607)
  52 compressed objects within 1 object stream

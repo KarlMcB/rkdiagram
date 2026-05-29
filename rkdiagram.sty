@@ -654,11 +654,13 @@
   \addtolength{\rk@effmod}{\rk@spacing}%
   %
   \if r#1%  %----- SUBJECT: convergence RIGHT --------------------------
-    % plat_l = rk@x,  bar_x = rk@x + effmod + gap,  conv_x = bar_x + csep
+    % plat_l = rk@x,  bar_x = rk@x + effmod + gap,  conv_x = bar_x + csep + halfsep
     % gap = rk@halfsep separates the text platform end from the dashed bar
+    % extra halfsep added to conv_x only — keeps word separation (rk@ta) unchanged
     \setlength{\rk@tb}{\rk@x}\addtolength{\rk@tb}{\rk@effmod}%  rk@tb = text end x
     \addtolength{\rk@tb}{\rk@halfsep}%                           rk@tb = bar_x (+ gap)
-    \setlength{\rk@tc}{\rk@tb}\addtolength{\rk@tc}{\rk@ta}%     rk@tc = conv_x
+    \setlength{\rk@tc}{\rk@tb}\addtolength{\rk@tc}{\rk@ta}%
+    \addtolength{\rk@tc}{\rk@halfsep}%                           rk@tc = conv_x (wider)
     % text_x = plat_l + halfsep  (reuse rk@sl@l as scratch)
     \setlength{\rk@sl@l}{\rk@x}\addtolength{\rk@sl@l}{\rk@halfsep}%
     % Lifted y values: +csep+lift for upper platform, −csep+lift for lower platform
@@ -678,7 +680,7 @@
     % Dashed vertical
     \draw[color=\rk@color,line width=\rk@lw,dashed]
       (\the\rk@tb, \the\rk@ta)--(\the\rk@tb,-\the\rk@ta);%
-    % Conjunction label beside bar, on the side facing the convergence (right)
+    % Conjunction label between bar and convergence node (right side)
     \node[rotate=90,anchor=north,inner sep=2pt,font=\rk@font]
       at (\the\rk@tb, 0pt) {\textit{#2}};%
     % Convergence slants on the right (connecting) end
@@ -692,10 +694,11 @@
     \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%
     \setlength{\rk@sl@y}{0pt}\setlength{\rk@x}{\rk@tc}%
   \else%   %----- VERB / OBJ: convergence LEFT --------------------------
-    % conv_x = rk@x,  junc_x = rk@x + csep,  bar_x = junc_x + gap,  plat_r = bar_x + effmod
-    % gap = rk@halfsep separates the dashed bar from the slant endpoints
-    \setlength{\rk@tb}{\rk@x}\addtolength{\rk@tb}{\rk@ta}%      rk@tb = junc_x (slant end)
-    \setlength{\rk@sl@l}{\rk@tb}\addtolength{\rk@sl@l}{\rk@halfsep}% rk@sl@l = bar_x (temp)
+    % conv_x = rk@x,  junc_x = rk@x + csep + halfsep,  bar_x = junc_x,  plat_r = bar_x + effmod
+    % extra halfsep added to junc_x only — keeps word separation (rk@ta) unchanged
+    \setlength{\rk@tb}{\rk@x}\addtolength{\rk@tb}{\rk@ta}%
+    \addtolength{\rk@tb}{\rk@halfsep}%                           rk@tb = junc_x = bar_x (wider)
+    \setlength{\rk@sl@l}{\rk@tb}%                                rk@sl@l = bar_x
     \setlength{\rk@tc}{\rk@sl@l}\addtolength{\rk@tc}{\rk@effmod}%   rk@tc = plat_r
     % text_x = bar_x + halfsep  (reuse rk@effmod as scratch — no longer needed for widths)
     \setlength{\rk@effmod}{\rk@sl@l}\addtolength{\rk@effmod}{\rk@halfsep}%

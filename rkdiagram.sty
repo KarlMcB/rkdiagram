@@ -627,6 +627,16 @@
   % rk@ta = csep  (vertical half-gap between platforms; also horizontal slant size)
   \setlength{\rk@ta}{\rk@ht}%
   \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
+  % Measure conjunction width; expand csep so rotated label fits inside the bar
+  \begingroup
+    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@conjN)at(0,0){\textit{#2}};%
+  \endgroup
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@conjN}{east}}%
+  \pgfextractx{\rk@tb}{\pgfpointanchor{rk@conjN}{west}}%
+  \addtolength{\rk@tc}{-\rk@tb}%    rk@tc = conjunction text width
+  \divide\rk@tc by 2\relax%
+  \addtolength{\rk@tc}{4pt}%        rk@tc = half-width + small padding
+  \ifdim\rk@tc>\rk@ta\setlength{\rk@ta}{\rk@tc}\fi%  csep = max(rk@ht, conj_half+pad)
   % Measure word widths in inline-mod context (inline \rkAdj etc.)
   \begingroup
     \let\rkAdj\rk@inline@mod\let\rkAdv\rk@inline@mod\let\rkPrep\rk@inline@prep
@@ -665,10 +675,12 @@
     % Platform baselines
     \rk@line{(\the\rk@x, \the\rk@ta)--(\the\rk@tb, \the\rk@ta)}%
     \rk@line{(\the\rk@x,-\the\rk@ta)--(\the\rk@tb,-\the\rk@ta)}%
-    % Dashed vertical + conjunction label at the platform/slant junction (plat_r)
+    % Dashed vertical
     \draw[color=\rk@color,line width=\rk@lw,dashed]
-      (\the\rk@tb, \the\rk@ta)--(\the\rk@tb,-\the\rk@ta)
-      node[midway,inner sep=2pt,font=\rk@font,rotate=90]{\textit{#2}};%
+      (\the\rk@tb, \the\rk@ta)--(\the\rk@tb,-\the\rk@ta);%
+    % Conjunction label beside bar, on the side facing the convergence (right)
+    \node[rotate=90,anchor=north,inner sep=2pt,font=\rk@font]
+      at (\the\rk@tb, 0pt) {\textit{#2}};%
     % Convergence slants on the right (connecting) end
     \rk@line{(\the\rk@tb, \the\rk@ta)--(\the\rk@tc,0pt)}%
     \rk@line{(\the\rk@tb,-\the\rk@ta)--(\the\rk@tc,0pt)}%
@@ -704,10 +716,12 @@
     % Convergence slants on the left (connecting) end
     \rk@line{(\the\rk@x,0pt)--(\the\rk@tb, \the\rk@ta)}%
     \rk@line{(\the\rk@x,0pt)--(\the\rk@tb,-\the\rk@ta)}%
-    % Dashed vertical + conjunction label at bar_x (pushed away from slant junction)
+    % Dashed vertical
     \draw[color=\rk@color,line width=\rk@lw,dashed]
-      (\the\rk@sl@l, \the\rk@ta)--(\the\rk@sl@l,-\the\rk@ta)
-      node[midway,inner sep=2pt,font=\rk@font,rotate=90]{\textit{#2}};%
+      (\the\rk@sl@l, \the\rk@ta)--(\the\rk@sl@l,-\the\rk@ta);%
+    % Conjunction label beside bar, on the side facing the convergence (left)
+    \node[rotate=90,anchor=south,inner sep=2pt,font=\rk@font]
+      at (\the\rk@sl@l, 0pt) {\textit{#2}};%
     % Slot registers
     \setlength{\rk@sl@l}{\rk@x}%
     \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%

@@ -600,34 +600,101 @@
 % ENVIRONMENT
 % ============================================================
 
-\NewDocumentEnvironment{rkdiagram}{O{}}{%
-  \ifblank{#1}{}{\pgfkeys{/rkdiagram, #1}}%
+% Internal state reset (called by both rkdiagram and rkCompoundSent)
+\newcommand{\rk@init@state}{%
   \setlength{\rk@x}{0pt}%
   \setlength{\rk@ht}{2.2ex}%
-  % Init modifier context
   \setlength{\rk@mc@y}{0pt}%
   \setlength{\rk@mc@d}{0pt}%
   \setlength{\rk@mc@cur}{0pt}%
-  % Init verb slot
   \setlength{\rk@vb@l}{0pt}%
   \setlength{\rk@vb@r}{0pt}%
   \setlength{\rk@vb@y}{0pt}%
   \setlength{\rk@iobj@xmax}{0pt}%
   \setlength{\rk@nounmodright}{0pt}%
   \setlength{\rk@base@y}{0pt}%
+}
+
+\NewDocumentEnvironment{rkdiagram}{O{}}{%
+  \ifblank{#1}{}{\pgfkeys{/rkdiagram, #1}}%
+  \rk@init@state
   \begin{tikzpicture}[
     line width = \rk@lw,
     baseline   = (rk@origin),
   ]%
   \coordinate (rk@origin) at (0,0);
   % Measure descender depth so placed word nodes clear the baseline lines.
-  % Place an invisible "g" at baseline, extract how far south goes below it.
   \node[anchor=base,opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font]
     (rk@descmsr) at (0,0) {g};%
   \pgfextracty{\rk@wordlift}{\pgfpointanchor{rk@descmsr}{south}}%
-  \setlength{\rk@wordlift}{-\rk@wordlift}%   south y is negative → negate
-  \addtolength{\rk@wordlift}{1pt}%            add 1 pt gap above line
+  \setlength{\rk@wordlift}{-\rk@wordlift}%
+  \addtolength{\rk@wordlift}{1pt}%
 }{%
+  \end{tikzpicture}%
+}
+
+% ============================================================
+% COMPOUND SENTENCE
+% \rkCompoundSent[conj][sep]{opts1}{body1}{opts2}{body2}
+%
+% Draws two independent clauses in a single tikzpicture,
+% connected by dashed verticals and a horizontal bridge bearing
+% the coordinating conjunction.  The bridge sits at the midpoint
+% between the two baselines, dropping from each clause's verb.
+% ============================================================
+
+% Registers for the connector
+\newlength{\rk@cmpst@va@x}   % verb 1 midpoint x
+\newlength{\rk@cmpst@vb@x}   % verb 2 midpoint x
+\newlength{\rk@cmpst@sep}     % baseline separation
+
+\NewDocumentCommand{\rkCompoundSent}{O{and} O{3cm} O{} m O{} m}{%
+  % Apply any options from either clause so spacing etc. are consistent
+  \ifblank{#3}{}{\pgfkeys{/rkdiagram, #3}}%
+  \ifblank{#5}{}{\pgfkeys{/rkdiagram, #5}}%
+  \setlength{\rk@cmpst@sep}{#2}%
+  \begin{tikzpicture}[line width=\rk@lw, baseline=(rk@origin)]%
+    \coordinate (rk@origin) at (0,0);
+    % Measure descender depth once for both clauses.
+    \node[anchor=base,opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font]
+      (rk@descmsr) at (0,0) {g};%
+    \pgfextracty{\rk@wordlift}{\pgfpointanchor{rk@descmsr}{south}}%
+    \setlength{\rk@wordlift}{-\rk@wordlift}\addtolength{\rk@wordlift}{1pt}%
+    % ---- Clause 1 at y = 0 ----
+    \rk@init@state
+    #4%
+    % Save verb 1 x midpoint = (vb@l + vb@r) / 2
+    \setlength{\rk@cmpst@va@x}{\rk@vb@l}%
+    \addtolength{\rk@cmpst@va@x}{\rk@vb@r}%
+    \divide\rk@cmpst@va@x by 2\relax
+    % ---- Clause 2 at y = -sep ----
+    \rk@init@state
+    \setlength{\rk@base@y}{-\rk@cmpst@sep}%
+    #6%
+    % Save verb 2 x midpoint
+    \setlength{\rk@cmpst@vb@x}{\rk@vb@l}%
+    \addtolength{\rk@cmpst@vb@x}{\rk@vb@r}%
+    \divide\rk@cmpst@vb@x by 2\relax
+    % ---- Draw connector ----
+    % rk@base@y is still -sep after clause 2; use it for clause-2 verb y.
+    % bridge_y = midpoint = -sep/2
+    \setlength{\rk@ta}{\rk@base@y}%
+    \divide\rk@ta by 2\relax%                    rk@ta = bridge_y = -sep/2
+    % bridge midpoint x = (va@x + vb@x) / 2
+    \setlength{\rk@tc}{\rk@cmpst@va@x}%
+    \addtolength{\rk@tc}{\rk@cmpst@vb@x}%
+    \divide\rk@tc by 2\relax%                    rk@tc = bridge mid x
+    % Dashed vertical from clause 1 verb down to bridge
+    \draw[color=\rk@color,line width=\rk@lw,dashed]
+      (\the\rk@cmpst@va@x, 0pt) -- (\the\rk@cmpst@va@x, \the\rk@ta);%
+    % Dashed vertical from bridge down to clause 2 verb
+    \draw[color=\rk@color,line width=\rk@lw,dashed]
+      (\the\rk@cmpst@vb@x, \the\rk@ta) -- (\the\rk@cmpst@vb@x, \the\rk@base@y);%
+    % Horizontal bridge
+    \rk@line{(\the\rk@cmpst@va@x, \the\rk@ta) -- (\the\rk@cmpst@vb@x, \the\rk@ta)}%
+    % Conjunction label above the bridge midpoint
+    \node[above, inner sep=2pt, font=\rk@font]
+      at (\the\rk@tc, \the\rk@ta) {\textit{#1}};%
   \end{tikzpicture}%
 }
 

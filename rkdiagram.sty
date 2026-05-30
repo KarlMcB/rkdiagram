@@ -86,6 +86,11 @@
 % Rightmost x reached by the most recent \rk@runmods call (global; used by \rk@divfull)
 \newlength{\rk@nounmodright}
 
+% Per-slot overrides (one-shot: applied once then auto-reset to 0pt)
+\newlength{\rk@slot@minwidth}  % minimum line width for next slot (0pt = auto)
+\newlength{\rk@slot@skip}      % extra gap inserted before next slot (0pt = none)
+\newlength{\rk@slant@minlen}   % minimum slant length for next modifier/prep (0pt = auto)
+
 % Scratch length registers (\newlength = \newdimen, safe for \pgfextractx)
 \newlength{\rk@ta}
 \newlength{\rk@tb}
@@ -158,6 +163,13 @@
   \global\rk@deferredcmpfalse
   \setlength{\rk@halfsep}{\rk@spacing}%
   \divide\rk@halfsep by 2\relax
+  % Apply per-slot skip (extends baseline, advances cursor, then resets).
+  \ifdim\rk@slot@skip>0pt
+    \setlength{\rk@ta}{\rk@x}\addtolength{\rk@ta}{\rk@slot@skip}%
+    \rk@line{(\the\rk@x, #2) -- (\the\rk@ta, #2)}%
+    \setlength{\rk@x}{\rk@ta}%
+    \setlength{\rk@slot@skip}{0pt}%
+  \fi
   % Lift word above the baseline line so descenders clear it.
   \setlength{\rk@wlevel}{#2}\addtolength{\rk@wlevel}{\rk@wordlift}%
   % Step 1: measure word width and detect deferred \rkSubClause / \rkCompound.
@@ -188,7 +200,13 @@
     \setlength{\rk@ta}{\rk@x}%
     \addtolength{\rk@ta}{\rk@halfsep}%
     \addtolength{\rk@ta}{\rk@tb}%
-    \addtolength{\rk@ta}{\rk@halfsep}%    rk@ta = line right edge
+    \addtolength{\rk@ta}{\rk@halfsep}%    rk@ta = line right edge (auto)
+    % Apply minwidth override: line must be at least rk@x + rk@slot@minwidth
+    \ifdim\rk@slot@minwidth>0pt
+      \setlength{\rk@tc}{\rk@x}\addtolength{\rk@tc}{\rk@slot@minwidth}%
+      \ifdim\rk@tc>\rk@ta\setlength{\rk@ta}{\rk@tc}\fi
+      \setlength{\rk@slot@minwidth}{0pt}%  reset after use
+    \fi
     % centre_x  = rk@x + halfsep + word_width/2
     \divide\rk@tb by 2\relax%             rk@tb = word_width/2
     \setlength{\rk@tc}{\rk@x}%
@@ -247,7 +265,10 @@
   \fi
   \setlength{\rk@ta}{\rk@ht}%
   \addtolength{\rk@ta}{0.18cm}%
+  % Top of bar: base_y + rk@ta  (full ascender)
   \setlength{\rk@tc}{\rk@base@y}\addtolength{\rk@tc}{\rk@ta}%
+  % Bottom of bar: base_y − rk@ta/2  (half descender)
+  \divide\rk@ta by 2\relax%
   \setlength{\rk@tb}{\rk@base@y}\addtolength{\rk@tb}{-\rk@ta}%
   \rk@line{(\the\rk@x, \the\rk@tb) -- (\the\rk@x, \the\rk@tc)}%
 }
@@ -302,6 +323,9 @@
   \pgfextracty{\rk@ta}{\pgfpointanchor{rk@modmsr}{south}}%
   \addtolength{\rk@tb}{-\rk@ta}%   % rk@tb = nodeHeight
   \pgfmathsetlength{\rk@effmod}{max(\the\rk@modDepth, (\the\rk@tc + \the\rk@tb) / 1.41422 + 6pt)}%
+  % Apply per-slant minimum override, then reset.
+  \ifdim\rk@slant@minlen>\rk@effmod\setlength{\rk@effmod}{\rk@slant@minlen}\fi
+  \setlength{\rk@slant@minlen}{0pt}%
   % Slant: (mc@cur, mc@y) → (mc@cur + E, mc@y − E)
   \setlength{\rk@ta}{\rk@mc@cur}%
   \addtolength{\rk@ta}{\rk@effmod}%    % rk@ta = endpoint x = x_s + E
@@ -382,6 +406,9 @@
   \pgfextracty{\rk@ta}{\pgfpointanchor{rk@prepmsr}{south}}%
   \addtolength{\rk@tb}{-\rk@ta}%   % rk@tb = nodeHeight
   \pgfmathsetlength{\rk@effmod}{max(\the\rk@modDepth, (\the\rk@tc + \the\rk@tb) / 1.41422 + 6pt)}%
+  % Apply per-slant minimum override, then reset.
+  \ifdim\rk@slant@minlen>\rk@effmod\setlength{\rk@effmod}{\rk@slant@minlen}\fi
+  \setlength{\rk@slant@minlen}{0pt}%
   % Slant end: (cursor + effmod, y_head - effmod)
   \setlength{\rk@ta}{\rk@mc@cur}%
   \addtolength{\rk@ta}{\rk@effmod}%
@@ -601,6 +628,13 @@
 % ============================================================
 
 % Internal state reset (called by both rkdiagram and rkCompoundSent)
+% \rkSkip{len}      — insert a gap of <len> in the baseline before the next slot.
+% \rkSlotWidth{len} — set minimum line width for the next slot.
+% Both are one-shot: they reset automatically after the next slot is drawn.
+\newcommand{\rkSkip}[1]{\setlength{\rk@slot@skip}{#1}}
+\newcommand{\rkSlotWidth}[1]{\setlength{\rk@slot@minwidth}{#1}}
+\newcommand{\rkSlantLen}[1]{\setlength{\rk@slant@minlen}{#1}}
+
 \newcommand{\rk@init@state}{%
   \setlength{\rk@x}{0pt}%
   \setlength{\rk@ht}{2.2ex}%
@@ -613,6 +647,9 @@
   \setlength{\rk@iobj@xmax}{0pt}%
   \setlength{\rk@nounmodright}{0pt}%
   \setlength{\rk@base@y}{0pt}%
+  \setlength{\rk@slot@minwidth}{0pt}%
+  \setlength{\rk@slot@skip}{0pt}%
+  \setlength{\rk@slant@minlen}{0pt}%
 }
 
 \NewDocumentEnvironment{rkdiagram}{O{}}{%

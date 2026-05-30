@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.28)  30 MAY 2026 07:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.5.28)  30 MAY 2026 07:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -392,22 +392,25 @@ Package: pgfopts 2014/07/10 v2.1a LaTeX package options with pgfkeys
 \rk@mc@d=\skip69
 \rk@mc@cur=\skip70
 \rk@nounmodright=\skip71
-\rk@ta=\skip72
-\rk@tb=\skip73
-\rk@tc=\skip74
-\rk@halfsep=\skip75
-\rk@cmp@textx=\skip76
-\rk@cmp@platright=\skip77
-\rk@cmp@csep=\skip78
-\rk@cmp@basey=\skip79
-\rk@cmp@wa=\skip80
-\rk@cmp@wb=\skip81
-\rk@base@y=\skip82
-\rk@wordlift=\skip83
-\rk@wlevel=\skip84
-\rk@cmpst@va@x=\skip85
-\rk@cmpst@vb@x=\skip86
-\rk@cmpst@sep=\skip87
+\rk@slot@minwidth=\skip72
+\rk@slot@skip=\skip73
+\rk@slant@minlen=\skip74
+\rk@ta=\skip75
+\rk@tb=\skip76
+\rk@tc=\skip77
+\rk@halfsep=\skip78
+\rk@cmp@textx=\skip79
+\rk@cmp@platright=\skip80
+\rk@cmp@csep=\skip81
+\rk@cmp@basey=\skip82
+\rk@cmp@wa=\skip83
+\rk@cmp@wb=\skip84
+\rk@base@y=\skip85
+\rk@wordlift=\skip86
+\rk@wlevel=\skip87
+\rk@cmpst@va@x=\skip88
+\rk@cmpst@vb@x=\skip89
+\rk@cmpst@sep=\skip90
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/geometry/geometry.sty
 Package: geometry 2026/03/07 v6.0 Page Geometry
@@ -471,7 +474,7 @@ File: microtype-pdftex.def 2026/03/01 v3.2d Definitions specific to pdftex (RS)
 
 LaTeX Info: Redefining \lsstyle on input line 944.
 LaTeX Info: Redefining \lslig on input line 944.
-\MT@outer@space=\skip88
+\MT@outer@space=\skip91
 )
 Package microtype Info: Loading configuration file microtype.cfg.
 
@@ -599,22 +602,15 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 Missing character: There is no , in font nullfont!
 Missing character: There is no , in font nullfont!
 Missing character: There is no , in font nullfont!
-[3]
 LaTeX Font Info:    Trying to load font information for OMS+cmtt on input line 
 436.
 LaTeX Font Info:    No file OMScmtt.fd. on input line 436.
-
 
 LaTeX Font Warning: Font shape `OMS/cmtt/m/it' undefined
 (Font)              using `OMS/cmsy/m/n' instead
 (Font)              for symbol `textbackslash' on input line 436.
 
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <10.95> on input line 453.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 453.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 453.
+[3]
 Missing character: There is no , in font nullfont!
 [4] (./rk-test.aux)
  ***********
@@ -627,26 +623,25 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 15771 strings out of 467340
- 315777 string characters out of 5415339
- 818813 words of memory out of 5000000
- 44561 multiletter control sequences out of 15000+600000
- 636133 words of font info for 94 fonts, out of 8000000 for 9000
+ 15728 strings out of 467340
+ 315189 string characters out of 5415339
+ 832838 words of memory out of 5000000
+ 44543 multiletter control sequences out of 15000+600000
+ 632909 words of font info for 76 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 117i,8n,121p,1004b,1058s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
-></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
-</usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmitt10.pfb>
-</usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></
-usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></us
-r/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr
-/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/
-local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/l
-ocal/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on rk-test.pdf (4 pages, 145602 bytes).
+ 117i,6n,121p,1004b,1058s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
+></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmitt10.pfb
+></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><
+/usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></u
+sr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></us
+r/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr
+/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/
+local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
+Output written on rk-test.pdf (4 pages, 131503 bytes).
 PDF statistics:
- 65 PDF objects out of 1000 (max. 8388607)
- 40 compressed objects within 1 object stream
+ 60 PDF objects out of 1000 (max. 8388607)
+ 37 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 28173 words of extra memory for PDF output out of 29859 (max. 10000000)
+ 22029 words of extra memory for PDF output out of 24883 (max. 10000000)
 

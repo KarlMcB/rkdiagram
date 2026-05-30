@@ -446,40 +446,6 @@
 }
 
 % ============================================================
-\testsection{Regression Checklist}
-% ============================================================
-
-{\small
-\begin{tabular}{lp{5.5cm}p{7cm}}
-  \toprule
-  \textbf{Test \#} & \textbf{Sentence} & \textbf{Feature(s) Verified} \\
-  \midrule
-  1--2   & Dogs bark / She laughed         & Baseline, divider, no crash on minimal input \\
-  3--5   & Old dog / Loudly / Very quite   & Adjective, adverb, nested modifier chains \\
-  6--7   & Cat chased / Maria writes       & Direct object, short vertical divider \\
-  8--9   & Gave him / Sent students        & Indirect object platform \\
-  10--12 & Soup smells / He is / Accurate  & Pred.\ adj., pred.\ nom., forward diagonal \\
-  13--16 & Cat on mat / Bird in tree / Two preps / Nested preps &
-           Prepositional phrases: verb-mod, noun-mod, multiple, nested \\
-  17--20 & John and Mary / sang and danced / cats and birds / but not &
-           Compound subject, predicate, object, two-word conjunction \\
-  21--22 & Brother the doctor / Paris city of light &
-           Appositive on subject; appositive with embedded prep \\
-  23--25 & Man who / knows that / Because rain &
-           Relative clause, noun clause, adverbial clause \\
-  26--27 & Tall woman \ldots\ book / John and Maria \ldots\ home &
-           Multiple simultaneous features \\
-  28--32 & Go! / Birds fly / NYC / has been running / never &
-           Implied subject, bare minimum, multi-word noun/verb, negation \\
-  \bottomrule
-\end{tabular}
-}
-
-\bigskip
-\noindent\textit{All tests should compile without error. Visual inspection of
-each diagram against the printed sentence is required; no automated output
-comparison is available at this stage.}
-
 % ============================================================
 \testsection{Group 12 — Mark Twain Stress Test}
 % ============================================================
@@ -534,6 +500,90 @@ take us ashore at so much a head, silver coin of any country.}{%
       ]{contracted}
     }%
   \par\textit{(Mark Twain, \textit{The Innocents Abroad}, 1869)}
+}
+
+% ============================================================
+\testsection{Group 13 — Manual Spacing Controls}
+% ============================================================
+% \rkSlotWidth{len}  sets a minimum line width for the next slot only.
+% \rkSkip{len}       inserts a gap in the baseline before the next slot.
+% Both are one-shot — they reset automatically after use.
+
+\testcase{Dogs bark. (default spacing for reference)}{%
+  \begin{rkdiagram}
+    \rkSubject{Dogs}
+    \rkVerb{bark}
+  \end{rkdiagram}
+  \par\textit{Baseline: auto-width lines, no adjustments.}
+}
+
+\testcase{Dogs bark. (wider subject line)}{%
+  \begin{rkdiagram}
+    \rkSlotWidth{4cm}
+    \rkSubject{Dogs}
+    \rkVerb{bark}
+  \end{rkdiagram}
+  \par\textit{\texttt{\textbackslash rkSlotWidth\{4cm\}} before \texttt{\textbackslash rkSubject}
+    forces the subject line to at least 4\,cm.}
+}
+
+\testcase{Dogs bark. (gap before verb)}{%
+  \begin{rkdiagram}
+    \rkSubject{Dogs}
+    \rkSkip{1.5cm}
+    \rkVerb{bark}
+  \end{rkdiagram}
+  \par\textit{\texttt{\textbackslash rkSkip\{1.5cm\}} before \texttt{\textbackslash rkVerb}
+    inserts a 1.5\,cm gap in the baseline (extends the subject line rightward).}
+}
+
+\testcase{The cat chased the mouse. (widen verb and object lines)}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{cat}
+    \rkSlotWidth{3.5cm}
+    \rkVerb{chased}
+    \rkSlotWidth{3.5cm}
+    \rkDObj[\rkAdj{the}]{mouse}
+  \end{rkdiagram}
+  \par\textit{Both verb and object lines forced to 3.5\,cm minimum — useful for
+    aligning words on parallel diagrams or leaving room for annotations.}
+}
+
+\testcase{She gave him a gift. (skip before indirect object platform)}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkSlotWidth{3cm}
+    \rkVerb{gave}
+    \rkIObj{him}
+    \rkDObj[\rkAdj{a}]{gift}
+  \end{rkdiagram}
+  \par\textit{\texttt{\textbackslash rkSlotWidth\{3cm\}} on the verb widens it
+    to give the indirect-object platform more room.}
+}
+
+\testcase{The cat sat on the mat. (longer prep slant)}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{cat}
+    \rkVerb[%
+      \rkSlantLen{2.5cm}%
+      \rkPrep[\rkAdj{the}]{on}{mat}%
+    ]{sat}
+  \end{rkdiagram}
+  \par\textit{\texttt{\textbackslash rkSlantLen\{2.5cm\}} before \texttt{\textbackslash rkPrep}
+    forces the ``on'' slant to 2.5\,cm — useful when the prep label is long or
+    when more visual separation is needed.}
+}
+
+\testcase{Dogs bark. (combining skip and minwidth)}{%
+  \begin{rkdiagram}
+    \rkSlotWidth{3cm}
+    \rkSubject{Dogs}
+    \rkSkip{0.8cm}
+    \rkSlotWidth{3cm}
+    \rkVerb{bark}
+  \end{rkdiagram}
+  \par\textit{Both controls used together: 3\,cm subject, 0.8\,cm gap,
+    3\,cm verb — each resets automatically after its slot.}
 }
 
 \end{document}

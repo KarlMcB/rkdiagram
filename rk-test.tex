@@ -17,7 +17,7 @@
 ]{rkdiagram}
 
 % ---- Support packages --------------------------------------
-\usepackage{geometry}
+\usepackage[a2paper]{geometry}
 \geometry{margin=1in}
 \usepackage{booktabs}
 \usepackage{microtype}
@@ -491,7 +491,7 @@ Portuguese boatmen, with brass rings in their ears and fraud in their hearts,
 climbed the ship's sides, and various parties of us contracted with them to
 take us ashore at so much a head, silver coin of any country.}{%
   % ------ Clause 1: A swarm … climbed the ship's sides ------
-  \begin{rkdiagram}[spacing=1.0cm,modDepth=0.9cm]
+  \begin{rkdiagram}[spacing=1.0cm,modDepth=0.9cm,cmpSep=1.8cm]
     \rkSubject[%
       \rkAdj{A},
       \rkPrep[%
@@ -501,13 +501,11 @@ take us ashore at so much a head, silver coin of any country.}{%
         \rkAdj{shoulder-shrugging},
         \rkAdj{gesticulating},
         \rkAdj{Portuguese},
-        \rkPrep[%
-          \rkAdj{brass},
-          \rkPrep[\rkAdj{their}]{in}{ears}%
-        ]{with}{rings},
-        \rkPrep[%
-          \rkPrep[\rkAdj{their}]{in}{hearts}%
-        ]{with}{fraud}%
+        \rkPrep{with}{%
+          \rkCompound[and]%
+            [\rkAdj{brass},\rkPrep[\rkAdj{their}]{in}{ears}]{rings}%
+            [\rkPrep[\rkAdj{their}]{in}{hearts}]{fraud}%
+        }%
       ]{of}{boatmen}%
     ]{swarm}
     \rkVerb{climbed}

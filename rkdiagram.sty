@@ -47,6 +47,7 @@
   subClauseDepth/.code = {\setlength{\rk@subClDepth}{#1}},
   linewidth/.code      = {\setlength{\rk@lw}{#1}},
   color/.code          = {\renewcommand{\rk@color}{#1}},
+  bridgeY/.code        = {\setlength{\rk@bridgey@override}{#1}},
 }
 
 \ProcessPgfOptions{/rkdiagram}
@@ -60,6 +61,9 @@
 
 \newlength{\rk@x}      % main baseline x cursor
 \newlength{\rk@ht}     % running max word height (used for divider length)
+\newlength{\rk@clause@miny}       % lowest y reached during current clause (for bridge placement)
+\newlength{\rk@cmpst@saved@miny}  % clause 1 miny saved before clause 2 is drawn
+\newlength{\rk@bridgey@override}  % manual bridge y override (0pt = auto)
 
 % Current slot — set by \rk@placeslot
 \newlength{\rk@sl@l}   % left x
@@ -331,6 +335,7 @@
   \addtolength{\rk@ta}{\rk@effmod}%    % rk@ta = endpoint x = x_s + E
   \setlength{\rk@tb}{\rk@mc@y}%
   \addtolength{\rk@tb}{-\rk@effmod}%   % rk@tb = endpoint y = y_s − E
+  \ifdim\rk@tb<\rk@clause@miny\global\rk@clause@miny=\rk@tb\fi
   \draw[color=\rk@color, line width=\rk@lw]
     (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
     node[midway, above, sloped,
@@ -414,6 +419,7 @@
   \addtolength{\rk@ta}{\rk@effmod}%
   \setlength{\rk@tb}{\rk@mc@y}%
   \addtolength{\rk@tb}{-\rk@effmod}%
+  \ifdim\rk@tb<\rk@clause@miny\global\rk@clause@miny=\rk@tb\fi
   % Draw slant with prep label above it at midpoint
   \draw[color=\rk@color, line width=\rk@lw]
     (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
@@ -503,6 +509,7 @@
     \addtolength{\rk@ta}{\rk@modDepth}%
     \setlength{\rk@tb}{\rk@mc@y}%
     \addtolength{\rk@tb}{-\rk@modDepth}%
+    \ifdim\rk@tb<\rk@clause@miny\global\rk@clause@miny=\rk@tb\fi
     \rk@line{(\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)}%
     \setlength{\rk@halfsep}{\rk@spacing}%
     \divide\rk@halfsep by 2\relax
@@ -650,6 +657,7 @@
   \setlength{\rk@slot@minwidth}{0pt}%
   \setlength{\rk@slot@skip}{0pt}%
   \setlength{\rk@slant@minlen}{0pt}%
+  \setlength{\rk@clause@miny}{0pt}%
 }
 
 \NewDocumentEnvironment{rkdiagram}{O{}}{%
@@ -686,6 +694,8 @@
 \newlength{\rk@cmpst@sep}     % baseline separation
 
 \NewDocumentCommand{\rkCompoundSent}{O{and} O{3cm} O{} m O{} m}{%
+  % Reset manual bridge override before applying options (so default is auto)
+  \setlength{\rk@bridgey@override}{0pt}%
   % Apply any options from either clause so spacing etc. are consistent
   \ifblank{#3}{}{\pgfkeys{/rkdiagram, #3}}%
   \ifblank{#5}{}{\pgfkeys{/rkdiagram, #5}}%
@@ -704,6 +714,8 @@
     \setlength{\rk@cmpst@va@x}{\rk@vb@l}%
     \addtolength{\rk@cmpst@va@x}{\rk@vb@r}%
     \divide\rk@cmpst@va@x by 2\relax
+    % Save clause 1 lowest y (for auto bridge placement)
+    \setlength{\rk@cmpst@saved@miny}{\rk@clause@miny}%
     % ---- Clause 2 at y = -sep ----
     \rk@init@state
     \setlength{\rk@base@y}{-\rk@cmpst@sep}%
@@ -714,9 +726,22 @@
     \divide\rk@cmpst@vb@x by 2\relax
     % ---- Draw connector ----
     % rk@base@y is still -sep after clause 2; use it for clause-2 verb y.
-    % bridge_y = midpoint = -sep/2
-    \setlength{\rk@ta}{\rk@base@y}%
-    \divide\rk@ta by 2\relax%                    rk@ta = bridge_y = -sep/2
+    % bridge_y: default is -sep/2, but auto-lower if clause 1 modifiers extend past it.
+    % bridgeY key overrides everything.
+    \ifdim\rk@bridgey@override=0pt
+      % Auto: start at -sep/2
+      \setlength{\rk@ta}{\rk@base@y}%
+      \divide\rk@ta by 2\relax%               rk@ta = -sep/2
+      % Lower to miny_clause1 - 0.4cm if that is further down
+      \setlength{\rk@tb}{\rk@cmpst@saved@miny}%
+      \addtolength{\rk@tb}{-0.4cm}%           rk@tb = miny - gap
+      \ifdim\rk@tb<\rk@ta\setlength{\rk@ta}{\rk@tb}\fi%  take the more-negative value
+      % Clamp: keep bridge above clause 2 baseline by at least 0.3cm
+      \setlength{\rk@tc}{\rk@base@y}\addtolength{\rk@tc}{0.3cm}%
+      \ifdim\rk@ta<\rk@tc\setlength{\rk@ta}{\rk@tc}\fi
+    \else
+      \setlength{\rk@ta}{\rk@bridgey@override}%  rk@ta = bridge_y (manual)
+    \fi%                                         rk@ta = bridge_y
     % bridge midpoint x = (va@x + vb@x) / 2
     \setlength{\rk@tc}{\rk@cmpst@va@x}%
     \addtolength{\rk@tc}{\rk@cmpst@vb@x}%

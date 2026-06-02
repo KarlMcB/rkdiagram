@@ -7,3 +7,6 @@
 *.toc
 *.fls
 *.fdb_latexmk
+rk-test.pdf
+*.log
+*.pdf

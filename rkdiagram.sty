@@ -131,10 +131,17 @@
 % Deferred gerund — used when \rkGerund appears as a word argument.
 \newif\ifrk@deferredgrd  \rk@deferredgrdfalse
 \newcommand{\rk@deferredgrd@word}{}
-\newcommand{\rk@deferred@Gerund}[1]{%
+\newcommand{\rk@deferredgrd@mods}{}
+\NewDocumentCommand{\rk@deferred@Gerund}{O{} m}{%
   \global\rk@deferredgrdtrue
-  \gdef\rk@deferredgrd@word{#1}%
+  \gdef\rk@deferredgrd@mods{#1}%
+  \gdef\rk@deferredgrd@word{#2}%
 }
+
+% Scratch lengths used during gerund modifier pre-measurement and drawing.
+\newlength{\rk@grd@maxdepth}  % deepest modifier slant found in the pre-scan
+\newlength{\rk@grd@posth}     % computed post height for the current gerund
+\newlength{\rk@grd@fh}        % equilateral-triangle half-base (= apex_height / sqrt(3))
 
 % Deferred subclause — used when \rkSubClause appears as a word argument.
 % The drawing is deferred until after the (empty) slot node is placed.
@@ -1092,20 +1099,83 @@
 }
 
 % ============================================================
+% GERUND PRE-SCAN HOOKS
+%
+% These lightweight commands are substituted for \rkAdj, \rkAdv, \rkPrep
+% during a dry-run pass over the gerund's modifier list.  Each one measures
+% the depth its slant would occupy and records the maximum in rk@grd@maxdepth.
+% Sub-modifiers add an extra modDepth level to the depth estimate.
+% ============================================================
+
+% \rk@grd@scanmod[submods]{word}  — covers \rkAdj and \rkAdv
+\NewDocumentCommand{\rk@grd@scanmod}{O{} m}{%
+  \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
+    (rk@grdscan) at (0,0) {#2};%
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@grdscan}{east}}%
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@grdscan}{west}}%
+  \addtolength{\rk@tc}{-\rk@ta}%           rk@tc = node width
+  \pgfextracty{\rk@tb}{\pgfpointanchor{rk@grdscan}{north}}%
+  \pgfextracty{\rk@ta}{\pgfpointanchor{rk@grdscan}{south}}%
+  \addtolength{\rk@tb}{-\rk@ta}%           rk@tb = node height
+  \pgfmathsetlength{\rk@ta}{max(\the\rk@modDepth,(\the\rk@tc+\the\rk@tb)/1.41422+6pt)}%
+  \ifblank{#1}{}{\addtolength{\rk@ta}{\rk@modDepth}}% one extra level for sub-mods
+  \ifdim\rk@ta>\rk@grd@maxdepth\global\rk@grd@maxdepth=\rk@ta\fi
+}
+
+% \rk@grd@scanprep[mods-on-obj]{prep}{obj}  — covers \rkPrep
+\NewDocumentCommand{\rk@grd@scanprep}{O{} m m}{%
+  \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
+    (rk@grdscan) at (0,0) {#2};%
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@grdscan}{east}}%
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@grdscan}{west}}%
+  \addtolength{\rk@tc}{-\rk@ta}%
+  \pgfextracty{\rk@tb}{\pgfpointanchor{rk@grdscan}{north}}%
+  \pgfextracty{\rk@ta}{\pgfpointanchor{rk@grdscan}{south}}%
+  \addtolength{\rk@tb}{-\rk@ta}%
+  \pgfmathsetlength{\rk@ta}{max(\the\rk@modDepth,(\the\rk@tc+\the\rk@tb)/1.41422+6pt)}%
+  \ifdim\rk@ta>\rk@grd@maxdepth\global\rk@grd@maxdepth=\rk@ta\fi
+}
+
+% ============================================================
 % GERUND PLATFORM
 % \rk@dogerund{foot-y}
 %
 % Draws the stepped T-platform for a gerund:
 %   foot  — long horizontal at foot-y (the noun-slot baseline)
-%   post  — vertical from foot centre up by \rk@gerundpost
+%   post  — vertical from foot centre up by the computed post height
 %   plat  — short horizontal at post top (the word sits here)
-% Records rk@sl@* on the word platform so \rk@slot@to@mc and
-% subsequent modifier runs attach at the correct level.
+%
+% Post height is computed adaptively: a dry-run pre-scan over the gerund's
+% own modifier list (stored in rk@deferredgrd@mods) finds the deepest slant;
+% the post is made tall enough to keep all modifier slants clear of the foot.
+% rk@gerundpost is the minimum post height (user-configurable floor).
+%
+% Records rk@sl@* on the word platform so \rk@slot@to@mc and subsequent
+% modifier runs attach at the correct level.
 % ============================================================
 
 \newcommand{\rk@dogerund}[1]{%
   % #1 = foot y (e.g. \the\rk@base@y)
   \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
+  % --- Pre-scan modifier list to find the deepest slant ---
+  \setlength{\rk@grd@maxdepth}{0pt}%
+  \ifblank{\rk@deferredgrd@mods}{}{%
+    \begingroup
+      \let\rkAdj\rk@grd@scanmod
+      \let\rkAdv\rk@grd@scanmod
+      \let\rkPrep\rk@grd@scanprep
+      \let\rkSubClause\@gobbletwo        % ignore subclauses during scan
+      \let\rkAppos\@gobble               % ignore appositives during scan
+      \rk@execmods{\rk@deferredgrd@mods}%
+    \endgroup
+  }%
+  % Compute post height: at least rk@gerundpost, at least maxdepth + 2*modgap
+  \setlength{\rk@grd@posth}{\rk@gerundpost}%
+  \ifdim\rk@grd@maxdepth>0pt
+    \setlength{\rk@ta}{\rk@grd@maxdepth}%
+    \addtolength{\rk@ta}{\rk@modgap}\addtolength{\rk@ta}{\rk@modgap}%
+    \ifdim\rk@ta>\rk@grd@posth\setlength{\rk@grd@posth}{\rk@ta}\fi
+  \fi
   % --- Measure gerund word ---
   \node[opacity=0, inner sep=0pt, outer sep=0pt, font=\rk@font]
     (rk@grdmsr) at (0,0) {\rk@deferredgrd@word};%
@@ -1119,28 +1189,43 @@
   \addtolength{\rk@tc}{\rk@ta}\addtolength{\rk@tc}{\rk@halfsep}%  rk@tc = word_plat_right
   % foot_right = word_plat_right + halfsep  (foot wider than platform)
   \setlength{\rk@effmod}{\rk@tc}\addtolength{\rk@effmod}{\rk@halfsep}%  rk@effmod = foot_right
-  % post_x = midpoint of word platform
+  % post_x = midpoint of word platform = midpoint of foot (both share the same centre)
   \setlength{\rk@tb}{\rk@ta}\addtolength{\rk@tb}{\rk@tc}\divide\rk@tb by 2\relax  % rk@tb = post_x
   % --- Y coordinates ---
-  % word_plat_y = foot_y + post_height
-  \setlength{\rk@wlevel}{#1}\addtolength{\rk@wlevel}{\rk@gerundpost}%  rk@wlevel = word_plat_y
-  % --- Draw structures ---
-  \rk@line{(\the\rk@x, #1) -- (\the\rk@effmod, #1)}%               foot
-  \rk@line{(\the\rk@tb, #1) -- (\the\rk@tb, \the\rk@wlevel)}%      post
-  \rk@line{(\the\rk@ta, \the\rk@wlevel) -- (\the\rk@tc, \the\rk@wlevel)}%  word platform
+  % apex_y     = foot_y + halfsep  (top of the two legs; post starts here)
+  % word_plat_y = foot_y + rk@grd@posth
+  \setlength{\rk@wlevel}{#1}\addtolength{\rk@wlevel}{\rk@halfsep}%          rk@wlevel = apex_y
+  \setlength{\rk@grd@maxdepth}{#1}\addtolength{\rk@grd@maxdepth}{\rk@grd@posth}% rk@grd@maxdepth = word_plat_y
+  % --- Draw word platform first (while rk@ta = word_plat_left is still intact) ---
+  \rk@line{(\the\rk@ta, \the\rk@grd@maxdepth) -- (\the\rk@tc, \the\rk@grd@maxdepth)}%
+  % --- Full-width foot and 60°-apart legs ---
+  % The foot spans the original full width.  Two legs branch from the apex
+  % (bottom of the post) at ±30° from vertical (= 60° total), landing on the
+  % baseline at post_x ± halfsep/sqrt(3).  This places an equilateral triangle
+  % with apex at (post_x, apex_y) sitting on the foot line.
+  \pgfmathsetlength{\rk@grd@fh}{\the\rk@halfsep / 1.73205}%  half-base = halfsep/√3
+  % foot_left_leg = post_x - half-base  →  store in rk@ta (word_plat_left no longer needed)
+  \setlength{\rk@ta}{\rk@tb}\addtolength{\rk@ta}{-\rk@grd@fh}%
+  \rk@line{(\the\rk@x, #1) -- (\the\rk@effmod, #1)}%                              full-width foot
+  \rk@line{(\the\rk@ta, #1) -- (\the\rk@tb, \the\rk@wlevel)}%                     left leg
+  \rk@line{(\the\dimexpr\rk@tb+\rk@grd@fh\relax, #1) -- (\the\rk@tb, \the\rk@wlevel)}% right leg
+  \rk@line{(\the\rk@tb, \the\rk@wlevel) -- (\the\rk@tb, \the\rk@grd@maxdepth)}%  post
+  % --- Record slot (rk@tc = word_plat_right still intact) ---
+  % sl@l = post_x so \rk@slot@to@mc starts modifiers to the right of the post.
+  \setlength{\rk@sl@l}{\rk@tb}%
+  \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%
+  \setlength{\rk@sl@y}{\rk@grd@maxdepth}%   word_plat_y
+  % Advance main cursor past word platform
+  \setlength{\rk@x}{\rk@effmod}%
   % --- Place word on platform (centred at post_x) ---
-  \setlength{\rk@ta}{\rk@wlevel}\addtolength{\rk@ta}{\rk@wordlift}%  rk@ta = word node y
+  \setlength{\rk@ta}{\rk@grd@maxdepth}\addtolength{\rk@ta}{\rk@wordlift}%  word node y
   \node[anchor=base, inner sep=0pt, outer sep=0pt, font=\rk@font]
     at (\the\rk@tb, \the\rk@ta) {\rk@deferredgrd@word};%
-  % --- Record slot on the word platform (for modifier attachment) ---
-  % sl@l = post_x (not word_plat_left) so \rk@slot@to@mc places mc@cur to the
-  % RIGHT of the post; modifier slants then diverge downward-right without
-  % crossing the vertical post line.
-  \setlength{\rk@sl@l}{\rk@tb}%        rk@tb = post_x
-  \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%
-  \setlength{\rk@sl@y}{\rk@wlevel}%
-  % Advance main cursor to foot_right
-  \setlength{\rk@x}{\rk@effmod}%
+  % --- Run gerund's own modifiers from the word platform ---
+  \ifblank{\rk@deferredgrd@mods}{}{%
+    \rk@slot@to@mc
+    \rk@runmods{\rk@deferredgrd@mods}%
+  }%
   % --- Update clause miny for bridge placement ---
   \setlength{\rk@ta}{#1}%
   \ifdim\rk@ta<\rk@clause@miny\global\rk@clause@miny=\rk@ta\fi
@@ -1148,14 +1233,15 @@
 
 % ============================================================
 % GERUND
-% \rkGerund{word}
+% \rkGerund[mods]{word}
 % Use as the word argument of \rkSubject, \rkDObj, \rkPredNom, etc.
-% Modifiers of the gerund are passed via the slot command's optional arg.
+% The optional [mods] are modifiers of the gerund word itself; they are
+% pre-scanned to compute the post height before drawing begins.
 % ============================================================
 
-\NewDocumentCommand{\rkGerund}{m}{%
+\NewDocumentCommand{\rkGerund}{O{} m}{%
   % Inline fallback (outside diagram context): just typeset the word.
-  \textit{#1}%
+  \textit{#2}%
 }
 
 \endinput

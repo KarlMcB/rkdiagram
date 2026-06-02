@@ -17,8 +17,9 @@
 ]{rkdiagram}
 
 % ---- Support packages --------------------------------------
-\usepackage[a2paper]{geometry}
+\usepackage[letterpaper]{geometry}
 \geometry{margin=1in}
+\usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{microtype}
 \usepackage{parskip}
@@ -84,7 +85,10 @@
 
 \testcase{The old dog barked.}{%
   \begin{rkdiagram}
-    \rkSubject[\rkAdj{the}, \rkAdj{old}]{dog}
+    \rkSubject[
+      \rkAdj{the},
+      \rkAdj{old}
+    ]{dog}
     \rkVerb{barked}
   \end{rkdiagram}
   \par\textit{Tests: article + adjective both modifying same noun.}
@@ -92,19 +96,29 @@
 
 \testcase{The dog barked loudly.}{%
   \begin{rkdiagram}
-    \rkSubject[\rkAdj{The}]{dog}
-    \rkVerb[\rkAdv{loudly}]{barked}
+    \rkSubject[
+      \rkAdj{The}
+    ]{dog}
+    \rkVerb[
+      \rkAdv{loudly}
+    ]{barked}
   \end{rkdiagram}
   \par\textit{Tests: adverb modifying verb.}
 }
 
 \testcase{The very old dog barked quite loudly.}{%
   \begin{rkdiagram}
-    \rkSubject[%
+    \rkSubject[
       \rkAdj{The},
-      \rkAdj[\rkAdv{very}]{old}
+      \rkAdj[
+        \rkAdv{very}
+      ]{old}
     ]{dog}
-    \rkVerb[\rkAdv[\rkAdv{quite}]{loudly}]{barked}
+    \rkVerb[
+      \rkAdv[
+        \rkAdv{quite}
+      ]{loudly}
+    ]{barked}
   \end{rkdiagram}
   \par\textit{Tests: nested modifiers — adverb modifying adjective; adverb modifying adverb.}
 }
@@ -116,9 +130,13 @@
 
 \testcase{The cat chased the mouse.}{%
   \begin{rkdiagram}
-    \rkSubject[\rkAdj{The}]{cat}
+    \rkSubject[
+      \rkAdj{The}
+    ]{cat}
     \rkVerb{chased}
-    \rkDObj[\rkAdj{the}]{mouse}
+    \rkDObj[
+      \rkAdj{the}
+    ]{mouse}
   \end{rkdiagram}
   \par\textit{Tests: direct object with article modifier.}
 }
@@ -127,7 +145,9 @@
   \begin{rkdiagram}
     \rkSubject{Maria}
     \rkVerb{writes}
-    \rkDObj[\rkAdj{beautiful}]{letters}
+    \rkDObj[
+      \rkAdj{beautiful}
+    ]{letters}
   \end{rkdiagram}
   \par\textit{Tests: adjective on direct object.}
 }
@@ -142,17 +162,25 @@
     \rkSubject{She}
     \rkVerb{gave}
     \rkIObj{him}
-    \rkDObj[\rkAdj{a}]{gift}
+    \rkDObj[
+      \rkAdj{a}
+    ]{gift}
   \end{rkdiagram}
   \par\textit{Tests: indirect object (pronoun) + direct object.}
 }
 
 \testcase{The teacher sent the students a warning.}{%
   \begin{rkdiagram}
-    \rkSubject[\rkAdj{The}]{teacher}
+    \rkSubject[
+      \rkAdj{The}
+    ]{teacher}
     \rkVerb{sent}
-    \rkIObj[\rkAdj{the}]{students}
-    \rkDObj[\rkAdj{a}]{warning}
+    \rkIObj[
+      \rkAdj{the}
+    ]{students}
+    \rkDObj[
+      \rkAdj{a}
+    ]{warning}
   \end{rkdiagram}
   \par\textit{Tests: indirect object with article modifier.}
 }
@@ -165,7 +193,9 @@
 
 \testcase{The soup smells delicious.}{%
   \begin{rkdiagram}
-    \rkSubject[\rkAdj{The}]{soup}
+    \rkSubject[
+      \rkAdj{The}
+    ]{soup}
     \rkVerb{smells}
     \rkPredAdj{delicious}
   \end{rkdiagram}
@@ -176,16 +206,22 @@
   \begin{rkdiagram}
     \rkSubject{He}
     \rkVerb{is}
-    \rkPredNom[\rkAdj{a}]{teacher}
+    \rkPredNom[
+      \rkAdj{a}
+    ]{teacher}
   \end{rkdiagram}
   \par\textit{Tests: predicate nominative with article.}
 }
 
 \testcase{The results seem surprisingly accurate.}{%
   \begin{rkdiagram}
-    \rkSubject[\rkAdj{The}]{results}
+    \rkSubject[
+      \rkAdj{The}
+    ]{results}
     \rkVerb{seem}
-    \rkPredAdj[\rkAdv{surprisingly}]{accurate}
+    \rkPredAdj[
+      \rkAdv{surprisingly}
+    ]{accurate}
   \end{rkdiagram}
   \par\textit{Tests: predicate adjective modified by adverb.}
 }
@@ -198,17 +234,25 @@
 
 \testcase{The cat sat on the mat.}{%
   \begin{rkdiagram}
-    \rkSubject[\rkAdj{The}]{cat}
-    \rkVerb[\rkPrep[\rkAdj{the}]{on}{mat}]{sat}
+    \rkSubject[
+      \rkAdj{The}
+    ]{cat}
+    \rkVerb[
+      \rkPrep[
+        \rkAdj{the}
+      ]{on}{mat}
+    ]{sat}
   \end{rkdiagram}
   \par\textit{Tests: prepositional phrase modifying verb.}
 }
 
 \testcase{The bird in the tree sang.}{%
   \begin{rkdiagram}
-    \rkSubject[%
+    \rkSubject[
       \rkAdj{The},
-      \rkPrep[\rkAdj{the}]{in}{tree}
+      \rkPrep[
+        \rkAdj{the}
+      ]{in}{tree}
     ]{bird}
     \rkVerb{sang}
   \end{rkdiagram}
@@ -218,8 +262,14 @@
 \testcase{She ran into the old barn near the river.}{%
   \begin{rkdiagram}
     \rkSubject{She}
-    \rkVerb[%
-      \rkPrep[\rkAdj{the}, \rkAdj{old}, \rkPrep[\rkAdj{the}]{near}{river}]{into}{barn}
+    \rkVerb[
+      \rkPrep[
+        \rkAdj{the},
+        \rkAdj{old},
+        \rkPrep[
+          \rkAdj{the}
+        ]{near}{river}
+      ]{into}{barn}
     ]{ran}
   \end{rkdiagram}
   \par\textit{Tests: prepositional phrase modifying the object of another prepositional phrase.}
@@ -227,11 +277,13 @@
 
 \testcase{The book on the shelf in the corner is mine.}{%
   \begin{rkdiagram}
-    \rkSubject[%
+    \rkSubject[
       \rkAdj{The},
-      \rkPrep[%
+      \rkPrep[
         \rkAdj{the},
-        \rkPrep[\rkAdj{the}]{in}{corner}
+        \rkPrep[
+          \rkAdj{the}
+        ]{in}{corner}
       ]{on}{shelf}
     ]{book}
     \rkVerb{is}
@@ -248,7 +300,9 @@
 
 \testcase{John and Mary sang.}{%
   \begin{rkdiagram}
-    \rkSubject{\rkCompound[and]{John}{Mary}}
+    \rkSubject{
+      \rkCompound[and]{John}{Mary}
+    }
     \rkVerb{sang}
   \end{rkdiagram}
   \par\textit{Tests: compound subject with coordinating conjunction.}
@@ -257,16 +311,22 @@
 \testcase{She sang and danced.}{%
   \begin{rkdiagram}
     \rkSubject{She}
-    \rkVerb{\rkCompound[and]{sang}{danced}}
+    \rkVerb{
+      \rkCompound[and]{sang}{danced}
+    }
   \end{rkdiagram}
   \par\textit{Tests: compound predicate.}
 }
 
 \testcase{The dog chased cats and birds.}{%
   \begin{rkdiagram}
-    \rkSubject[\rkAdj{The}]{dog}
+    \rkSubject[
+      \rkAdj{The}
+    ]{dog}
     \rkVerb{chased}
-    \rkDObj{\rkCompound[and]{cats}{birds}}
+    \rkDObj{
+      \rkCompound[and]{cats}{birds}
+    }
   \end{rkdiagram}
   \par\textit{Tests: compound direct object.}
 }
@@ -276,7 +336,11 @@
     \rkSubject{He}
     \rkVerb{painted}
     \rkDObj{%
-      \rkCompound[but not][\rkAdj{the}]{wall}[\rkAdj{the}]{ceiling}%
+      \rkCompound[but not][
+        \rkAdj{the}
+      ]{wall}[
+        \rkAdj{the}
+      ]{ceiling}%
     }
   \end{rkdiagram}
   \par\textit{Tests: compound object with two-word conjunction \textit{but not}.}
@@ -289,9 +353,11 @@
 
 \testcase{My brother, the doctor, arrived.}{%
   \begin{rkdiagram}
-    \rkSubject[%
+    \rkSubject[
       \rkAdj{My},
-      \rkAppos{\rkAdj{the}doctor}
+      \rkAppos{
+        \rkAdj{the}doctor
+      }
     ]{brother}
     \rkVerb{arrived}
   \end{rkdiagram}
@@ -302,7 +368,13 @@
   \begin{rkdiagram}
     \rkSubject{We}
     \rkVerb{visited}
-    \rkDObj[\rkAppos{\rkAdj{the}city\rkPrep[\rkAdj{}]{of}{light}}]{Paris}
+    \rkDObj[
+      \rkAppos{
+        \rkAdj{the}city\rkPrep[
+          \rkAdj{}
+        ]{of}{light}
+      }
+    ]{Paris}
   \end{rkdiagram}
   \par\textit{Tests: appositive (with embedded prep phrase) on direct object.}
 }
@@ -315,11 +387,13 @@
 
 \testcase{The man who wore the hat left.}{%
   \begin{rkdiagram}
-    \rkSubject[%
+    \rkSubject[
       \rkAdj{The},
       \rkSubClause[who]{%
         \rkVerb{wore}%
-        \rkDObj[\rkAdj{the}]{hat}%
+        \rkDObj[
+          \rkAdj{the}
+        ]{hat}%
       }%
     ]{man}
     \rkVerb{left}
@@ -344,10 +418,12 @@
 \testcase{Because the rain fell, we stayed inside.}{%
   \begin{rkdiagram}
     \rkSubject{we}
-    \rkVerb[%
+    \rkVerb[
       \rkAdv{inside},
       \rkSubClause[because]{%
-        \rkSubject[\rkAdj{the}]{rain}%
+        \rkSubject[
+          \rkAdj{the}
+        ]{rain}%
         \rkVerb{fell}%
       }%
     ]{stayed}
@@ -363,16 +439,24 @@
 \testcase{The tall woman in the red coat gave her young daughter
           a very old book.}{%
   \begin{rkdiagram}
-    \rkSubject[%
+    \rkSubject[
       \rkAdj{The},
       \rkAdj{tall},
-      \rkPrep[\rkAdj{the}, \rkAdj{red}]{in}{coat}
+      \rkPrep[
+        \rkAdj{the},
+        \rkAdj{red}
+      ]{in}{coat}
     ]{woman}
     \rkVerb{gave}
-    \rkIObj[\rkAdj{her}, \rkAdj{young}]{daughter}
-    \rkDObj[%
+    \rkIObj[
+      \rkAdj{her},
+      \rkAdj{young}
+    ]{daughter}
+    \rkDObj[
       \rkAdj{a},
-      \rkAdj[\rkAdv{very}]{old}
+      \rkAdj[
+        \rkAdv{very}
+      ]{old}
     ]{book}
   \end{rkdiagram}
   \par\textit{Tests: multiple adjectives, prep phrase on subject, indirect object
@@ -382,11 +466,21 @@
 \testcase{John and Maria quickly found the lost dog and gently
           carried it home.}{%
   \begin{rkdiagram}
-    \rkSubject{\rkCompound[and]{John}{Maria}}
+    \rkSubject{
+      \rkCompound[and]{John}{Maria}
+    }
     \rkVerb{%
-      \rkCompound[and]%
-        [\rkAdv{quickly},\rkDObj[\rkAdj{the},\rkAdj{lost}]{dog}]{found}%
-        [\rkAdv{gently},\rkDObj{it},\rkAdv{home}]{carried}%
+      \rkCompound[and][
+        \rkAdv{quickly},
+        \rkDObj[
+          \rkAdj{the},
+          \rkAdj{lost}
+        ]{dog}
+      ]{found}[
+        \rkAdv{gently},
+        \rkDObj{it},
+        \rkAdv{home}
+      ]{carried}%
     }
   \end{rkdiagram}
   \par\textit{Tests: compound subject + compound predicate, each verb with its
@@ -397,7 +491,6 @@
 \testsection{Group 11 — Edge Cases and Stress Tests}
 % ============================================================
 
-% 12a — Very short sentence (stress test for baseline minimum width)
 \testcase{Go!}{%
   \begin{rkdiagram}
     \rkSubject{(you)}   % implied subject — author inserts it in parens
@@ -406,7 +499,6 @@
   \par\textit{Tests: imperative with implied subject in parentheses (author convention).}
 }
 
-% 12b — Sentence with no modifiers at all
 \testcase{Birds fly.}{%
   \begin{rkdiagram}
     \rkSubject{Birds}
@@ -416,100 +508,375 @@
   and divider only.}
 }
 
-% 12c — Multi-word proper noun as subject
 \testcase{New York City never sleeps.}{%
   \begin{rkdiagram}
     \rkSubject{New York City}
-    \rkVerb[\rkAdv{never}]{sleeps}
+    \rkVerb[
+      \rkAdv{never}
+    ]{sleeps}
   \end{rkdiagram}
   \par\textit{Tests: multi-word proper noun in subject slot; adverb on verb.}
 }
 
-% 12d — Auxiliary + main verb (verb phrase)
 \testcase{She has been running every morning.}{%
   \begin{rkdiagram}
     \rkSubject{She}
-    \rkVerb[\rkPrep[\rkAdj{every}]{---}{morning}]{has been running}
+    \rkVerb[
+      \rkPrep[
+        \rkAdj{every}
+      ]{---}{morning}
+    ]{has been running}
   \end{rkdiagram}
   \par\textit{Tests: multi-word verb phrase (auxiliary + participle) in single
   \texttt{\textbackslash rkVerb} slot; temporal prep phrase.}
 }
 
-% 12e — Negative adverb
 \testcase{He never tells the truth.}{%
   \begin{rkdiagram}
     \rkSubject{He}
-    \rkVerb[\rkAdv{never}]{tells}
-    \rkDObj[\rkAdj{the}]{truth}
+    \rkVerb[
+      \rkAdv{never}
+    ]{tells}
+    \rkDObj[
+      \rkAdj{the}
+    ]{truth}
   \end{rkdiagram}
   \par\textit{Tests: negative adverb modifying verb.}
 }
 
 % ============================================================
+\testsection{Group 12 — Gerunds}
 % ============================================================
-\testsection{Group 12 — Mark Twain Stress Test}
-% ============================================================
+% A gerund sits on a stepped T-platform: word on a short top line,
+% connected by a vertical post to a longer foot that rests on the
+% noun-slot baseline.
 
-% Compound sentence (two independent clauses joined by ``and'').
-% Diagrammed as two stacked baselines.
-\testcase{A swarm of swarthy, noisy, lying, shoulder-shrugging, gesticulating
-Portuguese boatmen, with brass rings in their ears and fraud in their hearts,
-climbed the ship's sides, and various parties of us contracted with them to
-take us ashore at so much a head, silver coin of any country.}{%
+\testcase{Swimming is fun.}{%
+  \begin{rkdiagram}
+    \rkSubject{
+      \rkGerund{Swimming}
+    }
+    \rkVerb{is}
+    \rkPredAdj{fun}
+  \end{rkdiagram}
+  \par\textit{Tests: gerund as subject.}
+}
 
-  \rkCompoundSent[and][10cm]%
-    [spacing=1.0cm,modDepth=0.9cm,cmpSep=1.8cm]%
-    {%
-      \begin{rkdiagram}
-        \rkSubject[%
-          \rkAdj{A},
-          \rkset{cmpSep=1.0cm}
-          \rkPrep[%
-            \rkAdj{swarthy},
-            \rkAdj{noisy},
-            \rkAdj{lying},
-            \rkAdj{shoulder-shrugging},
-            \rkAdj{gesticulating},
-            \rkAdj{Portuguese},
-            \rkPrep{with}{%
-              \rkCompound[and]%
-                [\rkAdj{brass},\rkPrep[\rkAdj{their}]{in}{ears}]{rings}%
-                [\rkPrep[\rkAdj{their}]{in}{hearts}]{fraud}%
-            }%
-          ]{of}{boatmen}%
-        ]{swarm}
-        \rkVerb{climbed}
-        \rkDObj[\rkAdj{the},\rkAdj{ship's}]{sides}
-      \end{rkdiagram}%
-    }%
-    [spacing=1.0cm,modDepth=1.0cm]%
-    {%
-      \begin{rkdiagram}
-        \rkSubject[%
-          \rkAdj{various},
-          \rkPrep{of}{us}%
-        ]{parties}
-        \rkVerb[%
-          \rkPrep{with}{them},
-          \rkSubClause[to]{%
-            \rkVerb[%
-              \rkAdv{ashore},
-              \rkPrep[%
-                \rkAdj{so~much},
-                \rkAdj{a},
-                \rkAppos{silver coin of any country}%
-              ]{at}{head}%
-            ]{take}
-            \rkDObj{us}%
-          }%
-        ]{contracted}
-      \end{rkdiagram}%
-    }%
-  \par\textit{(Mark Twain, \textit{The Innocents Abroad}, 1869)}
+\testcase{She enjoys swimming.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{enjoys}
+    \rkDObj{
+      \rkGerund{swimming}
+    }
+  \end{rkdiagram}
+  \par\textit{Tests: gerund as direct object.}
+}
+
+\testcase{His hobby is collecting stamps.}{%
+  \begin{rkdiagram}
+    \rkSubject[
+      \rkAdj{His}
+    ]{hobby}
+    \rkVerb{is}
+    \rkPredNom{
+      \rkGerund{collecting}
+    }
+  \end{rkdiagram}
+  \par\textit{Tests: gerund as predicate nominative.}
+}
+
+\testcase{Rapid swimming exhausts him.}{%
+  \begin{rkdiagram}
+    \rkSubject{
+      \rkGerund[
+        \rkAdj{Rapid}
+      ]{swimming}
+    }
+    \rkVerb{exhausts}
+    \rkDObj{him}
+  \end{rkdiagram}
+  \par\textit{Tests: gerund as subject with adjective modifier (post auto-height).}
+}
+
+\testcase{She is good at running quickly.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{is}
+    \rkPredAdj[
+      \rkPrep{at}{
+        \rkGerund[
+          \rkAdv{quickly}
+        ]{running}
+      }
+    ]{good}
+  \end{rkdiagram}
+  \par\textit{Tests: gerund (with adverb modifier) as object of a preposition.}
 }
 
 % ============================================================
-\testsection{Group 13 — Manual Spacing Controls}
+\testsection{Group 13 — Participles}
+% ============================================================
+% A participle functions as an adjective modifying a noun.
+% It sits on a hockey-stick shape: diagonal slanting down-right
+% (word on it) then a short horizontal tail at the elbow.
+% The tail can carry a participial object and/or modifiers.
+
+\testcase{The barking dog scared us.}{%
+  \begin{rkdiagram}
+    \rkSubject[
+      \rkAdj{The},
+      \rkParticiple{barking}
+    ]{dog}
+    \rkVerb{scared}
+    \rkDObj{us}
+  \end{rkdiagram}
+  \par\textit{Tests: bare participle (no tail) modifying subject noun.}
+}
+
+\testcase{The man running the race smiled.}{%
+  \begin{rkdiagram}
+    \rkSubject[
+      \rkAdj{The},
+      \rkParticiple[
+        \rkPartObj[
+          \rkAdj{the}
+        ]{race}
+      ]{running}
+    ]{man}
+    \rkVerb{smiled}
+  \end{rkdiagram}
+  \par\textit{Tests: participle with participial object on horizontal tail.}
+}
+
+\testcase{Exhausted by the climb, she rested.}{%
+  \begin{rkdiagram}
+    \rkSubject[
+      \rkParticiple[
+        \rkPrep[
+          \rkAdj{the}
+        ]{by}{climb}
+      ]{Exhausted}
+    ]{she}
+    \rkVerb{rested}
+  \end{rkdiagram}
+  \par\textit{Tests: participle with a prepositional phrase on the tail.}
+}
+
+\testcase{The child sleeping quietly in the corner dreamed.}{%
+  \begin{rkdiagram}
+    \rkSubject[
+      \rkAdj{The},
+      \rkParticiple[
+        \rkAdv{quietly},
+        \rkPrep[
+          \rkAdj{the}
+        ]{in}{corner}
+      ]{sleeping}
+    ]{child}
+    \rkVerb{dreamed}
+  \end{rkdiagram}
+  \par\textit{Tests: participle with adverb and prepositional phrase on the tail.}
+}
+
+\testcase{The dog chased the cat sitting on the fence.}{%
+  \begin{rkdiagram}
+    \rkSubject[
+      \rkAdj{The}
+    ]{dog}
+    \rkVerb{chased}
+    \rkDObj[
+      \rkAdj{the},
+      \rkParticiple[
+        \rkPrep[
+          \rkAdj{the}
+        ]{on}{fence}
+      ]{sitting}
+    ]{cat}
+  \end{rkdiagram}
+  \par\textit{Tests: participle modifying the direct object, with prep phrase on tail.}
+}
+
+% ============================================================
+\testsection{Group 14 — Infinitives}
+% ============================================================
+
+\testcase{To run is fun.}{%
+  \begin{rkdiagram}
+    \rkSubject{
+      \rkInfinitive{run}
+    }
+    \rkVerb{is}
+    \rkPredNom{fun}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as subject, no mods.}
+}
+
+\testcase{She wants to win.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{wants}
+    \rkDObj{
+      \rkInfinitive{win}
+    }
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as direct object, no mods.}
+}
+
+\testcase{To run quickly is fun.}{%
+  \begin{rkdiagram}
+    \rkSubject{
+      \rkInfinitive[
+        \rkAdv{quickly}
+      ]{run}
+    }
+    \rkVerb{is}
+    \rkPredNom{fun}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as subject with adverb modifier (adaptive post height).}
+}
+
+\testcase{He wants to run in the race.}{%
+  \begin{rkdiagram}
+    \rkSubject{He}
+    \rkVerb{wants}
+    \rkDObj{
+      \rkInfinitive[
+        \rkPrep[
+          \rkAdj{the}
+        ]{in}{race}
+      ]{run}
+    }
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as direct object with prep phrase modifier on verb.}
+}
+
+\testcase{She came to win a prize.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb[
+      \rkInfinitive{win}
+    ]{came}
+    \rkDObj{prize}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as adverbial modifier on verb, no tail.}
+}
+
+\testcase{He found books to read.}{%
+  \begin{rkdiagram}
+    \rkSubject{He}
+    \rkVerb{found}
+    \rkDObj[
+      \rkInfinitive{read}
+    ]{books}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as adjectival modifier on direct object.}
+}
+
+\testcase{She came to win the prize.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb[
+      \rkInfinitive[
+        \rkInfObj{prize}
+      ]{win}
+    ]{came}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive modifier with direct object on mini-baseline.}
+}
+
+\testcase{He trained to finish the race quickly.}{%
+  \begin{rkdiagram}
+    \rkSubject{He}
+    \rkVerb[
+      \rkInfinitive[
+        \rkInfObj[
+          \rkAdj{the}
+        ]{race}
+        \rkAdv{quickly}
+      ]{finish}
+    ]{trained}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive modifier with object and adverb on mini-baseline.}
+}
+
+% ============================================================
+\testsection{Group 15 — Nominative Absolutes}
+% ============================================================
+
+\testcase{The battle over, the soldiers retreated.}{%
+  \begin{rkdiagram}
+    \rkSubject[
+      \rkAdj{The}
+    ]{soldiers}
+    \rkVerb{retreated}
+    \rkNomAbs[
+      \rkAdj{The}
+    ]{battle}{}{over}
+  \end{rkdiagram}
+  \par\textit{Tests: bare nominative absolute with adjective on noun.}
+}
+
+\testcase{The sun setting, they departed.}{%
+  \begin{rkdiagram}
+    \rkSubject{they}
+    \rkVerb{departed}
+    \rkNomAbs[
+      \rkAdj{The}
+    ]{sun}{}{setting}
+  \end{rkdiagram}
+  \par\textit{Tests: nominative absolute with adjective on noun.}
+}
+
+\testcase{His work finished, he ran.}{%
+  \begin{rkdiagram}
+    \rkSubject{he}
+    \rkVerb{ran}
+    \rkNomAbs[
+      \rkAdj{His}
+    ]{work}{\rkPartObj{done}}{finished}
+  \end{rkdiagram}
+  \par\textit{Tests: NA with participial object on tail.}
+}
+
+\testcase{His staff grasped in his hand, the old man walked the long road slowly.}{%
+  \begin{rkdiagram}
+    \rkSubject[
+      \rkAdj{The}
+      \rkAdj{old}
+    ]{man}
+    \rkVerb[
+      \rkAdv{slowly}
+    ]{walked}
+    \rkDObj[
+      \rkAdj{the}
+      \rkAdj{long}
+    ]{road}
+    \rkNomAbsHeight{4cm}
+    \rkNomAbs[
+      \rkAdj{his}
+    ]{staff}{
+      \rkPrep[
+        \rkAdj{his}
+      ]{in}{hand}
+    }{grasped}
+  \end{rkdiagram}
+  \par\textit{Tests: NA with modifier chains on main clause (vertical clearance).}
+}
+
+\testcase{Her hope gone, she wept.}{%
+  \begin{rkdiagram}
+    \rkSubject{she}
+    \rkVerb{wept}
+    \rkNomAbs[
+      \rkAdj{Her}
+    ]{hope}{}{gone}
+  \end{rkdiagram}
+  \par\textit{Tests: NA with no participle (empty ptcl-word, implied being).}
+}
+
+% ============================================================
+\testsection{Group 16 — Manual Spacing Controls}
 % ============================================================
 % \rkSlotWidth{len}  sets a minimum line width for the next slot only.
 % \rkSkip{len}       inserts a gap in the baseline before the next slot.
@@ -545,11 +912,15 @@ take us ashore at so much a head, silver coin of any country.}{%
 
 \testcase{The cat chased the mouse. (widen verb and object lines)}{%
   \begin{rkdiagram}
-    \rkSubject[\rkAdj{The}]{cat}
+    \rkSubject[
+      \rkAdj{The}
+    ]{cat}
     \rkSlotWidth{3.5cm}
     \rkVerb{chased}
     \rkSlotWidth{3.5cm}
-    \rkDObj[\rkAdj{the}]{mouse}
+    \rkDObj[
+      \rkAdj{the}
+    ]{mouse}
   \end{rkdiagram}
   \par\textit{Both verb and object lines forced to 3.5\,cm minimum — useful for
     aligning words on parallel diagrams or leaving room for annotations.}
@@ -561,7 +932,9 @@ take us ashore at so much a head, silver coin of any country.}{%
     \rkSlotWidth{3cm}
     \rkVerb{gave}
     \rkIObj{him}
-    \rkDObj[\rkAdj{a}]{gift}
+    \rkDObj[
+      \rkAdj{a}
+    ]{gift}
   \end{rkdiagram}
   \par\textit{\texttt{\textbackslash rkSlotWidth\{3cm\}} on the verb widens it
     to give the indirect-object platform more room.}
@@ -569,10 +942,14 @@ take us ashore at so much a head, silver coin of any country.}{%
 
 \testcase{The cat sat on the mat. (longer prep slant)}{%
   \begin{rkdiagram}
-    \rkSubject[\rkAdj{The}]{cat}
-    \rkVerb[%
-      \rkSlantLen{2.5cm}%
-      \rkPrep[\rkAdj{the}]{on}{mat}%
+    \rkSubject[
+      \rkAdj{The}
+    ]{cat}
+    \rkVerb[
+      \rkSlantLen{2.5cm}
+      \rkPrep[
+        \rkAdj{the}
+      ]{on}{mat}
     ]{sat}
   \end{rkdiagram}
   \par\textit{\texttt{\textbackslash rkSlantLen\{2.5cm\}} before \texttt{\textbackslash rkPrep}
@@ -593,243 +970,77 @@ take us ashore at so much a head, silver coin of any country.}{%
 }
 
 % ============================================================
-\testsection{Group 14 — Gerunds}
+\testsection{Group 17 — Mark Twain Stress Test}
 % ============================================================
-% A gerund sits on a stepped T-platform: word on a short top line,
-% connected by a vertical post to a longer foot that rests on the
-% noun-slot baseline.
 
-\testcase{Swimming is fun.}{%
-  \begin{rkdiagram}
-    \rkSubject{\rkGerund{Swimming}}
-    \rkVerb{is}
-    \rkPredAdj{fun}
-  \end{rkdiagram}
-  \par\textit{Tests: gerund as subject.}
-}
+% Compound sentence (two independent clauses joined by ``and'').
+% Diagrammed as two stacked baselines.
+\testcase{A swarm of swarthy, noisy, lying, shoulder-shrugging, gesticulating
+Portuguese boatmen, with brass rings in their ears and fraud in their hearts,
+climbed the ship's sides, and various parties of us contracted with them to
+take us ashore at so much a head, silver coin of any country.}{%
 
-\testcase{She enjoys swimming.}{%
-  \begin{rkdiagram}
-    \rkSubject{She}
-    \rkVerb{enjoys}
-    \rkDObj{\rkGerund{swimming}}
-  \end{rkdiagram}
-  \par\textit{Tests: gerund as direct object.}
-}
-
-\testcase{His hobby is collecting stamps.}{%
-  \begin{rkdiagram}
-    \rkSubject[\rkAdj{His}]{hobby}
-    \rkVerb{is}
-    \rkPredNom{\rkGerund{collecting}}
-  \end{rkdiagram}
-  \par\textit{Tests: gerund as predicate nominative.}
-}
-
-\testcase{Rapid swimming exhausts him.}{%
-  \begin{rkdiagram}
-    \rkSubject{\rkGerund[\rkAdj{Rapid}]{swimming}}
-    \rkVerb{exhausts}
-    \rkDObj{him}
-  \end{rkdiagram}
-  \par\textit{Tests: gerund as subject with adjective modifier (post auto-height).}
-}
-
-\testcase{She is good at running quickly.}{%
-  \begin{rkdiagram}
-    \rkSubject{She}
-    \rkVerb{is}
-    \rkPredAdj[\rkPrep{at}{\rkGerund[\rkAdv{quickly}]{running}}]{good}
-  \end{rkdiagram}
-  \par\textit{Tests: gerund (with adverb modifier) as object of a preposition.}
-}
-
-% ============================================================
-\testsection{Group 15 — Participles}
-% ============================================================
-% A participle functions as an adjective modifying a noun.
-% It sits on a hockey-stick shape: diagonal slanting down-right
-% (word on it) then a short horizontal tail at the elbow.
-% The tail can carry a participial object and/or modifiers.
-
-\testcase{The barking dog scared us.}{%
-  \begin{rkdiagram}
-    \rkSubject[%
-      \rkAdj{The},
-      \rkParticiple{barking}
-    ]{dog}
-    \rkVerb{scared}
-    \rkDObj{us}
-  \end{rkdiagram}
-  \par\textit{Tests: bare participle (no tail) modifying subject noun.}
-}
-
-\testcase{The man running the race smiled.}{%
-  \begin{rkdiagram}
-    \rkSubject[%
-      \rkAdj{The},
-      \rkParticiple[\rkPartObj[\rkAdj{the}]{race}]{running}
-    ]{man}
-    \rkVerb{smiled}
-  \end{rkdiagram}
-  \par\textit{Tests: participle with participial object on horizontal tail.}
-}
-
-\testcase{Exhausted by the climb, she rested.}{%
-  \begin{rkdiagram}
-    \rkSubject[%
-      \rkParticiple[\rkPrep[\rkAdj{the}]{by}{climb}]{Exhausted}
-    ]{she}
-    \rkVerb{rested}
-  \end{rkdiagram}
-  \par\textit{Tests: participle with a prepositional phrase on the tail.}
-}
-
-\testcase{The child sleeping quietly in the corner dreamed.}{%
-  \begin{rkdiagram}
-    \rkSubject[%
-      \rkAdj{The},
-      \rkParticiple[%
-        \rkAdv{quietly},
-        \rkPrep[\rkAdj{the}]{in}{corner}
-      ]{sleeping}
-    ]{child}
-    \rkVerb{dreamed}
-  \end{rkdiagram}
-  \par\textit{Tests: participle with adverb and prepositional phrase on the tail.}
-}
-
-\testcase{The dog chased the cat sitting on the fence.}{%
-  \begin{rkdiagram}
-    \rkSubject[\rkAdj{The}]{dog}
-    \rkVerb{chased}
-    \rkDObj[%
-      \rkAdj{the},
-      \rkParticiple[\rkPrep[\rkAdj{the}]{on}{fence}]{sitting}
-    ]{cat}
-  \end{rkdiagram}
-  \par\textit{Tests: participle modifying the direct object, with prep phrase on tail.}
-}
-
-\testsection{Group 16 — Infinitives}
-
-\testcase{To run is fun.}{%
-  \begin{rkdiagram}
-    \rkSubject{\rkInfinitive{run}}
-    \rkVerb{is}
-    \rkPredNom{fun}
-  \end{rkdiagram}
-  \par\textit{Tests: infinitive as subject, no mods.}
-}
-
-\testcase{She wants to win.}{%
-  \begin{rkdiagram}
-    \rkSubject{She}
-    \rkVerb{wants}
-    \rkDObj{\rkInfinitive{win}}
-  \end{rkdiagram}
-  \par\textit{Tests: infinitive as direct object, no mods.}
-}
-
-\testcase{To run quickly is fun.}{%
-  \begin{rkdiagram}
-    \rkSubject{\rkInfinitive[\rkAdv{quickly}]{run}}
-    \rkVerb{is}
-    \rkPredNom{fun}
-  \end{rkdiagram}
-  \par\textit{Tests: infinitive as subject with adverb modifier (adaptive post height).}
-}
-
-\testcase{He wants to run in the race.}{%
-  \begin{rkdiagram}
-    \rkSubject{He}
-    \rkVerb{wants}
-    \rkDObj{\rkInfinitive[\rkPrep[\rkAdj{the}]{in}{race}]{run}}
-  \end{rkdiagram}
-  \par\textit{Tests: infinitive as direct object with prep phrase modifier on verb.}
-}
-
-\testcase{She came to win a prize.}{%
-  \begin{rkdiagram}
-    \rkSubject{She}
-    \rkVerb[\rkInfinitive{win}]{came}
-    \rkDObj{prize}
-  \end{rkdiagram}
-  \par\textit{Tests: infinitive as adverbial modifier on verb, no tail.}
-}
-
-\testcase{He found books to read.}{%
-  \begin{rkdiagram}
-    \rkSubject{He}
-    \rkVerb{found}
-    \rkDObj[\rkInfinitive{read}]{books}
-  \end{rkdiagram}
-  \par\textit{Tests: infinitive as adjectival modifier on direct object.}
-}
-
-\testcase{She came to win the prize.}{%
-  \begin{rkdiagram}
-    \rkSubject{She}
-    \rkVerb[\rkInfinitive[\rkInfObj{prize}]{win}]{came}
-  \end{rkdiagram}
-  \par\textit{Tests: infinitive modifier with direct object on mini-baseline.}
-}
-
-\testcase{He trained to finish the race quickly.}{%
-  \begin{rkdiagram}
-    \rkSubject{He}
-    \rkVerb[\rkInfinitive[\rkInfObj[\rkAdj{the}]{race}\rkAdv{quickly}]{finish}]{trained}
-  \end{rkdiagram}
-  \par\textit{Tests: infinitive modifier with object and adverb on mini-baseline.}
-}
-
-\testsection{Group 17 — Nominative Absolutes}
-
-\testcase{The battle over, the soldiers retreated.}{%
-  \begin{rkdiagram}
-    \rkSubject[\rkAdj{The}]{soldiers}
-    \rkVerb{retreated}
-    \rkNomAbs[\rkAdj{The}]{battle}{}{over}
-  \end{rkdiagram}
-  \par\textit{Tests: bare nominative absolute with adjective on noun.}
-}
-
-\testcase{The sun setting, they departed.}{%
-  \begin{rkdiagram}
-    \rkSubject{they}
-    \rkVerb{departed}
-    \rkNomAbs[\rkAdj{The}]{sun}{}{setting}
-  \end{rkdiagram}
-  \par\textit{Tests: nominative absolute with adjective on noun.}
-}
-
-\testcase{His work finished, he ran.}{%
-  \begin{rkdiagram}
-    \rkSubject{he}
-    \rkVerb{ran}
-    \rkNomAbs[\rkAdj{His}]{work}{\rkPartObj{done}}{finished}
-  \end{rkdiagram}
-  \par\textit{Tests: NA with participial object on tail.}
-}
-
-\testcase{His staff grasped in his hand, the old man walked the long road slowly.}{%
-  \begin{rkdiagram}
-    \rkSubject[\rkAdj{The}\rkAdj{old}]{man}
-    \rkVerb[\rkAdv{slowly}]{walked}
-    \rkDObj[\rkAdj{the}\rkAdj{long}]{road}
-    \rkNomAbsHeight{4cm}
-    \rkNomAbs[\rkAdj{his}]{staff}{\rkPrep[\rkAdj{his}]{in}{hand}}{grasped}
-  \end{rkdiagram}
-  \par\textit{Tests: NA with modifier chains on main clause (vertical clearance).}
-}
-
-\testcase{Her hope gone, she wept.}{%
-  \begin{rkdiagram}
-    \rkSubject{she}
-    \rkVerb{wept}
-    \rkNomAbs[\rkAdj{Her}]{hope}{}{gone}
-  \end{rkdiagram}
-  \par\textit{Tests: NA with no participle (empty ptcl-word, implied being).}
+  \scalebox{0.6}{%
+  \rkCompoundSent[and][10cm]%
+    [spacing=1.0cm,modDepth=0.9cm,cmpSep=1.8cm]%
+    {%
+      \begin{rkdiagram}
+        \rkSubject[
+          \rkAdj{A},
+          \rkset{cmpSep=1.0cm}
+          \rkPrep[
+            \rkAdj{swarthy},
+            \rkAdj{noisy},
+            \rkAdj{lying},
+            \rkAdj{shoulder-shrugging},
+            \rkAdj{gesticulating},
+            \rkAdj{Portuguese},
+            \rkPrep{with}{%
+              \rkCompound[and][
+                \rkAdj{brass},
+                \rkPrep[
+                  \rkAdj{their}
+                ]{in}{ears}
+              ]{rings}[
+                \rkPrep[
+                  \rkAdj{their}
+                ]{in}{hearts}
+              ]{fraud}%
+            }%
+          ]{of}{boatmen}%
+        ]{swarm}
+        \rkVerb{climbed}
+        \rkDObj[
+          \rkAdj{the},
+          \rkAdj{ship's}
+        ]{sides}
+      \end{rkdiagram}%
+    }%
+    [spacing=1.0cm,modDepth=1.0cm]%
+    {%
+      \begin{rkdiagram}
+        \rkSubject[
+          \rkAdj{various},
+          \rkPrep{of}{us}%
+        ]{parties}
+        \rkVerb[
+          \rkPrep{with}{them},
+          \rkSubClause[to]{%
+            \rkVerb[
+              \rkAdv{ashore},
+              \rkPrep[
+                \rkAdj{so~much},
+                \rkAdj{a},
+                \rkAppos{silver coin of any country}%
+              ]{at}{head}%
+            ]{take}
+            \rkDObj{us}%
+          }%
+        ]{contracted}
+      \end{rkdiagram}%
+    }%
+  }%
+  \par\textit{(Mark Twain, \textit{The Innocents Abroad}, 1869)}
 }
 
 \end{document}

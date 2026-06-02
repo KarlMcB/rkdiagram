@@ -24,6 +24,7 @@
 \usepackage{fancyvrb}
 \usepackage{tcolorbox}
 \tcbuselibrary{listings, skins, breakable}
+\usepackage{adjustbox}
 \usepackage{titlesec}
 \usepackage{hyperref}
 \hypersetup{colorlinks=true, linkcolor=black, urlcolor=black}
@@ -44,21 +45,39 @@
 % ---- Code box style ----------------------------------------
 \tcbset{
   codebox/.style={
-    enhanced, colback=gray!7, colframe=gray!30, arc=3pt, boxrule=0.4pt,
+    colback=gray!7, colframe=gray!30, arc=3pt, boxrule=0.4pt,
     left=6pt, right=6pt, top=4pt, bottom=4pt,
-    fontupper=\small\ttfamily, breakable,
+    fontupper=\small\ttfamily,
   }
 }
 
 % ---- Example environment -----------------------------------
+% Code box occupies 0.54\linewidth; diagram gets the remaining 0.44\linewidth
+% (0.02\linewidth gutter between them).
+%
+% \minipage/\endminipage are called directly (not via \begin/\end) so that
+% LaTeX's environment-nesting checker does not object to the minipage being
+% opened inside rkexample and closed inside \rksidediagram.
 \newenvironment{rkexample}[1]{%
   \medskip\noindent\textit{``#1''}\par\smallskip
-  \noindent\begin{minipage}[t]{0.52\linewidth}
-    \begin{tcolorbox}[codebox]
-}{\end{tcolorbox}\end{minipage}}
+  \noindent\minipage[t]{0.54\linewidth}%   <- raw call, no env tracking
+    \begin{tcolorbox}[codebox]%
+}{%
+  \end{tcolorbox}%
+}% \minipage intentionally left open — \rksidediagram closes it
 
+% \rksidediagram{content} — closes the raw \minipage from rkexample then
+% opens a fresh minipage flush to its right.  adjustbox scales the diagram
+% down only when it exceeds 0.44\linewidth; smaller diagrams are untouched.
 \newcommand{\rksidediagram}[1]{%
-  \hfill\begin{minipage}[t]{0.44\linewidth}\vspace{4pt}#1\end{minipage}\par\medskip}
+  \endminipage%                            <- closes the raw \minipage
+  \hspace{0.02\linewidth}%
+  \begin{minipage}[t]{0.44\linewidth}%
+    \vspace{4pt}%
+    \adjustbox{max width=\linewidth}{#1}%
+  \end{minipage}%
+  \par\medskip%
+}
 
 % Fix: LuaLaTeX + TikZ font-patch recursion inside minipage/tcolorbox groups.
 % pgf saves \selectfont as \pgf@selectfontorig; inside grouped environments it can
@@ -118,7 +137,7 @@ Override any option mid-document with \cmd{rkset}:
 
 \subsection*{Package options}
 
-\begin{tabular}{@{}lll@{}}
+\begin{tabular}{@{}l l p{8cm}@{}}
   \toprule
   Option & Default & Effect \\
   \midrule

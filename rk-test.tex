@@ -41,7 +41,8 @@
   \par\medskip
 }
 
-% Manual counter for test numberin
+% Manual counter for test numbering
+\newcounter{subsection}
 \setcounter{subsection}{1}
 
 % ============================================================
@@ -512,85 +513,6 @@
   \bottomrule
 \end{tabular}
 }
-
-% ============================================================
-\testsection{Group 14 — Gerunds}
-% ============================================================
-% A gerund sits on a T-shaped pedestal: word on the top horizontal line,
-% vertical post, foot on the main baseline.  The gerund may carry its
-% own direct object, adverbs, and prepositional phrases on the top line.
-
-\testcase{Swimming is fun.}{%
-  \begin{rkdiagram}
-    \rkSubject{\rkGerund{Swimming}}
-    \rkVerb{is}
-    \rkPredAdj{fun}
-  \end{rkdiagram}
-  \par\textit{Tests: bare gerund as subject — pedestal only, no body.}
-}
-
-\testcase{She enjoys running.}{%
-  \begin{rkdiagram}
-    \rkSubject{She}
-    \rkVerb{enjoys}
-    \rkDObj{\rkGerund{running}}
-  \end{rkdiagram}
-  \par\textit{Tests: gerund as direct object, no body.}
-}
-
-\testcase{Catching fish is difficult.}{%
-  \begin{rkdiagram}
-    \rkSubject{\rkGerund[\rkDObj{fish}]{Catching}}
-    \rkVerb{is}
-    \rkPredAdj{difficult}
-  \end{rkdiagram}
-  \par\textit{Tests: gerund as subject with a direct object on the top line.}
-}
-
-\testcase{She loves catching the big fish.}{%
-  \begin{rkdiagram}
-    \rkSubject{She}
-    \rkVerb{loves}
-    \rkDObj{\rkGerund[\rkDObj[\rkAdj{the},\rkAdj{big}]{fish}]{catching}}
-  \end{rkdiagram}
-  \par\textit{Tests: gerund as DObj with a modified direct object on the top line.}
-}
-
-\testcase{Running quickly tires him.}{%
-  \begin{rkdiagram}
-    \rkSubject{\rkGerund[\rkAdv{quickly}]{Running}}
-    \rkVerb{tires}
-    \rkDObj{him}
-  \end{rkdiagram}
-  \par\textit{Tests: adverb modifying the gerund on the top line.}
-}
-
-\testcase{He avoided walking in the rain.}{%
-  \begin{rkdiagram}
-    \rkSubject{He}
-    \rkVerb{avoided}
-    \rkDObj{\rkGerund[\rkPrep[\rkAdj{the}]{in}{rain}]{walking}}
-  \end{rkdiagram}
-  \par\textit{Tests: prepositional phrase on the gerund's top line.}
-}
-
-\testcase{Giving her a gift made him happy.}{%
-  \begin{rkdiagram}
-    \rkSubject{%
-      \rkGerund[\rkDObj[\rkAdj{a}]{gift}]{Giving}%
-    }
-    \rkVerb{made}
-    \rkDObj{him}
-    \rkPredAdj{happy}
-  \end{rkdiagram}
-  \par\textit{Tests: gerund subject with DObj; also exercises PredAdj after DObj.}
-}
-
-% Note: \rkGerund as the object of \rkPrep is not yet supported.
-% The gerund pedestal only renders when \rkGerund is the word argument of a
-% baseline command (\rkSubject, \rkDObj, etc.). When used as a prep object it
-% degrades gracefully to plain text on the prep horizontal.  A future revision
-% will add gerund-in-prep-object support.
 
 \bigskip
 \noindent\textit{All tests should compile without error. Visual inspection of

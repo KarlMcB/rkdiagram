@@ -65,6 +65,7 @@
 \newlength{\rk@x}      % main baseline x cursor
 \newlength{\rk@ht}     % running max word height (used for divider length)
 \newlength{\rk@clause@miny}       % lowest y reached during current clause (for bridge placement)
+\newlength{\rk@sc@saved@vb@r}    % saves outer verb x across \rk@dosubclause (global write bleeds)
 \newlength{\rk@cmpst@saved@miny}  % clause 1 miny saved before clause 2 is drawn
 \newlength{\rk@bridgey@override}  % manual bridge y override (0pt = auto)
 
@@ -635,7 +636,10 @@
   % Dashed vertical connector
   \draw[color=\rk@color, line width=\rk@lw, dashed]
     (\the\rk@ta, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb);%
-  % Open a sub-context for the clause body
+  % Open a sub-context for the clause body.
+  % Save the outer verb x: \rkVerb inside the sub-clause writes rk@vb@r globally,
+  % which would overwrite the enclosing clause's verb position.
+  \global\rk@sc@saved@vb@r=\rk@vb@r
   \begingroup
     % Reset x cursor and baseline y to the sub-clause level
     \setlength{\rk@x}{\rk@ta}%
@@ -656,6 +660,8 @@
     \setlength{\rk@mc@cur}{\rk@x}%
     \ifdim\rk@x>\rk@mc@d \setlength{\rk@mc@d}{\rk@x}\fi
   \endgroup
+  % Restore outer verb x (sub-clause \rkVerb wrote it globally)
+  \global\rk@vb@r=\rk@sc@saved@vb@r
 }
 
 % ============================================================

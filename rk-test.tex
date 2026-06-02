@@ -592,4 +592,56 @@ take us ashore at so much a head, silver coin of any country.}{%
     3\,cm verb — each resets automatically after its slot.}
 }
 
+% ============================================================
+\testsection{Group 14 — Gerunds}
+% ============================================================
+% A gerund sits on a stepped T-platform: word on a short top line,
+% connected by a vertical post to a longer foot that rests on the
+% noun-slot baseline.
+
+\testcase{Swimming is fun.}{%
+  \begin{rkdiagram}
+    \rkSubject{\rkGerund{Swimming}}
+    \rkVerb{is}
+    \rkPredAdj{fun}
+  \end{rkdiagram}
+  \par\textit{Tests: gerund as subject.}
+}
+
+\testcase{She enjoys swimming.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{enjoys}
+    \rkDObj{\rkGerund{swimming}}
+  \end{rkdiagram}
+  \par\textit{Tests: gerund as direct object.}
+}
+
+\testcase{His hobby is collecting stamps.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{His}]{hobby}
+    \rkVerb{is}
+    \rkPredNom{\rkGerund{collecting}}
+  \end{rkdiagram}
+  \par\textit{Tests: gerund as predicate nominative.}
+}
+
+\testcase{Rapid swimming exhausts him.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{Rapid}]{\rkGerund{swimming}}
+    \rkVerb{exhausts}
+    \rkDObj{him}
+  \end{rkdiagram}
+  \par\textit{Tests: gerund as subject with adjective modifier.}
+}
+
+\testcase{She is good at running quickly.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{is}
+    \rkPredAdj[\rkPrep[\rkAdv{quickly}]{at}{\rkGerund{running}}]{good}
+  \end{rkdiagram}
+  \par\textit{Tests: gerund as object of a preposition.}
+}
+
 \end{document}

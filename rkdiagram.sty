@@ -33,6 +33,7 @@
 \newlength{\rk@modgap}     \setlength{\rk@modgap}{0.25cm}
 \newlength{\rk@cmpsep}     \setlength{\rk@cmpsep}{0pt}  % 0pt = auto (use rk@ht)
 \newlength{\rk@subClDepth} \setlength{\rk@subClDepth}{2.5cm}
+\newlength{\rk@gerundpost} \setlength{\rk@gerundpost}{1.2cm}
 \newlength{\rk@lw}         \setlength{\rk@lw}{0.4pt}
 \newcommand{\rk@color}{black}
 \newcommand{\rk@font}{}
@@ -45,6 +46,7 @@
   modgap/.code         = {\setlength{\rk@modgap}{#1}},
   cmpSep/.code         = {\setlength{\rk@cmpsep}{#1}},
   subClauseDepth/.code = {\setlength{\rk@subClDepth}{#1}},
+  gerundPost/.code     = {\setlength{\rk@gerundpost}{#1}},
   linewidth/.code      = {\setlength{\rk@lw}{#1}},
   color/.code          = {\renewcommand{\rk@color}{#1}},
   bridgeY/.code        = {\setlength{\rk@bridgey@override}{#1}},
@@ -126,6 +128,14 @@
 \newlength{\rk@wordlift}
 \newlength{\rk@wlevel}   % scratch: line_y + wordlift, used at each word placement
 
+% Deferred gerund — used when \rkGerund appears as a word argument.
+\newif\ifrk@deferredgrd  \rk@deferredgrdfalse
+\newcommand{\rk@deferredgrd@word}{}
+\newcommand{\rk@deferred@Gerund}[1]{%
+  \global\rk@deferredgrdtrue
+  \gdef\rk@deferredgrd@word{#1}%
+}
+
 % Deferred subclause — used when \rkSubClause appears as a word argument.
 % The drawing is deferred until after the (empty) slot node is placed.
 \newif\ifrk@deferredsc  \rk@deferredscfalse
@@ -174,6 +184,7 @@
 \newcommand{\rk@placeslot}[2]{%
   \global\rk@deferredscfalse
   \global\rk@deferredcmpfalse
+  \global\rk@deferredgrdfalse
   \setlength{\rk@halfsep}{\rk@spacing}%
   \divide\rk@halfsep by 2\relax
   % Apply per-slot skip (extends baseline, advances cursor, then resets).
@@ -185,10 +196,11 @@
   \fi
   % Lift word above the baseline line so descenders clear it.
   \setlength{\rk@wlevel}{#2}\addtolength{\rk@wlevel}{\rk@wordlift}%
-  % Step 1: measure word width and detect deferred \rkSubClause / \rkCompound.
+  % Step 1: measure word width and detect deferred \rkSubClause / \rkCompound / \rkGerund.
   \begingroup
     \let\rkSubClause\rk@deferred@SubClause
     \let\rkCompound\rk@deferred@Compound
+    \let\rkGerund\rk@deferred@Gerund
     \node[
       opacity   = 0,
       inner sep = 0pt,
@@ -196,7 +208,11 @@
       font      = \rk@font,
     ] (rk@wnode) at (0, 0) {#1};%
   \endgroup
-  \ifrk@deferredcmp
+  \ifrk@deferredgrd
+    % Gerund: draw stepped-platform structure.
+    \rk@dogerund{#2}%
+    \global\rk@deferredgrdfalse
+  \else\ifrk@deferredcmp
     % Compound: draw compound structure (rk@x is the compound start).
     \rk@docompound{\rk@cmpdir}%
       {\rk@deferredcmp@conj}%
@@ -249,7 +265,7 @@
       \rk@dosubclause{\rk@deferredsc@rw}{\rk@deferredsc@body}%
       \global\rk@deferredscfalse
     \fi
-  \fi
+  \fi\fi
 }
 
 % Set modifier context from current slot.
@@ -1073,6 +1089,73 @@
 
 \NewDocumentCommand{\rkSubClause}{O{}m}{%
   \rk@dosubclause{#1}{#2}%
+}
+
+% ============================================================
+% GERUND PLATFORM
+% \rk@dogerund{foot-y}
+%
+% Draws the stepped T-platform for a gerund:
+%   foot  — long horizontal at foot-y (the noun-slot baseline)
+%   post  — vertical from foot centre up by \rk@gerundpost
+%   plat  — short horizontal at post top (the word sits here)
+% Records rk@sl@* on the word platform so \rk@slot@to@mc and
+% subsequent modifier runs attach at the correct level.
+% ============================================================
+
+\newcommand{\rk@dogerund}[1]{%
+  % #1 = foot y (e.g. \the\rk@base@y)
+  \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
+  % --- Measure gerund word ---
+  \node[opacity=0, inner sep=0pt, outer sep=0pt, font=\rk@font]
+    (rk@grdmsr) at (0,0) {\rk@deferredgrd@word};%
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@grdmsr}{east}}%
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@grdmsr}{west}}%
+  \addtolength{\rk@tc}{-\rk@ta}%             rk@tc = word_width
+  % --- Word platform x bounds ---
+  % word_plat_left  = rk@x + halfsep
+  \setlength{\rk@ta}{\rk@x}\addtolength{\rk@ta}{\rk@halfsep}%     rk@ta = word_plat_left
+  % word_plat_right = word_plat_left + word_width + halfsep
+  \addtolength{\rk@tc}{\rk@ta}\addtolength{\rk@tc}{\rk@halfsep}%  rk@tc = word_plat_right
+  % foot_right = word_plat_right + halfsep  (foot wider than platform)
+  \setlength{\rk@effmod}{\rk@tc}\addtolength{\rk@effmod}{\rk@halfsep}%  rk@effmod = foot_right
+  % post_x = midpoint of word platform
+  \setlength{\rk@tb}{\rk@ta}\addtolength{\rk@tb}{\rk@tc}\divide\rk@tb by 2\relax  % rk@tb = post_x
+  % --- Y coordinates ---
+  % word_plat_y = foot_y + post_height
+  \setlength{\rk@wlevel}{#1}\addtolength{\rk@wlevel}{\rk@gerundpost}%  rk@wlevel = word_plat_y
+  % --- Draw structures ---
+  \rk@line{(\the\rk@x, #1) -- (\the\rk@effmod, #1)}%               foot
+  \rk@line{(\the\rk@tb, #1) -- (\the\rk@tb, \the\rk@wlevel)}%      post
+  \rk@line{(\the\rk@ta, \the\rk@wlevel) -- (\the\rk@tc, \the\rk@wlevel)}%  word platform
+  % --- Place word on platform (centred at post_x) ---
+  \setlength{\rk@ta}{\rk@wlevel}\addtolength{\rk@ta}{\rk@wordlift}%  rk@ta = word node y
+  \node[anchor=base, inner sep=0pt, outer sep=0pt, font=\rk@font]
+    at (\the\rk@tb, \the\rk@ta) {\rk@deferredgrd@word};%
+  % --- Record slot on the word platform (for modifier attachment) ---
+  % sl@l = post_x (not word_plat_left) so \rk@slot@to@mc places mc@cur to the
+  % RIGHT of the post; modifier slants then diverge downward-right without
+  % crossing the vertical post line.
+  \setlength{\rk@sl@l}{\rk@tb}%        rk@tb = post_x
+  \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%
+  \setlength{\rk@sl@y}{\rk@wlevel}%
+  % Advance main cursor to foot_right
+  \setlength{\rk@x}{\rk@effmod}%
+  % --- Update clause miny for bridge placement ---
+  \setlength{\rk@ta}{#1}%
+  \ifdim\rk@ta<\rk@clause@miny\global\rk@clause@miny=\rk@ta\fi
+}
+
+% ============================================================
+% GERUND
+% \rkGerund{word}
+% Use as the word argument of \rkSubject, \rkDObj, \rkPredNom, etc.
+% Modifiers of the gerund are passed via the slot command's optional arg.
+% ============================================================
+
+\NewDocumentCommand{\rkGerund}{m}{%
+  % Inline fallback (outside diagram context): just typeset the word.
+  \textit{#1}%
 }
 
 \endinput

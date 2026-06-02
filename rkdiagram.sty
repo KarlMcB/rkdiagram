@@ -30,21 +30,24 @@
 
 \newlength{\rk@spacing}    \setlength{\rk@spacing}{1.2cm}
 \newlength{\rk@modDepth}   \setlength{\rk@modDepth}{1.0cm}
+\newlength{\rk@modgap}     \setlength{\rk@modgap}{0.25cm}
+\newlength{\rk@cmpsep}     \setlength{\rk@cmpsep}{0pt}  % 0pt = auto (use rk@ht)
 \newlength{\rk@subClDepth} \setlength{\rk@subClDepth}{2.5cm}
 \newlength{\rk@lw}         \setlength{\rk@lw}{0.4pt}
 \newcommand{\rk@color}{black}
 \newcommand{\rk@font}{}
-\newif\ifrk@showroles \rk@showrolesfalse
 
 \pgfkeys{
   /rkdiagram/.is family, /rkdiagram,
   font/.code           = {\renewcommand{\rk@font}{#1}},
   spacing/.code        = {\setlength{\rk@spacing}{#1}},
   modDepth/.code       = {\setlength{\rk@modDepth}{#1}},
+  modgap/.code         = {\setlength{\rk@modgap}{#1}},
+  cmpSep/.code         = {\setlength{\rk@cmpsep}{#1}},
   subClauseDepth/.code = {\setlength{\rk@subClDepth}{#1}},
   linewidth/.code      = {\setlength{\rk@lw}{#1}},
   color/.code          = {\renewcommand{\rk@color}{#1}},
-  showroles/.is if     = rk@showroles,
+  bridgeY/.code        = {\setlength{\rk@bridgey@override}{#1}},
 }
 
 \ProcessPgfOptions{/rkdiagram}
@@ -56,8 +59,15 @@
 % INTERNAL STATE
 % ============================================================
 
+% Set to true by \rkCompoundSent so the rkdiagram env skips the tikzpicture wrapper.
+\newif\ifrk@intikz  \rk@intikzfalse
+
 \newlength{\rk@x}      % main baseline x cursor
 \newlength{\rk@ht}     % running max word height (used for divider length)
+\newlength{\rk@clause@miny}       % lowest y reached during current clause (for bridge placement)
+\newlength{\rk@sc@saved@vb@r}    % saves outer verb x across \rk@dosubclause (global write bleeds)
+\newlength{\rk@cmpst@saved@miny}  % clause 1 miny saved before clause 2 is drawn
+\newlength{\rk@bridgey@override}  % manual bridge y override (0pt = auto)
 
 % Current slot — set by \rk@placeslot
 \newlength{\rk@sl@l}   % left x
@@ -70,10 +80,29 @@
 \newlength{\rk@vb@r}
 \newlength{\rk@vb@y}
 
+% Right edge of the indirect-object platform (global; checked after \rk@doiobj)
+\newlength{\rk@iobj@xmax}
+
+% Effective mod depth for a single modifier (may exceed \rk@modDepth for wide words)
+\newlength{\rk@effmod}
+
+% Sibling-push: E of the most recently drawn modifier at this level (reset by \rk@runmods).
+% Used to push a modifier-with-sub-modifiers right when preceded by a longer sibling,
+% so the sub-modifier connector does not land in the preceding slant's territory.
+\newlength{\rk@prevmod@E}  \setlength{\rk@prevmod@E}{0pt}
+
 % Modifier context — saved/restored via \begingroup
 \newlength{\rk@mc@y}    % head y level
 \newlength{\rk@mc@d}    % head drawn-right x
 \newlength{\rk@mc@cur}  % attachment cursor x
+
+% Rightmost x reached by the most recent \rk@runmods call (global; used by \rk@divfull)
+\newlength{\rk@nounmodright}
+
+% Per-slot overrides (one-shot: applied once then auto-reset to 0pt)
+\newlength{\rk@slot@minwidth}  % minimum line width for next slot (0pt = auto)
+\newlength{\rk@slot@skip}      % extra gap inserted before next slot (0pt = none)
+\newlength{\rk@slant@minlen}   % minimum slant length for next modifier/prep (0pt = auto)
 
 % Scratch length registers (\newlength = \newdimen, safe for \pgfextractx)
 \newlength{\rk@ta}
@@ -81,9 +110,26 @@
 \newlength{\rk@tc}
 \newlength{\rk@halfsep}
 
+% Saved compound modifier context (text start x, platform right x, csep, centre y)
+\newlength{\rk@cmp@textx}
+\newlength{\rk@cmp@platright}
+\newlength{\rk@cmp@csep}
+\newlength{\rk@cmp@basey}   % outer rk@base@y at time docompound is called
+\newlength{\rk@cmp@wa}      % width of compound word A (for centring)
+\newlength{\rk@cmp@wb}      % width of compound word B (for centring)
+
+% Current baseline y-level; 0pt on the main baseline, overridden in sub-clauses
+\newlength{\rk@base@y}
+
+% Word-lift: distance to raise word nodes above their platform line
+% so descenders never touch the line.  Measured once per rkdiagram.
+\newlength{\rk@wordlift}
+\newlength{\rk@wlevel}   % scratch: line_y + wordlift, used at each word placement
+
 % Deferred subclause — used when \rkSubClause appears as a word argument.
 % The drawing is deferred until after the (empty) slot node is placed.
 \newif\ifrk@deferredsc  \rk@deferredscfalse
+\newif\ifrk@extendbl    \rk@extendblfalse   % true only while processing word-level mods
 \newcommand{\rk@deferredsc@rw}{}
 \newcommand{\rk@deferredsc@body}{}
 \newcommand{\rk@deferred@SubClause}[2][]{%
@@ -91,6 +137,25 @@
   \gdef\rk@deferredsc@rw{#1}%
   \gdef\rk@deferredsc@body{#2}%
 }
+
+% Deferred compound — used when \rkCompound appears as a word argument.
+% \rk@cmpdir is set by each slot command before calling \rk@placeslot.
+\newif\ifrk@deferredcmp  \rk@deferredcmpfalse
+\newcommand{\rk@deferredcmp@conj}{and}
+\newcommand{\rk@deferredcmp@modsa}{}
+\newcommand{\rk@deferredcmp@worda}{}
+\newcommand{\rk@deferredcmp@modsb}{}
+\newcommand{\rk@deferredcmp@wordb}{}
+% Signature: [conj][mods_a]{word_a}[mods_b]{word_b}
+\NewDocumentCommand{\rk@deferred@Compound}{O{and} O{} m O{} m}{%
+  \global\rk@deferredcmptrue
+  \gdef\rk@deferredcmp@conj{#1}%
+  \gdef\rk@deferredcmp@modsa{#2}%
+  \gdef\rk@deferredcmp@worda{#3}%
+  \gdef\rk@deferredcmp@modsb{#4}%
+  \gdef\rk@deferredcmp@wordb{#5}%
+}
+\def\rk@cmpdir{l}   % default; overridden by each slot command
 
 % ============================================================
 % DRAW SHORTHAND
@@ -108,87 +173,133 @@
 
 \newcommand{\rk@placeslot}[2]{%
   \global\rk@deferredscfalse
+  \global\rk@deferredcmpfalse
   \setlength{\rk@halfsep}{\rk@spacing}%
   \divide\rk@halfsep by 2\relax
-  \setlength{\rk@ta}{\rk@x}%
-  \addtolength{\rk@ta}{\rk@halfsep}%
-  % Temporarily replace \rkSubClause with a deferred version so that
-  % structural elements used as word arguments don't call \draw inside text.
+  % Apply per-slot skip (extends baseline, advances cursor, then resets).
+  \ifdim\rk@slot@skip>0pt
+    \setlength{\rk@ta}{\rk@x}\addtolength{\rk@ta}{\rk@slot@skip}%
+    \rk@line{(\the\rk@x, #2) -- (\the\rk@ta, #2)}%
+    \setlength{\rk@x}{\rk@ta}%
+    \setlength{\rk@slot@skip}{0pt}%
+  \fi
+  % Lift word above the baseline line so descenders clear it.
+  \setlength{\rk@wlevel}{#2}\addtolength{\rk@wlevel}{\rk@wordlift}%
+  % Step 1: measure word width and detect deferred \rkSubClause / \rkCompound.
   \begingroup
     \let\rkSubClause\rk@deferred@SubClause
+    \let\rkCompound\rk@deferred@Compound
     \node[
-      anchor    = base west,
+      opacity   = 0,
       inner sep = 0pt,
       outer sep = 0pt,
       font      = \rk@font,
-    ] (rk@wnode) at (\the\rk@ta, #2) {#1};%
+    ] (rk@wnode) at (0, 0) {#1};%
   \endgroup
-  % Measure east x and height via \pgfextractx/y (require \dimen registers)
-  \pgfextractx{\rk@tb}{\pgfpointanchor{rk@wnode}{east}}%
-  \addtolength{\rk@tb}{\rk@halfsep}%
-  \pgfextracty{\rk@tc}{\pgfpointanchor{rk@wnode}{north}}%
-  \ifdim\rk@tc>\rk@ht \setlength{\rk@ht}{\rk@tc}\fi
-  % Draw baseline segment
-  \rk@line{(\the\rk@x, #2) -- (\the\rk@tb, #2)}%
-  % Record slot
-  \setlength{\rk@sl@l}{\rk@x}%
-  \setlength{\rk@sl@r}{\rk@tb}%
-  \setlength{\rk@sl@d}{\rk@tb}%
-  \setlength{\rk@sl@y}{#2}%
-  \setlength{\rk@x}{\rk@tb}%
-  % If \rkSubClause was captured as the word, draw it now in slot context
-  \ifrk@deferredsc
-    \rk@slot@to@mc
-    \rk@dosubclause{\rk@deferredsc@rw}{\rk@deferredsc@body}%
-    \global\rk@deferredscfalse
+  \ifrk@deferredcmp
+    % Compound: draw compound structure (rk@x is the compound start).
+    \rk@docompound{\rk@cmpdir}%
+      {\rk@deferredcmp@conj}%
+      {\rk@deferredcmp@modsa}{\rk@deferredcmp@worda}%
+      {\rk@deferredcmp@modsb}{\rk@deferredcmp@wordb}%
+    \global\rk@deferredcmpfalse
+  \else
+    % Normal word: compute centred position, draw baseline, place word, record slot.
+    % word_width = east − west of measurement node
+    \pgfextractx{\rk@tb}{\pgfpointanchor{rk@wnode}{east}}%
+    \pgfextractx{\rk@ta}{\pgfpointanchor{rk@wnode}{west}}%
+    \addtolength{\rk@tb}{-\rk@ta}%        rk@tb = word_width
+    % line_right = rk@x + halfsep + word_width + halfsep
+    \setlength{\rk@ta}{\rk@x}%
+    \addtolength{\rk@ta}{\rk@halfsep}%
+    \addtolength{\rk@ta}{\rk@tb}%
+    \addtolength{\rk@ta}{\rk@halfsep}%    rk@ta = line right edge (auto)
+    % Apply minwidth override: line must be at least rk@x + rk@slot@minwidth
+    \ifdim\rk@slot@minwidth>0pt
+      \setlength{\rk@tc}{\rk@x}\addtolength{\rk@tc}{\rk@slot@minwidth}%
+      \ifdim\rk@tc>\rk@ta\setlength{\rk@ta}{\rk@tc}\fi
+      \setlength{\rk@slot@minwidth}{0pt}%  reset after use
+    \fi
+    % centre_x  = rk@x + halfsep + word_width/2
+    \divide\rk@tb by 2\relax%             rk@tb = word_width/2
+    \setlength{\rk@tc}{\rk@x}%
+    \addtolength{\rk@tc}{\rk@halfsep}%
+    \addtolength{\rk@tc}{\rk@tb}%         rk@tc = centre_x
+    % Update rk@ht (north y from measurement node)
+    \pgfextracty{\rk@tb}{\pgfpointanchor{rk@wnode}{north}}%
+    \ifdim\rk@tb>\rk@ht \setlength{\rk@ht}{\rk@tb}\fi
+    % Draw baseline, then place visible centred word node.
+    \rk@line{(\the\rk@x, #2) -- (\the\rk@ta, #2)}%
+    \begingroup
+      \let\rkSubClause\rk@deferred@SubClause
+      \let\rkCompound\rk@deferred@Compound
+      \node[
+        anchor    = base,
+        inner sep = 0pt,
+        outer sep = 0pt,
+        font      = \rk@font,
+      ] (rk@wnode) at (\the\rk@tc, \the\rk@wlevel) {#1};%
+    \endgroup
+    % Record slot registers.
+    \setlength{\rk@sl@l}{\rk@x}%
+    \setlength{\rk@sl@r}{\rk@ta}\setlength{\rk@sl@d}{\rk@ta}%
+    \setlength{\rk@sl@y}{#2}\setlength{\rk@x}{\rk@ta}%
+    \ifrk@deferredsc
+      \rk@slot@to@mc
+      \rk@dosubclause{\rk@deferredsc@rw}{\rk@deferredsc@body}%
+      \global\rk@deferredscfalse
+    \fi
   \fi
 }
 
-% Set modifier context from current slot (cursor starts at slot left)
+% Set modifier context from current slot.
+% First modifier attaches 10% along the word's baseline (not at the very start).
 \newcommand{\rk@slot@to@mc}{%
   \setlength{\rk@mc@y}{\rk@sl@y}%
   \setlength{\rk@mc@d}{\rk@sl@d}%
+  \setlength{\rk@ta}{\rk@sl@r}%
+  \addtolength{\rk@ta}{-\rk@sl@l}%      % rk@ta = slot width
+  \divide\rk@ta by 10\relax              % rk@ta = 10% of slot width
   \setlength{\rk@mc@cur}{\rk@sl@l}%
-}
-
-% ============================================================
-% SHOW ROLE LABEL  (showroles option)
-% ============================================================
-
-\newcommand{\rk@showrole}[1]{%
-  \ifrk@showroles
-    \node[
-      above     = 1pt,
-      font      = \tiny\color{gray},
-      inner sep = 0pt,
-    ] at (rk@wnode.north) {#1};%
-  \fi
+  \addtolength{\rk@mc@cur}{\rk@ta}%     % mc@cur = sl@l + 10%
 }
 
 % ============================================================
 % DIVIDERS
 % ============================================================
 
-% Full vertical bar  (subject | verb)
+% Full vertical bar  (subject | verb) — symmetric around baseline.
+% Advances rk@x past any noun modifier overhang before drawing, so both
+% the divider and the verb slot sit to the right of all noun modifier slants.
 \newcommand{\rk@divfull}{%
+  \ifdim\rk@nounmodright>\rk@x
+    \rk@line{(\the\rk@x, \the\rk@base@y) -- (\the\rk@nounmodright, \the\rk@base@y)}%
+    \setlength{\rk@x}{\rk@nounmodright}%
+  \fi
   \setlength{\rk@ta}{\rk@ht}%
   \addtolength{\rk@ta}{0.18cm}%
-  \rk@line{(\the\rk@x, -0.18cm) -- (\the\rk@x, \the\rk@ta)}%
+  % Top of bar: base_y + rk@ta  (full ascender)
+  \setlength{\rk@tc}{\rk@base@y}\addtolength{\rk@tc}{\rk@ta}%
+  % Bottom of bar: base_y − rk@ta/2  (half descender)
+  \divide\rk@ta by 2\relax%
+  \setlength{\rk@tb}{\rk@base@y}\addtolength{\rk@tb}{-\rk@ta}%
+  \rk@line{(\the\rk@x, \the\rk@tb) -- (\the\rk@x, \the\rk@tc)}%
 }
 
 % Short vertical bar  (verb | direct object)
 \newcommand{\rk@divshort}{%
   \setlength{\rk@ta}{\rk@ht}%
   \addtolength{\rk@ta}{0.10cm}%
-  \rk@line{(\the\rk@x, 0pt) -- (\the\rk@x, \the\rk@ta)}%
+  \addtolength{\rk@ta}{\rk@base@y}%
+  \rk@line{(\the\rk@x, \the\rk@base@y) -- (\the\rk@x, \the\rk@ta)}%
 }
 
-% Forward diagonal  (verb / predNom or predAdj)
+% Back diagonal  (verb \ predNom or predAdj) — bottom touches baseline, slants up-left
 \newcommand{\rk@divfwd}{%
   \setlength{\rk@ta}{\rk@ht}%
   \addtolength{\rk@ta}{0.18cm}%
-  \pgfmathsetlength{\rk@tb}{\the\rk@ta / tan(60)}%
-  \rk@line{(\the\rk@x, -0.10cm) -- ++(\the\rk@tb, \the\rk@ta)}%
+  \pgfmathsetlength{\rk@tb}{\the\rk@ta / tan(45)}%
+  \rk@line{(\the\rk@x, \the\rk@base@y) -- ++(-\the\rk@tb, \the\rk@ta)}%
 }
 
 % ============================================================
@@ -204,31 +315,94 @@
 }
 
 % \rk@domod{word}{submods}
-% Draw one modifier in the current mc context, then recurse into submods.
+% Draw one modifier slant (always down-right), then recurse into sub-modifiers.
+%
+% Sub-modifier geometry (matching example: adjective (0,0)→(10,−10),
+% connector (2,−2)→(0,−4), adverb (0,−4)→(8,−12)):
+%   • The connector branches off the parent slant at 20% of the way along
+%     (i.e., at x_s + 0.2·E, y_s − 0.2·E) and goes diagonally down-left
+%     back to the parent's starting x (x_s, y_s − 0.4·E).
+%   • The child slant then continues down-right from (x_s, y_s − 0.4·E).
 \newcommand{\rk@domod}[2]{%
-  % Extend head baseline to attachment cursor if needed
   \rk@extendbase
-  % Slant endpoint: one modDepth step diagonally down-right from attachment
+  \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
+    (rk@modmsr) at (0,0) {#1};%
+  % Measure width (east − west)
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@modmsr}{east}}%
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@modmsr}{west}}%
+  \addtolength{\rk@tc}{-\rk@ta}%   % rk@tc = nodeWidth
+  % Measure height (north − south)
+  \pgfextracty{\rk@tb}{\pgfpointanchor{rk@modmsr}{north}}%
+  \pgfextracty{\rk@ta}{\pgfpointanchor{rk@modmsr}{south}}%
+  \addtolength{\rk@tb}{-\rk@ta}%   % rk@tb = nodeHeight
+  \pgfmathsetlength{\rk@effmod}{max(\the\rk@modDepth, (\the\rk@tc + \the\rk@tb) / 1.41422 + 6pt)}%
+  % Apply per-slant minimum override, then reset.
+  \ifdim\rk@slant@minlen>\rk@effmod\setlength{\rk@effmod}{\rk@slant@minlen}\fi
+  \setlength{\rk@slant@minlen}{0pt}%
+  % Sub-modifier sibling push: if this modifier has sub-modifiers and the preceding
+  % sibling's slant extended past the standard modDepth step, push mc@cur forward
+  % so the sub-modifier connector clears the preceding slant's territory.
+  % (Plain adjectives always step by modDepth, so prev_E − modDepth is the overhang.)
+  \ifblank{#2}{}{%
+    \ifdim\rk@prevmod@E>\rk@modDepth
+      \addtolength{\rk@mc@cur}{\rk@prevmod@E}%
+      \addtolength{\rk@mc@cur}{-\rk@modDepth}%
+    \fi
+  }%
+  % Slant: (mc@cur, mc@y) → (mc@cur + E, mc@y − E)
   \setlength{\rk@ta}{\rk@mc@cur}%
-  \addtolength{\rk@ta}{\rk@modDepth}%   % endpoint x
+  \addtolength{\rk@ta}{\rk@effmod}%    % rk@ta = endpoint x = x_s + E
   \setlength{\rk@tb}{\rk@mc@y}%
-  \addtolength{\rk@tb}{-\rk@modDepth}%  % endpoint y
-  % Draw slant line; word sits ABOVE the line via sloped path label.
-  % This avoids the line passing through the text.
+  \addtolength{\rk@tb}{-\rk@effmod}%   % rk@tb = endpoint y = y_s − E
+  \ifdim\rk@tb<\rk@clause@miny\global\rk@clause@miny=\rk@tb\fi
   \draw[color=\rk@color, line width=\rk@lw]
     (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
     node[midway, above, sloped,
          inner sep=2pt, outer sep=0pt, font=\rk@font] {#1};%
-  % Advance sibling cursor by fixed modDepth step
-  \addtolength{\rk@mc@cur}{\rk@modDepth}%
-  \ifdim\rk@mc@cur>\rk@mc@d \setlength{\rk@mc@d}{\rk@mc@cur}\fi
-  % Recurse into sub-modifiers from the slant endpoint.
-  % rk@ta / rk@tb still hold the endpoint coords.
+  % Advance sibling cursor:
+  %   • Modifier WITH sub-modifiers: advance by full effmod (sub-modifier needs the room).
+  %   • Plain modifier (no sub-modifiers): advance by modDepth only — equal spacing
+  %     regardless of word length; long words just produce deeper slants.
+  \ifblank{#2}{%
+    \addtolength{\rk@mc@cur}{\rk@modDepth}%
+  }{%
+    \addtolength{\rk@mc@cur}{\rk@effmod}%
+  }%
+  \global\rk@prevmod@E=\rk@effmod   % record actual E for the next sibling's push check
+  \ifrk@extendbl \rk@extendbase \fi
+  % Sub-modifiers: connector branches off at 20% along the parent slant,
+  % goes diagonally down-left back to the parent's start x, then child
+  % slants continue down-right from that lower anchor point.
   \ifblank{#2}{}{%
     \begingroup
-      \setlength{\rk@mc@y}{\rk@tb}%
-      \setlength{\rk@mc@d}{\rk@ta}%
-      \setlength{\rk@mc@cur}{\rk@ta}%
+      \global\rk@prevmod@E=0pt   % reset sibling-push tracking for child modifier level
+      % a = max(cap-height, 0.2·E) so child level is always at least one cap-height below parent
+      \node[opacity=0, inner sep=0pt, outer sep=0pt, font=\rk@font]
+        (rk@capmsr) at (0,0) {M};%
+      \pgfextracty{\rk@halfsep}{\pgfpointanchor{rk@capmsr}{north}}%
+      \pgfextracty{\rk@ta}{\pgfpointanchor{rk@capmsr}{south}}%
+      \addtolength{\rk@halfsep}{-\rk@ta}%   % rk@halfsep = cap-height of font
+      \pgfmathsetlength{\rk@halfsep}{max(\the\rk@halfsep, 0.2 * \the\rk@effmod)}%
+      \addtolength{\rk@halfsep}{\rk@modgap}% extra headspace between modifier levels
+      % x_s = parent start x = (mc@cur after advance) − E
+      \setlength{\rk@tc}{\rk@mc@cur}%
+      \addtolength{\rk@tc}{-\rk@effmod}%      % rk@tc = x_s
+      % Connector attachment on parent slant: (x_s + a, y_s − a)
+      \setlength{\rk@ta}{\rk@tc}%
+      \addtolength{\rk@ta}{\rk@halfsep}%      % attachment x = x_s + a
+      \setlength{\rk@tb}{\rk@mc@y}%
+      \addtolength{\rk@tb}{-\rk@halfsep}%     % attachment y = y_s − a
+      % Connector endpoint (= child anchor): (x_s + modgap, y_s − 2a)
+      % modgap shifts child right so it clears the previous sibling's slant region
+      \addtolength{\rk@mc@y}{-\rk@halfsep}%
+      \addtolength{\rk@mc@y}{-\rk@halfsep}%   % mc@y = y_s − 2a
+      \addtolength{\rk@tc}{\rk@modgap}%        % rk@tc = x_s + modgap
+      % Draw connector: (x_s+a, y_s−a) → (x_s+modgap, y_s−2a)
+      \rk@line{(\the\rk@ta, \the\rk@tb) -- (\the\rk@tc, \the\rk@mc@y)}%
+      % Child context: cursor at x_s + modgap, level at y_s − 2a; disable baseline extension
+      \setlength{\rk@mc@cur}{\rk@tc}%
+      \setlength{\rk@mc@d}{\rk@tc}%
+      \rk@extendblfalse
       \rk@execmods{#2}%
     \endgroup
   }%
@@ -238,7 +412,11 @@
 \newcommand{\rk@runmods}[1]{%
   \ifblank{#1}{}{%
     \begingroup
+      \global\rk@prevmod@E=0pt   % reset sibling-push tracking for this modifier list
+      \rk@extendbltrue   % word-level: baseline extension enabled
       \rk@execmods{#1}%
+      % Max-update: preserve any deeper extent propagated by sub-mod groups
+      \ifdim\rk@mc@d>\rk@nounmodright\global\rk@nounmodright=\rk@mc@d\fi
     \endgroup
   }%
 }
@@ -252,55 +430,91 @@
 \newcommand{\rk@doprep}[3]{%
   % Extend head baseline to cursor
   \rk@extendbase
-  % Slant end: (cursor + modDepth, y_head - modDepth)
+  % Measure prep label to size the slant (same formula as \rk@domod)
+  \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
+    (rk@prepmsr) at (0,0) {#2};%
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@prepmsr}{east}}%
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@prepmsr}{west}}%
+  \addtolength{\rk@tc}{-\rk@ta}%   % rk@tc = nodeWidth
+  \pgfextracty{\rk@tb}{\pgfpointanchor{rk@prepmsr}{north}}%
+  \pgfextracty{\rk@ta}{\pgfpointanchor{rk@prepmsr}{south}}%
+  \addtolength{\rk@tb}{-\rk@ta}%   % rk@tb = nodeHeight
+  \pgfmathsetlength{\rk@effmod}{max(\the\rk@modDepth, (\the\rk@tc + \the\rk@tb) / 1.41422 + 6pt)}%
+  % Apply per-slant minimum override, then reset.
+  \ifdim\rk@slant@minlen>\rk@effmod\setlength{\rk@effmod}{\rk@slant@minlen}\fi
+  \setlength{\rk@slant@minlen}{0pt}%
+  % Slant end: (cursor + effmod, y_head - effmod)
   \setlength{\rk@ta}{\rk@mc@cur}%
-  \addtolength{\rk@ta}{\rk@modDepth}%
+  \addtolength{\rk@ta}{\rk@effmod}%
   \setlength{\rk@tb}{\rk@mc@y}%
-  \addtolength{\rk@tb}{-\rk@modDepth}%
-  % Prep label on slant (rotated -45, anchored base west at slant end)
-  \node[
-    rotate    = -45,
-    anchor    = base west,
-    inner sep = 0pt,
-    outer sep = 0pt,
-    font      = \rk@font,
-  ] (rk@prepnode) at (\the\rk@ta, \the\rk@tb) {#2};%
-  % Draw slant: cursor to east of prep node
-  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@prepnode}{east}}%
-  \pgfextracty{\rk@tb}{\pgfpointanchor{rk@prepnode}{east}}%
-  \rk@line{(\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)}%
-  % Object on horizontal line extending from slant end
-  \setlength{\rk@halfsep}{\rk@spacing}%
-  \divide\rk@halfsep by 2\relax
-  \setlength{\rk@tc}{\rk@ta}%
-  \addtolength{\rk@tc}{\rk@halfsep}%
-  \node[
-    anchor    = base west,
-    inner sep = 0pt,
-    outer sep = 0pt,
-    font      = \rk@font,
-  ] (rk@pobjnode) at (\the\rk@tc, \the\rk@tb) {#3};%
-  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@pobjnode}{east}}%
-  \addtolength{\rk@tc}{\rk@halfsep}%
-  % Draw horizontal: slant end to right of object
-  \rk@line{(\the\rk@ta, \the\rk@tb) -- (\the\rk@tc, \the\rk@tb)}%
-  % Update parent cursor
-  \setlength{\rk@mc@cur}{\rk@tc}%
-  \ifdim\rk@tc>\rk@mc@d \setlength{\rk@mc@d}{\rk@tc}\fi
-  % Process mods on object (hanging below the object horizontal)
-  \ifblank{#1}{}{%
-    \begingroup
-      % Object context: head y = tb (slant end y), cursor/d from pobj node
-      \setlength{\rk@mc@y}{\rk@tb}%
-      \pgfextractx{\rk@ta}{\pgfpointanchor{rk@pobjnode}{west}}%
-      \setlength{\rk@mc@cur}{\rk@ta}%
-      \addtolength{\rk@mc@cur}{-\rk@halfsep}%
-      \pgfextractx{\rk@ta}{\pgfpointanchor{rk@pobjnode}{east}}%
-      \setlength{\rk@mc@d}{\rk@ta}%
-      \addtolength{\rk@mc@d}{\rk@halfsep}%
-      \rk@execmods{#1}%
-    \endgroup
-  }%
+  \addtolength{\rk@tb}{-\rk@effmod}%
+  \ifdim\rk@tb<\rk@clause@miny\global\rk@clause@miny=\rk@tb\fi
+  % Draw slant with prep label above it at midpoint
+  \draw[color=\rk@color, line width=\rk@lw]
+    (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
+    node[midway, above, sloped,
+         inner sep=2pt, outer sep=0pt, font=\rk@font] {#2};%
+  % Object: detect \rkCompound for compound fork, else draw single object on horizontal.
+  \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
+  \global\rk@deferredcmpfalse
+  \begingroup
+    \let\rkCompound\rk@deferred@Compound
+    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@pobjnode) at (0,0) {#3};%
+  \endgroup
+  \ifrk@deferredcmp
+    % Compound object: fork centred on slant end (rk@ta, rk@tb)
+    \setlength{\rk@x}{\rk@ta}%
+    \setlength{\rk@base@y}{\rk@tb}%
+    \setlength{\rk@ht}{2.2ex}%
+    \rk@docompound{l}{\rk@deferredcmp@conj}%
+      {\rk@deferredcmp@modsa}{\rk@deferredcmp@worda}%
+      {\rk@deferredcmp@modsb}{\rk@deferredcmp@wordb}%
+    \global\rk@deferredcmpfalse
+    \setlength{\rk@mc@cur}{\rk@x}%
+    \ifdim\rk@x>\rk@mc@d \setlength{\rk@mc@d}{\rk@x}\fi
+  \else
+    % Normal single object: measure then place centred on horizontal from slant end.
+    % rk@ta = slant_end_x, rk@tb = slant_end_y (preserved throughout).
+    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font]
+      (rk@pobjnode) at (0,0) {#3};%
+    % word_width = east − west of measurement node
+    \pgfextractx{\rk@effmod}{\pgfpointanchor{rk@pobjnode}{east}}%
+    \pgfextractx{\rk@tc}    {\pgfpointanchor{rk@pobjnode}{west}}%
+    \addtolength{\rk@effmod}{-\rk@tc}%       rk@effmod = word_width
+    % line_right = rk@ta + halfsep + word_width + halfsep
+    \setlength{\rk@tc}{\rk@ta}%
+    \addtolength{\rk@tc}{\rk@halfsep}%
+    \addtolength{\rk@tc}{\rk@effmod}%
+    \addtolength{\rk@tc}{\rk@halfsep}%       rk@tc = line_right
+    % centre_x = (line_left + line_right) / 2 = (rk@ta + rk@tc) / 2
+    \setlength{\rk@effmod}{\rk@ta}%
+    \addtolength{\rk@effmod}{\rk@tc}%
+    \divide\rk@effmod by 2\relax%            rk@effmod = centre_x
+    % Draw horizontal line from slant end to line_right.
+    \rk@line{(\the\rk@ta, \the\rk@tb) -- (\the\rk@tc, \the\rk@tb)}%
+    % Place visible word centred on the line.
+    \setlength{\rk@wlevel}{\rk@tb}\addtolength{\rk@wlevel}{\rk@wordlift}%
+    \node[
+      anchor    = base,
+      inner sep = 0pt,
+      outer sep = 0pt,
+      font      = \rk@font,
+    ] (rk@pobjnode) at (\the\rk@effmod, \the\rk@wlevel) {#3};%
+
+    \setlength{\rk@mc@cur}{\rk@tc}%
+    \ifdim\rk@tc>\rk@mc@d \setlength{\rk@mc@d}{\rk@tc}\fi
+    \ifblank{#1}{}{%
+      \begingroup
+        \setlength{\rk@mc@y}{\rk@tb}%
+        \pgfextractx{\rk@ta}{\pgfpointanchor{rk@pobjnode}{west}}%
+        \setlength{\rk@mc@cur}{\rk@ta}\addtolength{\rk@mc@cur}{-\rk@halfsep}%
+        \pgfextractx{\rk@ta}{\pgfpointanchor{rk@pobjnode}{east}}%
+        \setlength{\rk@mc@d}{\rk@ta}\addtolength{\rk@mc@d}{\rk@halfsep}%
+        \rk@execmods{#1}%
+        \ifdim\rk@mc@d>\rk@nounmodright\global\rk@nounmodright=\rk@mc@d\fi
+      \endgroup
+    }%
+  \fi
 }
 
 % ============================================================
@@ -310,7 +524,7 @@
 
 \newcommand{\rk@doiobj}[2]{%
   % Attach below the verb slot center.
-  % Save/restore the main context; this does NOT advance \rk@x.
+  % Advances \rk@x if the platform extends past the current cursor.
   \begingroup
     \setlength{\rk@mc@y}{\rk@vb@y}%
     \setlength{\rk@mc@d}{\rk@vb@r}%
@@ -324,20 +538,32 @@
     \addtolength{\rk@ta}{\rk@modDepth}%
     \setlength{\rk@tb}{\rk@mc@y}%
     \addtolength{\rk@tb}{-\rk@modDepth}%
+    \ifdim\rk@tb<\rk@clause@miny\global\rk@clause@miny=\rk@tb\fi
     \rk@line{(\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)}%
     \setlength{\rk@halfsep}{\rk@spacing}%
     \divide\rk@halfsep by 2\relax
+    % Measure word width, compute line_right, centre word on platform.
+    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font]
+      (rk@iobjnode) at (0,0) {#2};%
+    \pgfextractx{\rk@effmod}{\pgfpointanchor{rk@iobjnode}{east}}%
+    \pgfextractx{\rk@tc}    {\pgfpointanchor{rk@iobjnode}{west}}%
+    \addtolength{\rk@effmod}{-\rk@tc}%      rk@effmod = word_width
     \setlength{\rk@tc}{\rk@ta}%
     \addtolength{\rk@tc}{\rk@halfsep}%
+    \addtolength{\rk@tc}{\rk@effmod}%
+    \addtolength{\rk@tc}{\rk@halfsep}%      rk@tc = line_right
+    \setlength{\rk@effmod}{\rk@ta}%
+    \addtolength{\rk@effmod}{\rk@tc}%
+    \divide\rk@effmod by 2\relax%           rk@effmod = centre_x
+    \rk@line{(\the\rk@ta, \the\rk@tb) -- (\the\rk@tc, \the\rk@tb)}%
+    \setlength{\rk@wlevel}{\rk@tb}\addtolength{\rk@wlevel}{\rk@wordlift}%
     \node[
-      anchor    = base west,
+      anchor    = base,
       inner sep = 0pt,
       outer sep = 0pt,
       font      = \rk@font,
-    ] (rk@iobjnode) at (\the\rk@tc, \the\rk@tb) {#2};%
-    \pgfextractx{\rk@tc}{\pgfpointanchor{rk@iobjnode}{east}}%
-    \addtolength{\rk@tc}{\rk@halfsep}%
-    \rk@line{(\the\rk@ta, \the\rk@tb) -- (\the\rk@tc, \the\rk@tb)}%
+    ] (rk@iobjnode) at (\the\rk@effmod, \the\rk@wlevel) {#2};%
+    \global\rk@iobj@xmax=\rk@tc\relax
     % Mods on indirect object
     \ifblank{#1}{}{%
       \begingroup
@@ -348,6 +574,12 @@
       \endgroup
     }%
   \endgroup
+  % Push main cursor past IObj platform to prevent DObj modifier collision.
+  % Also extend the baseline so the line stays continuous.
+  \ifdim\rk@iobj@xmax>\rk@x
+    \rk@line{(\the\rk@x, \the\rk@vb@y) -- (\the\rk@iobj@xmax, \the\rk@vb@y)}%
+    \setlength{\rk@x}{\rk@iobj@xmax}%
+  \fi
 }
 
 % ============================================================
@@ -361,6 +593,7 @@
   \setlength{\rk@ta}{\rk@mc@d}%
   \addtolength{\rk@ta}{\rk@halfsep}%
   % Inside appositive, disable modifier drawing (just typeset inline)
+  \setlength{\rk@wlevel}{\rk@mc@y}\addtolength{\rk@wlevel}{\rk@wordlift}%
   \begingroup
     \let\rkAdj\rk@inline@mod
     \let\rkAdv\rk@inline@mod
@@ -370,7 +603,7 @@
       inner sep = 0pt,
       outer sep = 0pt,
       font      = \rk@font,
-    ] (rk@apposnode) at (\the\rk@ta, \the\rk@mc@y) {(#1)};%
+    ] (rk@apposnode) at (\the\rk@ta, \the\rk@wlevel) {(#1)};%
   \endgroup
   \pgfextractx{\rk@ta}{\pgfpointanchor{rk@apposnode}{east}}%
   \addtolength{\rk@ta}{\rk@halfsep}%
@@ -394,24 +627,31 @@
 \newcommand{\rk@dosubclause}[2]{%
   \rk@extendbase
   % Attachment x = current cursor on head baseline
-  \setlength{\rk@ta}{\rk@mc@cur}%
+  % Attachment x = current modifier cursor + halfsep gap
+  \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
+  \setlength{\rk@ta}{\rk@mc@cur}\addtolength{\rk@ta}{\rk@halfsep}%
   % Sub-baseline y = head_y - subClDepth
   \setlength{\rk@tb}{\rk@mc@y}%
   \addtolength{\rk@tb}{-\rk@subClDepth}%
   % Dashed vertical connector
   \draw[color=\rk@color, line width=\rk@lw, dashed]
     (\the\rk@ta, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb);%
-  % Open a sub-context for the clause body
+  % Open a sub-context for the clause body.
+  % Save the outer verb x: \rkVerb inside the sub-clause writes rk@vb@r globally,
+  % which would overwrite the enclosing clause's verb position.
+  \global\rk@sc@saved@vb@r=\rk@vb@r
   \begingroup
-    % Reset x cursor to the attachment point
+    % Reset x cursor and baseline y to the sub-clause level
     \setlength{\rk@x}{\rk@ta}%
     \setlength{\rk@ht}{2.2ex}%
+    \setlength{\rk@base@y}{\rk@tb}%
     \setlength{\rk@mc@y}{\rk@tb}%
     \setlength{\rk@mc@d}{\rk@ta}%
     \setlength{\rk@mc@cur}{\rk@ta}%
+    \rk@nounmodright=\rk@x  % reset so outer overhang doesn't bleed in
     % Place the rel-word (e.g. "who", "that", "because") first if provided
     \ifblank{#1}{}{%
-      \rk@placeslot{#1}{\the\rk@tb}%
+      \rk@placeslot{#1}{\the\rk@base@y}%
       \rk@slot@to@mc
     }%
     % Execute clause body (\rkSubject, \rkVerb, etc.)
@@ -420,30 +660,148 @@
     \setlength{\rk@mc@cur}{\rk@x}%
     \ifdim\rk@x>\rk@mc@d \setlength{\rk@mc@d}{\rk@x}\fi
   \endgroup
+  % Restore outer verb x (sub-clause \rkVerb wrote it globally)
+  \global\rk@vb@r=\rk@sc@saved@vb@r
 }
 
 % ============================================================
 % ENVIRONMENT
 % ============================================================
 
-\NewDocumentEnvironment{rkdiagram}{O{}}{%
-  \ifblank{#1}{}{\pgfkeys{/rkdiagram, #1}}%
+% Internal state reset (called by both rkdiagram and rkCompoundSent)
+% \rkSkip{len}      — insert a gap of <len> in the baseline before the next slot.
+% \rkSlotWidth{len} — set minimum line width for the next slot.
+% Both are one-shot: they reset automatically after the next slot is drawn.
+\newcommand{\rkSkip}[1]{\setlength{\rk@slot@skip}{#1}}
+\newcommand{\rkSlotWidth}[1]{\setlength{\rk@slot@minwidth}{#1}}
+\newcommand{\rkSlantLen}[1]{\setlength{\rk@slant@minlen}{#1}}
+
+\newcommand{\rk@init@state}{%
   \setlength{\rk@x}{0pt}%
   \setlength{\rk@ht}{2.2ex}%
-  % Init modifier context
   \setlength{\rk@mc@y}{0pt}%
   \setlength{\rk@mc@d}{0pt}%
   \setlength{\rk@mc@cur}{0pt}%
-  % Init verb slot
-  \setlength{\rk@vb@l}{0pt}%
-  \setlength{\rk@vb@r}{0pt}%
-  \setlength{\rk@vb@y}{0pt}%
-  \begin{tikzpicture}[
-    line width = \rk@lw,
-    baseline   = (rk@origin),
-  ]%
-  \coordinate (rk@origin) at (0,0);
+  % vb@* are reset and written globally so group boundaries don't restore stale values.
+  \global\rk@vb@l=0pt
+  \global\rk@vb@r=0pt
+  \global\rk@vb@y=0pt
+  \setlength{\rk@iobj@xmax}{0pt}%
+  \setlength{\rk@nounmodright}{0pt}%
+  \setlength{\rk@base@y}{0pt}%
+  \setlength{\rk@slot@minwidth}{0pt}%
+  \setlength{\rk@slot@skip}{0pt}%
+  \setlength{\rk@slant@minlen}{0pt}%
+  \setlength{\rk@clause@miny}{0pt}%
+}
+
+\NewDocumentEnvironment{rkdiagram}{O{}}{%
+  \ifblank{#1}{}{\pgfkeys{/rkdiagram, #1}}%
+  \ifrk@intikz
+    % Nested inside \rkCompoundSent: preserve the clause baseline y set by the outer
+    % command, reset everything else.
+    \setlength{\rk@ta}{\rk@base@y}%   save
+    \rk@init@state
+    \setlength{\rk@base@y}{\rk@ta}%   restore
+  \else
+    \rk@init@state
+    \begin{tikzpicture}[
+      line width = \rk@lw,
+      baseline   = (rk@origin),
+    ]%
+    \coordinate (rk@origin) at (0,0);
+    % Measure descender depth so placed word nodes clear the baseline lines.
+    \node[anchor=base,opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font]
+      (rk@descmsr) at (0,0) {g};%
+    \pgfextracty{\rk@wordlift}{\pgfpointanchor{rk@descmsr}{south}}%
+    \setlength{\rk@wordlift}{-\rk@wordlift}%
+    \addtolength{\rk@wordlift}{1pt}%
+  \fi
 }{%
+  \ifrk@intikz\else
+    \end{tikzpicture}%
+  \fi
+}
+
+% ============================================================
+% COMPOUND SENTENCE
+% \rkCompoundSent[conj][sep]{opts1}{body1}{opts2}{body2}
+%
+% Draws two independent clauses in a single tikzpicture,
+% connected by dashed verticals and a horizontal bridge bearing
+% the coordinating conjunction.  The bridge sits at the midpoint
+% between the two baselines, dropping from each clause's verb.
+% ============================================================
+
+% Registers for the connector
+\newlength{\rk@cmpst@va@x}   % verb 1 midpoint x
+\newlength{\rk@cmpst@vb@x}   % verb 2 midpoint x
+\newlength{\rk@cmpst@sep}     % baseline separation
+
+\NewDocumentCommand{\rkCompoundSent}{O{and} O{3cm} O{} m O{} m}{%
+  % Reset manual bridge override before applying options (so default is auto)
+  \setlength{\rk@bridgey@override}{0pt}%
+  % Apply any options from either clause so spacing etc. are consistent
+  \ifblank{#3}{}{\pgfkeys{/rkdiagram, #3}}%
+  \ifblank{#5}{}{\pgfkeys{/rkdiagram, #5}}%
+  \setlength{\rk@cmpst@sep}{#2}%
+  \begin{tikzpicture}[line width=\rk@lw, baseline=(rk@origin)]%
+    \coordinate (rk@origin) at (0,0);
+    % Measure descender depth once for both clauses.
+    \node[anchor=base,opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font]
+      (rk@descmsr) at (0,0) {g};%
+    \pgfextracty{\rk@wordlift}{\pgfpointanchor{rk@descmsr}{south}}%
+    \setlength{\rk@wordlift}{-\rk@wordlift}\addtolength{\rk@wordlift}{1pt}%
+    % ---- Clause 1 at y = 0 ----
+    % rk@intikz suppresses the tikzpicture wrapper inside \begin{rkdiagram}.
+    \rk@intikztrue
+    \rk@init@state   % reset state; \begin{rkdiagram} in body will do this too (harmless)
+    #4%
+    % Save verb 1 x at right edge of verb slot (so dashed line drops from end of verb)
+    \setlength{\rk@cmpst@va@x}{\rk@vb@r}%
+    % Save clause 1 lowest y (for auto bridge placement)
+    \setlength{\rk@cmpst@saved@miny}{\rk@clause@miny}%
+    % ---- Clause 2 at y = -sep ----
+    % Set base@y before #6 so the inner rkdiagram env (intikz branch) preserves it.
+    \rk@init@state
+    \setlength{\rk@base@y}{-\rk@cmpst@sep}%
+    #6%
+    % Save verb 2 x at right edge of verb slot
+    \setlength{\rk@cmpst@vb@x}{\rk@vb@r}%
+    % ---- Draw connector ----
+    % rk@base@y is still -sep after clause 2; use it for clause-2 verb y.
+    % bridge_y: default is -sep/2, but auto-lower if clause 1 modifiers extend past it.
+    % bridgeY key overrides everything.
+    \ifdim\rk@bridgey@override=0pt
+      % Auto: start at -sep/2
+      \setlength{\rk@ta}{\rk@base@y}%
+      \divide\rk@ta by 2\relax%               rk@ta = -sep/2
+      % Lower to miny_clause1 - 0.4cm if that is further down
+      \setlength{\rk@tb}{\rk@cmpst@saved@miny}%
+      \addtolength{\rk@tb}{-0.4cm}%           rk@tb = miny - gap
+      \ifdim\rk@tb<\rk@ta\setlength{\rk@ta}{\rk@tb}\fi%  take the more-negative value
+      % Clamp: keep bridge above clause 2 baseline by at least 0.3cm
+      \setlength{\rk@tc}{\rk@base@y}\addtolength{\rk@tc}{0.3cm}%
+      \ifdim\rk@ta<\rk@tc\setlength{\rk@ta}{\rk@tc}\fi
+    \else
+      \setlength{\rk@ta}{\rk@bridgey@override}%  rk@ta = bridge_y (manual)
+    \fi%                                         rk@ta = bridge_y
+    % bridge midpoint x = (va@x + vb@x) / 2
+    \setlength{\rk@tc}{\rk@cmpst@va@x}%
+    \addtolength{\rk@tc}{\rk@cmpst@vb@x}%
+    \divide\rk@tc by 2\relax%                    rk@tc = bridge mid x
+    % Dashed vertical from clause 1 verb down to bridge
+    \draw[color=\rk@color,line width=\rk@lw,dashed]
+      (\the\rk@cmpst@va@x, 0pt) -- (\the\rk@cmpst@va@x, \the\rk@ta);%
+    % Dashed vertical from bridge down to clause 2 verb
+    \draw[color=\rk@color,line width=\rk@lw,dashed]
+      (\the\rk@cmpst@vb@x, \the\rk@ta) -- (\the\rk@cmpst@vb@x, \the\rk@base@y);%
+    % Horizontal bridge
+    \rk@line{(\the\rk@cmpst@va@x, \the\rk@ta) -- (\the\rk@cmpst@vb@x, \the\rk@ta)}%
+    % Conjunction label above the bridge midpoint
+    \node[above, inner sep=2pt, font=\rk@font]
+      at (\the\rk@tc, \the\rk@ta) {\textit{#1}};%
+    \rk@intikzfalse
   \end{tikzpicture}%
 }
 
@@ -452,44 +810,45 @@
 % ============================================================
 
 \NewDocumentCommand{\rkSubject}{O{}m}{%
-  \rk@placeslot{#2}{0pt}%
-  \rk@showrole{subj}%
+  \def\rk@cmpdir{r}%
+  \rk@placeslot{#2}{\the\rk@base@y}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
 }
 
 \NewDocumentCommand{\rkVerb}{O{}m}{%
   \rk@divfull
-  \rk@placeslot{#2}{0pt}%
-  \rk@showrole{vb}%
-  % Save verb slot for \rkIObj
-  \setlength{\rk@vb@l}{\rk@sl@l}%
-  \setlength{\rk@vb@r}{\rk@sl@r}%
-  \setlength{\rk@vb@y}{\rk@sl@y}%
+  \def\rk@cmpdir{l}%
+  \rk@placeslot{#2}{\the\rk@base@y}%
+  % Save verb slot globally so \rkCompoundSent can read vb@r after \end{rkdiagram}
+  % closes the environment's implicit group.
+  \global\rk@vb@l=\rk@sl@l
+  \global\rk@vb@r=\rk@sl@r
+  \global\rk@vb@y=\rk@sl@y
   \rk@slot@to@mc
   \rk@runmods{#1}%
 }
 
 \NewDocumentCommand{\rkDObj}{O{}m}{%
   \rk@divshort
-  \rk@placeslot{#2}{0pt}%
-  \rk@showrole{dobj}%
+  \def\rk@cmpdir{l}%
+  \rk@placeslot{#2}{\the\rk@base@y}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
 }
 
 \NewDocumentCommand{\rkPredNom}{O{}m}{%
   \rk@divfwd
-  \rk@placeslot{#2}{0pt}%
-  \rk@showrole{pnom}%
+  \def\rk@cmpdir{l}%
+  \rk@placeslot{#2}{\the\rk@base@y}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
 }
 
 \NewDocumentCommand{\rkPredAdj}{O{}m}{%
   \rk@divfwd
-  \rk@placeslot{#2}{0pt}%
-  \rk@showrole{padj}%
+  \def\rk@cmpdir{l}%
+  \rk@placeslot{#2}{\the\rk@base@y}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
 }
@@ -523,15 +882,178 @@
 % ============================================================
 % COMPOUND STRUCTURE
 % \rkCompound[conjunction]{word1}{word2}
-% Simplified: renders as a dashed-underlined compound on the baseline.
+% Inside \rkSubject/\rkVerb/\rkDObj etc., intercepted by \rk@deferred@Compound
+% and rendered as a proper forked compound via \rk@docompound.
+% Outside a diagram context the inline fallback applies.
 % ============================================================
 
-\NewDocumentCommand{\rkCompound}{O{and}mm}{%
+% \rk@docompound{dir}{conj}{modsa}{worda}{modsb}{wordb}
+%   dir = r  subject  (convergence RIGHT, dashed bar on LEFT)
+%   dir = l  verb/obj (convergence LEFT,  dashed bar on RIGHT)
+%   modsa/modsb = optional modifier lists (e.g. \rkAdj{the}) for each word
+\newcommand{\rk@docompound}[6]{%
+  % Save outer base_y as compound centre (allows compound objects of preps)
+  \setlength{\rk@cmp@basey}{\rk@base@y}%
+  % rk@ta = csep  (vertical half-gap between platforms)
+  \setlength{\rk@ta}{\rk@ht}%
+  \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
+  % Measure conjunction width; expand csep so rotated label fits inside the bar
+  \begingroup
+    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@conjN)at(0,0){\textit{#2}};%
+  \endgroup
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@conjN}{east}}%
+  \pgfextractx{\rk@tb}{\pgfpointanchor{rk@conjN}{west}}%
+  \addtolength{\rk@tc}{-\rk@tb}%    rk@tc = conjunction text width
+  \divide\rk@tc by 2\relax%
+  \addtolength{\rk@tc}{4pt}%        rk@tc = half-width + small padding
+  \ifdim\rk@tc>\rk@ta\setlength{\rk@ta}{\rk@tc}\fi%  csep = max(rk@ht, conj_half+pad)
+  % Apply cmpSep minimum if set (overrides auto csep)
+  \ifdim\rk@cmpsep>\rk@ta\setlength{\rk@ta}{\rk@cmpsep}\fi%
+  % Measure word widths (inline-mod context suppresses any embedded modifier draws)
+  \begingroup
+    \let\rkAdj\rk@inline@mod\let\rkAdv\rk@inline@mod\let\rkPrep\rk@inline@prep
+    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@cmpA)at(0,0){#4};%
+    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@cmpB)at(0,0){#6};%
+  \endgroup
+  \pgfextractx{\rk@effmod}{\pgfpointanchor{rk@cmpA}{east}}%
+  \pgfextractx{\rk@tb}    {\pgfpointanchor{rk@cmpA}{west}}%
+  \addtolength{\rk@effmod}{-\rk@tb}%           rk@effmod = width_A
+  \setlength{\rk@cmp@wa}{\rk@effmod}%          save width_A for centring
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@cmpB}{east}}%
+  \pgfextractx{\rk@tb}{\pgfpointanchor{rk@cmpB}{west}}%
+  \addtolength{\rk@tc}{-\rk@tb}%               rk@tc = width_B
+  \setlength{\rk@cmp@wb}{\rk@tc}%              save width_B for centring
+  \ifdim\rk@tc>\rk@effmod\setlength{\rk@effmod}{\rk@tc}\fi
+  % rk@effmod = max word width; platform width = max + full spacing margin
+  \addtolength{\rk@effmod}{\rk@spacing}%
+  %
+  \if r#1%  %----- SUBJECT: convergence RIGHT --------------------------
+    % plat_l = rk@x,  bar_x = rk@x + effmod + gap,  conv_x = bar_x + csep + halfsep
+    % gap = rk@halfsep separates the text platform end from the dashed bar
+    % extra halfsep added to conv_x only — keeps word separation (rk@ta) unchanged
+    \setlength{\rk@tb}{\rk@x}\addtolength{\rk@tb}{\rk@effmod}%  rk@tb = text end x
+    \addtolength{\rk@tb}{\rk@halfsep}%                           rk@tb = bar_x
+    \setlength{\rk@tc}{\rk@tb}\addtolength{\rk@tc}{\rk@ta}%
+    \addtolength{\rk@tc}{\rk@halfsep}%                           rk@tc = conv_x
+    \setlength{\rk@sl@l}{\rk@x}\addtolength{\rk@sl@l}{\rk@halfsep}%  text_x
+    \setlength{\rk@cmp@textx}{\rk@sl@l}%
+    \setlength{\rk@cmp@csep}{\rk@ta}%
+    % Word y = cmp@basey ± csep + wordlift; words centred on their platforms.
+    \setlength{\rk@wlevel}{\rk@cmp@basey}\addtolength{\rk@wlevel}{\rk@ta}\addtolength{\rk@wlevel}{\rk@wordlift}%
+    \begingroup
+      \let\rkAdj\rk@inline@mod\let\rkAdv\rk@inline@mod\let\rkPrep\rk@inline@prep
+      % centre_x_A = sl@l + cmp@wa/2  (text_x + half word width)
+      \setlength{\rk@tc}{\rk@sl@l}%
+      \setlength{\rk@tb}{\rk@cmp@wa}\divide\rk@tb by 2\relax\addtolength{\rk@tc}{\rk@tb}%
+      \node[anchor=base,inner sep=0pt,outer sep=0pt,font=\rk@font]
+        (rk@cmpAN)at(\the\rk@tc, \the\rk@wlevel){#4};%
+      \setlength{\rk@wlevel}{\rk@cmp@basey}\addtolength{\rk@wlevel}{-\the\rk@ta}\addtolength{\rk@wlevel}{\rk@wordlift}%
+      % centre_x_B = sl@l + cmp@wb/2
+      \setlength{\rk@tc}{\rk@sl@l}%
+      \setlength{\rk@tb}{\rk@cmp@wb}\divide\rk@tb by 2\relax\addtolength{\rk@tc}{\rk@tb}%
+      \node[anchor=base,inner sep=0pt,outer sep=0pt,font=\rk@font]
+        (rk@cmpBN)at(\the\rk@tc, \the\rk@wlevel){#6};%
+    \endgroup
+    % Platform baselines (upper y = cmp@basey+ta, lower y = cmp@basey-ta)
+    \setlength{\rk@wlevel}{\rk@cmp@basey}\addtolength{\rk@wlevel}{\rk@ta}%
+    \rk@line{(\the\rk@x, \the\rk@wlevel)--(\the\rk@tb, \the\rk@wlevel)}%
+    \setlength{\rk@wlevel}{\rk@cmp@basey}\addtolength{\rk@wlevel}{-\the\rk@ta}%
+    \rk@line{(\the\rk@x, \the\rk@wlevel)--(\the\rk@tb, \the\rk@wlevel)}%
+    % Dashed vertical bar and conjunction label
+    \setlength{\rk@wlevel}{\rk@cmp@basey}\addtolength{\rk@wlevel}{\rk@ta}%
+    \setlength{\rk@sl@d}{\rk@cmp@basey}\addtolength{\rk@sl@d}{-\the\rk@ta}%
+    \draw[color=\rk@color,line width=\rk@lw,dashed]
+      (\the\rk@tb, \the\rk@wlevel)--(\the\rk@tb, \the\rk@sl@d);%
+    \node[rotate=90,anchor=north,inner sep=2pt,font=\rk@font]
+      at (\the\rk@tb, \the\rk@cmp@basey) {\textit{#2}};%
+    % Convergence slants
+    \rk@line{(\the\rk@tb, \the\rk@wlevel)--(\the\rk@tc, \the\rk@cmp@basey)}%
+    \rk@line{(\the\rk@tb, \the\rk@sl@d)--(\the\rk@tc, \the\rk@cmp@basey)}%
+    \setlength{\rk@cmp@platright}{\rk@tb}%
+    \pgfextracty{\rk@tb}{\pgfpointanchor{rk@cmpAN}{north}}%
+    \ifdim\rk@tb>\rk@ht\setlength{\rk@ht}{\rk@tb}\fi
+    \setlength{\rk@sl@l}{\rk@x}%
+    \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%
+    \setlength{\rk@sl@y}{\rk@cmp@basey}\setlength{\rk@x}{\rk@tc}%
+  \else%   %----- VERB / OBJ: convergence LEFT --------------------------
+    \setlength{\rk@tb}{\rk@x}\addtolength{\rk@tb}{\rk@ta}%
+    \addtolength{\rk@tb}{\rk@halfsep}%                           rk@tb = bar_x
+    \setlength{\rk@sl@l}{\rk@tb}%
+    \setlength{\rk@tc}{\rk@sl@l}\addtolength{\rk@tc}{\rk@effmod}%  rk@tc = plat_r
+    \setlength{\rk@effmod}{\rk@sl@l}\addtolength{\rk@effmod}{\rk@halfsep}%  text_x
+    \setlength{\rk@cmp@textx}{\rk@effmod}%
+    \setlength{\rk@cmp@csep}{\rk@ta}%
+    % Word y levels; words centred on their platforms (centre_x = text_x + width/2).
+    \setlength{\rk@wlevel}{\rk@cmp@basey}\addtolength{\rk@wlevel}{\rk@ta}\addtolength{\rk@wlevel}{\rk@wordlift}%
+    \begingroup
+      \let\rkAdj\rk@inline@mod\let\rkAdv\rk@inline@mod\let\rkPrep\rk@inline@prep
+      % centre_x_A = effmod + cmp@wa/2
+      \setlength{\rk@tc}{\rk@effmod}%
+      \setlength{\rk@tb}{\rk@cmp@wa}\divide\rk@tb by 2\relax\addtolength{\rk@tc}{\rk@tb}%
+      \node[anchor=base,inner sep=0pt,outer sep=0pt,font=\rk@font]
+        (rk@cmpAN)at(\the\rk@tc, \the\rk@wlevel){#4};%
+      \setlength{\rk@wlevel}{\rk@cmp@basey}\addtolength{\rk@wlevel}{-\the\rk@ta}\addtolength{\rk@wlevel}{\rk@wordlift}%
+      % centre_x_B = effmod + cmp@wb/2
+      \setlength{\rk@tc}{\rk@effmod}%
+      \setlength{\rk@tb}{\rk@cmp@wb}\divide\rk@tb by 2\relax\addtolength{\rk@tc}{\rk@tb}%
+      \node[anchor=base,inner sep=0pt,outer sep=0pt,font=\rk@font]
+        (rk@cmpBN)at(\the\rk@tc, \the\rk@wlevel){#6};%
+    \endgroup
+    % Platform baselines
+    \setlength{\rk@wlevel}{\rk@cmp@basey}\addtolength{\rk@wlevel}{\rk@ta}%
+    \rk@line{(\the\rk@tb, \the\rk@wlevel)--(\the\rk@tc, \the\rk@wlevel)}%
+    \setlength{\rk@wlevel}{\rk@cmp@basey}\addtolength{\rk@wlevel}{-\the\rk@ta}%
+    \rk@line{(\the\rk@tb, \the\rk@wlevel)--(\the\rk@tc, \the\rk@wlevel)}%
+    % Convergence slants
+    \setlength{\rk@wlevel}{\rk@cmp@basey}\addtolength{\rk@wlevel}{\rk@ta}%
+    \setlength{\rk@sl@d}{\rk@cmp@basey}\addtolength{\rk@sl@d}{-\the\rk@ta}%
+    \rk@line{(\the\rk@x, \the\rk@cmp@basey)--(\the\rk@tb, \the\rk@wlevel)}%
+    \rk@line{(\the\rk@x, \the\rk@cmp@basey)--(\the\rk@tb, \the\rk@sl@d)}%
+    % Dashed vertical bar and conjunction label
+    \draw[color=\rk@color,line width=\rk@lw,dashed]
+      (\the\rk@sl@l, \the\rk@wlevel)--(\the\rk@sl@l, \the\rk@sl@d);%
+    \node[rotate=90,anchor=south,inner sep=2pt,font=\rk@font]
+      at (\the\rk@sl@l, \the\rk@cmp@basey) {\textit{#2}};%
+    \setlength{\rk@cmp@platright}{\rk@tc}%
+    \setlength{\rk@sl@l}{\rk@x}%
+    \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%
+    \setlength{\rk@sl@y}{\rk@cmp@basey}\setlength{\rk@x}{\rk@tc}%
+  \fi
+  % Run modifier/slot extensions for each word in its platform context.
+  \ifblank{#3}{}{%
+    \begingroup
+      \setlength{\rk@base@y}{\rk@cmp@basey}\addtolength{\rk@base@y}{\rk@cmp@csep}%
+      \setlength{\rk@mc@y}{\rk@base@y}%
+      \setlength{\rk@mc@cur}{\rk@cmp@textx}%
+      \setlength{\rk@mc@d}{\rk@cmp@textx}%
+      \setlength{\rk@x}{\rk@cmp@platright}%
+      \setlength{\rk@ht}{2.2ex}%
+      \rk@extendblfalse
+      \rk@execmods{#3}%
+    \endgroup
+  }%
+  \ifblank{#5}{}{%
+    \begingroup
+      \setlength{\rk@base@y}{\rk@cmp@basey}\addtolength{\rk@base@y}{-\the\rk@cmp@csep}%
+      \setlength{\rk@mc@y}{\rk@base@y}%
+      \setlength{\rk@mc@cur}{\rk@cmp@textx}%
+      \setlength{\rk@mc@d}{\rk@cmp@textx}%
+      \setlength{\rk@x}{\rk@cmp@platright}%
+      \setlength{\rk@ht}{2.2ex}%
+      \rk@extendblfalse
+      \rk@execmods{#5}%
+    \endgroup
+  }%
+}
+
+% Inline fallback (used outside diagram context or as a safety net)
+% Signature: [conj][mods_a]{word_a}[mods_b]{word_b}
+\NewDocumentCommand{\rkCompound}{O{and} O{} m O{} m}{%
   \begingroup
     \let\rkAdj\rk@inline@mod
     \let\rkAdv\rk@inline@mod
     \let\rkPrep\rk@inline@prep
-    #3~\textit{#1}~#2%
+    #3~\textit{#1}~#5%
   \endgroup
 }
 

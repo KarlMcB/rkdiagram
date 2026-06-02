@@ -17,7 +17,7 @@
 ]{rkdiagram}
 
 % ---- Support packages --------------------------------------
-\usepackage{geometry}
+\usepackage[a2paper]{geometry}
 \geometry{margin=1in}
 \usepackage{booktabs}
 \usepackage{microtype}
@@ -27,22 +27,19 @@
 % ---- Document styling --------------------------------------
 \newcommand{\testsection}[1]{%
   \bigskip
-  \noindent\rule{\linewidth}{0.8pt}\\[2pt]
-  {\large\bfseries #1}\\[4pt]
+  \noindent\rule{\linewidth}{0.8pt}\par\vspace{2pt}%
+  {\noindent\raggedright\large\bfseries #1\par}\vspace{4pt}%
 }
 
 \newcommand{\testcase}[2]{%
   \medskip
-  \noindent
-  \textbf{Test \thesubsection:} \textit{``#1''}
-  \stepcounter{subsection}
-  \par\smallskip
+  {\noindent\raggedright\textbf{Test \thesubsection:} \textit{``#1''}\par}%
+  \stepcounter{subsection}\smallskip
   #2
   \par\medskip
 }
 
-% Manual counter for test numbering
-\newcounter{subsection}
+% Manual counter for test numbering (subsection already defined by article class)
 \setcounter{subsection}{1}
 
 % ============================================================
@@ -222,11 +219,10 @@
   \begin{rkdiagram}
     \rkSubject{She}
     \rkVerb[%
-      \rkPrep[\rkAdj{the}, \rkAdj{old}]{into}{barn},
-      \rkPrep[\rkAdj{the}]{near}{river}
+      \rkPrep[\rkAdj{the}, \rkAdj{old}, \rkPrep[\rkAdj{the}]{near}{river}]{into}{barn}
     ]{ran}
   \end{rkdiagram}
-  \par\textit{Tests: two prepositional phrases modifying the same verb.}
+  \par\textit{Tests: prepositional phrase modifying the object of another prepositional phrase.}
 }
 
 \testcase{The book on the shelf in the corner is mine.}{%
@@ -280,11 +276,7 @@
     \rkSubject{He}
     \rkVerb{painted}
     \rkDObj{%
-      \rkCompound[but not]{%
-        \rkAdj{the}wall%
-      }{%
-        \rkAdj{the}ceiling%
-      }%
+      \rkCompound[but not][\rkAdj{the}]{wall}[\rkAdj{the}]{ceiling}%
     }
   \end{rkdiagram}
   \par\textit{Tests: compound object with two-word conjunction \textit{but not}.}
@@ -326,7 +318,6 @@
     \rkSubject[%
       \rkAdj{The},
       \rkSubClause[who]{%
-        \rkSubject{who}%
         \rkVerb{wore}%
         \rkDObj[\rkAdj{the}]{hat}%
       }%
@@ -352,14 +343,14 @@
 
 \testcase{Because the rain fell, we stayed inside.}{%
   \begin{rkdiagram}
+    \rkSubject{we}
     \rkVerb[%
+      \rkAdv{inside},
       \rkSubClause[because]{%
         \rkSubject[\rkAdj{the}]{rain}%
         \rkVerb{fell}%
       }%
     ]{stayed}
-    \rkSubject{we}
-    \rkDObj{inside}
   \end{rkdiagram}
   \par\textit{Tests: adverbial clause (fronted) modifying main verb.}
 }
@@ -393,46 +384,17 @@
   \begin{rkdiagram}
     \rkSubject{\rkCompound[and]{John}{Maria}}
     \rkVerb{%
-      \rkCompound[and]{%
-        found\rkAdv{quickly}%
-      }{%
-        carried\rkAdv{gently}%
-      }%
+      \rkCompound[and]%
+        [\rkAdv{quickly},\rkDObj[\rkAdj{the},\rkAdj{lost}]{dog}]{found}%
+        [\rkAdv{gently},\rkDObj{it},\rkAdv{home}]{carried}%
     }
-    \rkDObj[%
-      \rkAdj{the},
-      \rkAdj{lost}
-    ]{dog}
-    \rkDObj{it}
-    \rkAdv{home}
   \end{rkdiagram}
   \par\textit{Tests: compound subject + compound predicate, each verb with its
   own adverb, multiple direct objects.}
 }
 
 % ============================================================
-\testsection{Group 11 — Package Option: \texttt{showroles} Mode}
-% ============================================================
-% The showroles option prints small gray role labels above each word.
-% Useful for teacher answer keys. Redefine \rkset mid-document.
-
-\rkset{showroles=true}
-
-\testcase{The eager students solved the difficult problem
-          carefully.}{%
-  \begin{rkdiagram}
-    \rkSubject[\rkAdj{The}, \rkAdj{eager}]{students}
-    \rkVerb[\rkAdv{carefully}]{solved}
-    \rkDObj[\rkAdj{the}, \rkAdj{difficult}]{problem}
-  \end{rkdiagram}
-  \par\textit{Tests: \texttt{showroles=true} — role labels visible above all words.
-  Disable with \texttt{\textbackslash rkset\{showroles=false\}}.}
-}
-
-\rkset{showroles=false}
-
-% ============================================================
-\testsection{Group 12 — Edge Cases and Stress Tests}
+\testsection{Group 11 — Edge Cases and Stress Tests}
 % ============================================================
 
 % 12a — Very short sentence (stress test for baseline minimum width)
@@ -484,39 +446,150 @@
 }
 
 % ============================================================
-\testsection{Regression Checklist}
+% ============================================================
+\testsection{Group 12 — Mark Twain Stress Test}
 % ============================================================
 
-{\small
-\begin{tabular}{llp{8cm}}
-  \toprule
-  \textbf{Test \#} & \textbf{Sentence} & \textbf{Feature(s) Verified} \\
-  \midrule
-  1--2   & Dogs bark / She laughed         & Baseline, divider, no crash on minimal input \\
-  3--5   & Old dog / Loudly / Very quite   & Adjective, adverb, nested modifier chains \\
-  6--7   & Cat chased / Maria writes       & Direct object, short vertical divider \\
-  8--9   & Gave him / Sent students        & Indirect object platform \\
-  10--12 & Soup smells / He is / Accurate  & Pred.\ adj., pred.\ nom., forward diagonal \\
-  13--16 & Cat on mat / Bird in tree / Two preps / Nested preps &
-           Prepositional phrases: verb-mod, noun-mod, multiple, nested \\
-  17--20 & John and Mary / sang and danced / cats and birds / but not &
-           Compound subject, predicate, object, two-word conjunction \\
-  21--22 & Brother the doctor / Paris city of light &
-           Appositive on subject; appositive with embedded prep \\
-  23--25 & Man who / knows that / Because rain &
-           Relative clause, noun clause, adverbial clause \\
-  26--27 & Tall woman \ldots\ book / John and Maria \ldots\ home &
-           Multiple simultaneous features \\
-  28     & Eager students (showroles)      & \texttt{showroles=true} role labels \\
-  29--33 & Go! / Birds fly / NYC / has been running / never &
-           Implied subject, bare minimum, multi-word noun/verb, negation \\
-  \bottomrule
-\end{tabular}
+% Compound sentence (two independent clauses joined by ``and'').
+% Diagrammed as two stacked baselines.
+\testcase{A swarm of swarthy, noisy, lying, shoulder-shrugging, gesticulating
+Portuguese boatmen, with brass rings in their ears and fraud in their hearts,
+climbed the ship's sides, and various parties of us contracted with them to
+take us ashore at so much a head, silver coin of any country.}{%
+
+  \rkCompoundSent[and][10cm]%
+    [spacing=1.0cm,modDepth=0.9cm,cmpSep=1.8cm]%
+    {%
+      \begin{rkdiagram}
+        \rkSubject[%
+          \rkAdj{A},
+          \rkset{cmpSep=1.0cm}
+          \rkPrep[%
+            \rkAdj{swarthy},
+            \rkAdj{noisy},
+            \rkAdj{lying},
+            \rkAdj{shoulder-shrugging},
+            \rkAdj{gesticulating},
+            \rkAdj{Portuguese},
+            \rkPrep{with}{%
+              \rkCompound[and]%
+                [\rkAdj{brass},\rkPrep[\rkAdj{their}]{in}{ears}]{rings}%
+                [\rkPrep[\rkAdj{their}]{in}{hearts}]{fraud}%
+            }%
+          ]{of}{boatmen}%
+        ]{swarm}
+        \rkVerb{climbed}
+        \rkDObj[\rkAdj{the},\rkAdj{ship's}]{sides}
+      \end{rkdiagram}%
+    }%
+    [spacing=1.0cm,modDepth=1.0cm]%
+    {%
+      \begin{rkdiagram}
+        \rkSubject[%
+          \rkAdj{various},
+          \rkPrep{of}{us}%
+        ]{parties}
+        \rkVerb[%
+          \rkPrep{with}{them},
+          \rkSubClause[to]{%
+            \rkVerb[%
+              \rkAdv{ashore},
+              \rkPrep[%
+                \rkAdj{so~much},
+                \rkAdj{a},
+                \rkAppos{silver coin of any country}%
+              ]{at}{head}%
+            ]{take}
+            \rkDObj{us}%
+          }%
+        ]{contracted}
+      \end{rkdiagram}%
+    }%
+  \par\textit{(Mark Twain, \textit{The Innocents Abroad}, 1869)}
 }
 
-\bigskip
-\noindent\textit{All tests should compile without error. Visual inspection of
-each diagram against the printed sentence is required; no automated output
-comparison is available at this stage.}
+% ============================================================
+\testsection{Group 13 — Manual Spacing Controls}
+% ============================================================
+% \rkSlotWidth{len}  sets a minimum line width for the next slot only.
+% \rkSkip{len}       inserts a gap in the baseline before the next slot.
+% Both are one-shot — they reset automatically after use.
+
+\testcase{Dogs bark. (default spacing for reference)}{%
+  \begin{rkdiagram}
+    \rkSubject{Dogs}
+    \rkVerb{bark}
+  \end{rkdiagram}
+  \par\textit{Baseline: auto-width lines, no adjustments.}
+}
+
+\testcase{Dogs bark. (wider subject line)}{%
+  \begin{rkdiagram}
+    \rkSlotWidth{4cm}
+    \rkSubject{Dogs}
+    \rkVerb{bark}
+  \end{rkdiagram}
+  \par\textit{\texttt{\textbackslash rkSlotWidth\{4cm\}} before \texttt{\textbackslash rkSubject}
+    forces the subject line to at least 4\,cm.}
+}
+
+\testcase{Dogs bark. (gap before verb)}{%
+  \begin{rkdiagram}
+    \rkSubject{Dogs}
+    \rkSkip{1.5cm}
+    \rkVerb{bark}
+  \end{rkdiagram}
+  \par\textit{\texttt{\textbackslash rkSkip\{1.5cm\}} before \texttt{\textbackslash rkVerb}
+    inserts a 1.5\,cm gap in the baseline (extends the subject line rightward).}
+}
+
+\testcase{The cat chased the mouse. (widen verb and object lines)}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{cat}
+    \rkSlotWidth{3.5cm}
+    \rkVerb{chased}
+    \rkSlotWidth{3.5cm}
+    \rkDObj[\rkAdj{the}]{mouse}
+  \end{rkdiagram}
+  \par\textit{Both verb and object lines forced to 3.5\,cm minimum — useful for
+    aligning words on parallel diagrams or leaving room for annotations.}
+}
+
+\testcase{She gave him a gift. (skip before indirect object platform)}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkSlotWidth{3cm}
+    \rkVerb{gave}
+    \rkIObj{him}
+    \rkDObj[\rkAdj{a}]{gift}
+  \end{rkdiagram}
+  \par\textit{\texttt{\textbackslash rkSlotWidth\{3cm\}} on the verb widens it
+    to give the indirect-object platform more room.}
+}
+
+\testcase{The cat sat on the mat. (longer prep slant)}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{cat}
+    \rkVerb[%
+      \rkSlantLen{2.5cm}%
+      \rkPrep[\rkAdj{the}]{on}{mat}%
+    ]{sat}
+  \end{rkdiagram}
+  \par\textit{\texttt{\textbackslash rkSlantLen\{2.5cm\}} before \texttt{\textbackslash rkPrep}
+    forces the ``on'' slant to 2.5\,cm — useful when the prep label is long or
+    when more visual separation is needed.}
+}
+
+\testcase{Dogs bark. (combining skip and minwidth)}{%
+  \begin{rkdiagram}
+    \rkSlotWidth{3cm}
+    \rkSubject{Dogs}
+    \rkSkip{0.8cm}
+    \rkSlotWidth{3cm}
+    \rkVerb{bark}
+  \end{rkdiagram}
+  \par\textit{Both controls used together: 3\,cm subject, 0.8\,cm gap,
+    3\,cm verb — each resets automatically after its slot.}
+}
 
 \end{document}

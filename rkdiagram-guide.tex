@@ -255,6 +255,7 @@ The \opt{modgap} option adds extra vertical clearance between nested levels (def
 
 \textbf{Modifier spacing:} plain adjectives and adverbs (no sub-modifiers) advance the sibling cursor by exactly \opt{modDepth}, giving even horizontal spacing regardless of label width. Their slant lines are still sized to fit the word — long labels simply extend past the slant ends, matching hand-drawn convention. Modifiers that carry sub-modifiers (e.g.\ \cmd{rkAdj[\cmd{rkAdv}\{very\}]\{old\}}) use the word-fit formula so the slant is long enough to keep the sub-modifier connector clear of the next sibling. Use \opt{modDepth} to control the global step between plain modifiers.
 
+
 % ---- Prepositional phrases ---------------------------------
 \section{Prepositional Phrases}
 
@@ -713,6 +714,7 @@ Pass \opt{bridgeY} in the first per-clause options argument. Setting it to \text
       {\rkSubject{Cats}\rkVerb{purr}}
   \end{rkdiagram}}
 
+
 % ---- Complete example --------------------------------------
 \section{Complete Example}
 
@@ -822,6 +824,7 @@ These are standard package options (see §2) but can also be passed to any \text
   \opt{bridgeY=\textit{neg-len}}    & Pin compound-sentence bridge at a fixed y below clause 1 (\texttt{0pt} = auto) \\
   \bottomrule
 \end{tabular}
+
 
 \subsection*{Global configuration}
 

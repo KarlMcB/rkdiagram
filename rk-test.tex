@@ -429,7 +429,8 @@
 \testcase{She has been running every morning.}{%
   \begin{rkdiagram}
     \rkSubject{She}
-    \rkVerb[\rkPrep[\rkAdj{every}]{---}{morning}]{has been running}
+    \rkVerb
+    	[\rkPrep[\rkAdj{every}]{---}{morning}]{has been running}
   \end{rkdiagram}
   \par\textit{Tests: multi-word verb phrase (auxiliary + participle) in single
   \texttt{\textbackslash rkVerb} slot; temporal prep phrase.}
@@ -456,49 +457,53 @@
 Portuguese boatmen, with brass rings in their ears and fraud in their hearts,
 climbed the ship's sides, and various parties of us contracted with them to
 take us ashore at so much a head, silver coin of any country.}{%
-  \rkCompoundSent[and][5cm]%
-    [spacing=1.0cm,modDepth=0.9cm,cmpSep=1.8cm]%
-    {%
-      \rkSubject[%
-        \rkAdj{A},
-        \rkPrep[%
-          \rkAdj{swarthy},
-          \rkAdj{noisy},
-          \rkAdj{lying},
-          \rkAdj{shoulder-shrugging},
-          \rkAdj{gesticulating},
-          \rkAdj{Portuguese},
-          \rkPrep{with}{%
-            \rkCompound[and]%
-              [\rkAdj{brass},\rkPrep[\rkAdj{their}]{in}{ears}]{rings}%
-              [\rkPrep[\rkAdj{their}]{in}{hearts}]{fraud}%
+  \begin{rkdiagram}
+    \rkCompoundSent[and][10cm]%
+      [spacing=1.0cm,modDepth=1.5cm,cmpSep=1.8cm]%
+      {%
+        \rkSubject[%
+          \rkAdj{A},
+          \rkSlantLen{2.0cm}
+          \rkPrep[%
+            \rkAdj{swarthy},
+            \rkAdj{noisy},
+            \rkAdj{lying},
+            \rkAdj{shoulder-shrugging},
+            \rkAdj{gesticulating},
+            \rkAdj{Portuguese},
+            \rkset{cmpSep=1.0cm}%
+            \rkPrep{with}{%
+              \rkCompound[and]%
+                [\rkAdj{brass},\rkPrep[\rkAdj{their}]{in}{ears}]{rings}%
+                [\rkPrep[\rkAdj{their}]{in}{hearts}]{fraud}%
+            }%
+          ]{of}{boatmen}%
+        ]{swarm}
+        \rkVerb{climbed}
+        \rkDObj[\rkAdj{the},\rkAdj{ship's}]{sides}
+      }%
+      [spacing=1.0cm,modDepth=1.5cm]%
+      {%
+        \rkSubject[%
+          \rkAdj{various},
+          \rkPrep{of}{us}%
+        ]{parties}
+        \rkVerb[%
+          \rkPrep{with}{them},
+          \rkSubClause[to]{%
+            \rkVerb[%
+              \rkAdv{ashore},
+              \rkPrep[%
+                \rkAdj{so~much},
+                \rkAdj{a},
+                \rkAppos{silver coin of any country}%
+              ]{at}{head}%
+            ]{take}
+            \rkDObj{us}%
           }%
-        ]{of}{boatmen}%
-      ]{swarm}
-      \rkVerb{climbed}
-      \rkDObj[\rkAdj{the},\rkAdj{ship's}]{sides}
-    }%
-    [spacing=1.0cm,modDepth=0.9cm]%
-    {%
-      \rkSubject[%
-        \rkAdj{various},
-        \rkPrep{of}{us}%
-      ]{parties}
-      \rkVerb[%
-        \rkPrep{with}{them},
-        \rkSubClause[to]{%
-          \rkVerb[%
-            \rkAdv{ashore},
-            \rkPrep[%
-              \rkAdj{so~much},
-              \rkAdj{a},
-              \rkAppos{silver coin of any country}%
-            ]{at}{head}%
-          ]{take}
-          \rkDObj{us}%
-        }%
-      ]{contracted}
-    }%
+        ]{contracted}
+      }%
+  \end{rkdiagram}
   \par\textit{(Mark Twain, \textit{The Innocents Abroad}, 1869)}
 }
 

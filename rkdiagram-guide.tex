@@ -69,7 +69,7 @@
 \begin{center}
   {\LARGE\bfseries The \texttt{rkdiagram} Package}\\[6pt]
   {\large Reed-Kellogg Sentence Diagrams for \LaTeX}\\[4pt]
-  {\small Version 1.1 \quad\textbullet\quad Requires Lua\LaTeX}
+  {\small Version 1.2 \quad\textbullet\quad Requires Lua\LaTeX}
 \end{center}
 
 \bigskip
@@ -115,13 +115,14 @@ Override any option mid-document with \cmd{rkset}:
   Option & Default & Effect \\
   \midrule
   \opt{spacing}        & \opt{1.2cm}  & Horizontal gap (padding) between baseline elements \\
-  \opt{modDepth}       & \opt{1.0cm}  & Minimum diagonal slant length for modifiers/preps \\
+  \opt{modDepth}       & \opt{1.0cm}  & Fixed horizontal step between plain adj/adv modifiers; minimum slant length for all modifiers/preps \\
   \opt{modgap}         & \opt{0.25cm} & Extra vertical headspace between nested modifier levels \\
   \opt{cmpSep}         & \opt{0pt}    & Minimum half-gap between compound platforms (0pt = auto) \\
   \opt{subClauseDepth} & \opt{2.5cm}  & Vertical drop to a subordinate clause baseline \\
   \opt{linewidth}      & \opt{0.4pt}  & Thickness of all diagram lines \\
   \opt{font}           & (doc font)   & Font applied to all diagram words \\
   \opt{color}          & \opt{black}  & Line and text colour \\
+  \opt{bridgeY}        & \opt{0pt}    & Pin compound-sentence bridge y (0pt = auto) \\
   \bottomrule
 \end{tabular}
 
@@ -251,6 +252,8 @@ A modifier takes its own optional argument for sub-modifiers, creating chains of
   \end{rkdiagram}}
 
 The \opt{modgap} option adds extra vertical clearance between nested levels (default 0.25\,cm), preventing crowding when modifier chains are deep.
+
+\textbf{Modifier spacing:} plain adjectives and adverbs (no sub-modifiers) advance the sibling cursor by exactly \opt{modDepth}, giving even horizontal spacing regardless of label width. Their slant lines are still sized to fit the word — long labels simply extend past the slant ends, matching hand-drawn convention. Modifiers that carry sub-modifiers (e.g.\ \cmd{rkAdj[\cmd{rkAdv}\{very\}]\{old\}}) use the word-fit formula so the slant is long enough to keep the sub-modifier connector clear of the next sibling. Use \opt{modDepth} to control the global step between plain modifiers.
 
 % ---- Prepositional phrases ---------------------------------
 \section{Prepositional Phrases}
@@ -398,18 +401,20 @@ Use \opt{cmpSep} when modifiers on the compound words are deep and need extra ve
 % ---- Compound sentences ------------------------------------
 \section{Compound Sentences}
 
-Use \cmd{rkCompoundSent} to diagram two independent clauses in a single picture, connected by a dashed-line bridge with the coordinating conjunction:
+Use \cmd{rkCompoundSent} inside an \texttt{rkdiagram} environment to diagram two independent clauses in a single picture, connected by a dashed-line bridge with the coordinating conjunction:
 
 \begin{tcolorbox}[codebox]
 \begin{Verbatim}
-\rkCompoundSent[conj][sep]{opts1}{body1}{opts2}{body2}
+\begin{rkdiagram}
+  \rkCompoundSent[conj][sep][opts1]{body1}[opts2]{body2}
+\end{rkdiagram}
 \end{Verbatim}
 \end{tcolorbox}
 
 \begin{itemize}\setlength\itemsep{2pt}
   \item \texttt{[conj]} — conjunction (default: \textit{and})
   \item \texttt{[sep]} — vertical distance between the two baselines (default: 3\,cm)
-  \item \texttt{\{opts1\}} / \texttt{\{opts2\}} — per-clause \cmd{rkset}-style options
+  \item \texttt{[opts1]} / \texttt{[opts2]} — optional per-clause \cmd{rkset}-style options
   \item \texttt{\{body1\}} / \texttt{\{body2\}} — clause contents (\cmd{rkSubject}, \cmd{rkVerb}, etc.)
 \end{itemize}
 
@@ -418,15 +423,19 @@ The connector drops a dashed vertical from each clause's verb to a midpoint brid
 \medskip
 \begin{rkexample}{Dogs bark and cats purr.}
 \begin{Verbatim}
-\rkCompoundSent[and][2.5cm]
-  {}{ \rkSubject{Dogs} \rkVerb{bark} }
-  {}{ \rkSubject{Cats} \rkVerb{purr} }
+\begin{rkdiagram}
+  \rkCompoundSent[and][2.5cm]
+    { \rkSubject{Dogs} \rkVerb{bark} }
+    { \rkSubject{Cats} \rkVerb{purr} }
+\end{rkdiagram}
 \end{Verbatim}
 \end{rkexample}
 \rksidediagram{%
-  \rkCompoundSent[and][2.5cm]
-    {}{\rkSubject{Dogs}\rkVerb{bark}}
-    {}{\rkSubject{Cats}\rkVerb{purr}}}
+  \begin{rkdiagram}
+    \rkCompoundSent[and][2.5cm]
+      {\rkSubject{Dogs}\rkVerb{bark}}
+      {\rkSubject{Cats}\rkVerb{purr}}
+  \end{rkdiagram}}
 
 % ---- Appositives -------------------------------------------
 \section{Appositives}
@@ -585,6 +594,125 @@ Forces the next modifier or prepositional slant to be at least \texttt{len} long
 
 All three commands work inside sub-clauses and on compound-word platforms as well as the main baseline.
 
+% ---- Structural depth controls --------------------------------
+\section{Structural Depth Controls}
+
+The global options \opt{modDepth}, \opt{subClauseDepth}, and \opt{cmpSep} control the vertical geometry of the diagram. Any of them can be changed per-diagram by passing options to the \texttt{rkdiagram} environment, or mid-document with \cmd{rkset}:
+
+\begin{tcolorbox}[codebox]
+\begin{Verbatim}
+\begin{rkdiagram}[modDepth=1.5cm, subClauseDepth=3cm]
+  ...
+\end{rkdiagram}
+\end{Verbatim}
+\end{tcolorbox}
+
+\subsection*{\opt{modDepth} — modifier spacing and slant depth}
+
+Controls two related things simultaneously. For plain adjectives and adverbs (no sub-modifiers), it is the \emph{fixed horizontal step} between siblings — all such modifiers are evenly spaced regardless of label width, with their slant lines sized to fit the word. For modifiers with sub-modifiers, it is the \emph{minimum} slant length. Increase it to widen spacing and push labels further from the baseline; decrease it to tighten compact diagrams.
+
+\medskip
+\begin{rkexample}{Deeper slants (modDepth=1.6cm)}
+\begin{Verbatim}
+\begin{rkdiagram}[modDepth=1.6cm]
+  \rkSubject[\rkAdj{The}]{cat}
+  \rkVerb[\rkPrep[\rkAdj{the}]{on}{mat}]{sat}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}[modDepth=1.6cm]
+    \rkSubject[\rkAdj{The}]{cat}
+    \rkVerb[\rkPrep[\rkAdj{the}]{on}{mat}]{sat}
+  \end{rkdiagram}}
+
+\subsection*{\opt{subClauseDepth} — vertical drop to sub-baseline}
+
+Controls how far below the main baseline a subordinate clause is drawn. Increase it when deep modifier chains on the main clause would overlap the sub-clause.
+
+\medskip
+\begin{rkexample}{Deeper sub-clause (subClauseDepth=3.5cm)}
+\begin{Verbatim}
+\begin{rkdiagram}[subClauseDepth=3.5cm]
+  \rkSubject[
+    \rkAdj{The},
+    \rkSubClause[who]{
+      \rkVerb{wore}
+      \rkDObj[\rkAdj{the}]{hat}
+    }
+  ]{man}
+  \rkVerb{left}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}[spacing=1.1cm,subClauseDepth=3.5cm]
+    \rkSubject[
+      \rkAdj{The},
+      \rkSubClause[who]{
+        \rkVerb{wore}
+        \rkDObj[\rkAdj{the}]{hat}
+      }
+    ]{man}
+    \rkVerb{left}
+  \end{rkdiagram}}
+
+\subsection*{\opt{cmpSep} — compound platform separation}
+
+Sets the minimum vertical half-gap between the two platforms of a compound element. The default \texttt{0pt} lets the package scale the gap automatically from the conjunction width. Set an explicit value when modifier chains on the compound words need extra vertical clearance.
+
+\medskip
+\begin{rkexample}{Extra separation (cmpSep=1.0cm)}
+\begin{Verbatim}
+\begin{rkdiagram}[cmpSep=1.0cm]
+  \rkSubject{
+    \rkCompound[and]{John}{Mary}
+  }
+  \rkVerb{sang}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}[cmpSep=1.0cm]
+    \rkSubject{\rkCompound[and]{John}{Mary}}
+    \rkVerb{sang}
+  \end{rkdiagram}}
+
+\subsection*{\opt{bridgeY} — connector bridge height (compound sentences)}
+
+By default \cmd{rkCompoundSent} places the horizontal bridge halfway between the two baselines, automatically lowering it if clause\,1 modifiers extend into that region. Use \opt{bridgeY} (a negative length, measured from clause\,1's baseline) to pin the bridge at an exact position:
+
+\begin{tcolorbox}[codebox]
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkCompoundSent[and][3cm][bridgeY=-1.8cm]
+    { \rkSubject{Dogs} \rkVerb{bark} }
+    { \rkSubject{Cats} \rkVerb{purr} }
+\end{rkdiagram}
+\end{Verbatim}
+\end{tcolorbox}
+
+Pass \opt{bridgeY} in the first per-clause options argument. Setting it to \texttt{0pt} restores automatic placement.
+
+\medskip
+\begin{rkexample}{Bridge pinned at $-1.2$\,cm}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkCompoundSent[and][2.5cm]
+    [bridgeY=-1.2cm]
+    { \rkSubject{Dogs} \rkVerb{bark} }
+    { \rkSubject{Cats} \rkVerb{purr} }
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkCompoundSent[and][2.5cm]
+      [bridgeY=-1.2cm]
+      {\rkSubject{Dogs}\rkVerb{bark}}
+      {\rkSubject{Cats}\rkVerb{purr}}
+  \end{rkdiagram}}
+
 % ---- Complete example --------------------------------------
 \section{Complete Example}
 
@@ -661,8 +789,8 @@ The modifier list is a comma-separated sequence of modifier, prep, appositive, o
   \toprule
   Command & Role \\
   \midrule
-  \cmd{rkCompoundSent[conj][sep]\{opts1\}\{body1\}\{opts2\}\{body2\}} &
-    Two independent clauses in one picture, connected by a dashed bridge \\
+  \cmd{rkCompoundSent[conj][sep][opts1]\{body1\}[opts2]\{body2\}} &
+    Two independent clauses (used inside \texttt{rkdiagram}), connected by a dashed bridge \\
   \bottomrule
 \end{tabular}
 
@@ -676,6 +804,22 @@ The modifier list is a comma-separated sequence of modifier, prep, appositive, o
   \cmd{rkSlotWidth\{len\}} & Minimum line width for the next baseline slot \\
   \cmd{rkSkip\{len\}}      & Gap in baseline before the next slot \\
   \cmd{rkSlantLen\{len\}}  & Minimum diagonal length for the next modifier/prep \\
+  \bottomrule
+\end{tabular}
+
+\subsection*{Structural depth options (per-diagram or global)}
+
+These are standard package options (see §2) but can also be passed to any \texttt{rkdiagram} environment or to \cmd{rkset} mid-document:
+
+\medskip
+\begin{tabular}{@{}lp{8.5cm}@{}}
+  \toprule
+  Option & Effect \\
+  \midrule
+  \opt{modDepth=\textit{len}}       & Fixed step between plain adj/adv siblings; minimum slant length for sub-modified modifiers and preps \\
+  \opt{subClauseDepth=\textit{len}} & Vertical drop from main baseline to sub-clause baseline \\
+  \opt{cmpSep=\textit{len}}         & Minimum half-gap between compound platforms (\texttt{0pt} = auto) \\
+  \opt{bridgeY=\textit{neg-len}}    & Pin compound-sentence bridge at a fixed y below clause 1 (\texttt{0pt} = auto) \\
   \bottomrule
 \end{tabular}
 

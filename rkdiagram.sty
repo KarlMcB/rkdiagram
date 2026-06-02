@@ -59,6 +59,9 @@
 % INTERNAL STATE
 % ============================================================
 
+% Set to true by \rkCompoundSent so the rkdiagram env skips the tikzpicture wrapper.
+\newif\ifrk@intikz  \rk@intikzfalse
+
 \newlength{\rk@x}      % main baseline x cursor
 \newlength{\rk@ht}     % running max word height (used for divider length)
 \newlength{\rk@clause@miny}       % lowest y reached during current clause (for bridge placement)
@@ -81,6 +84,11 @@
 
 % Effective mod depth for a single modifier (may exceed \rk@modDepth for wide words)
 \newlength{\rk@effmod}
+
+% Sibling-push: E of the most recently drawn modifier at this level (reset by \rk@runmods).
+% Used to push a modifier-with-sub-modifiers right when preceded by a longer sibling,
+% so the sub-modifier connector does not land in the preceding slant's territory.
+\newlength{\rk@prevmod@E}  \setlength{\rk@prevmod@E}{0pt}
 
 % Modifier context — saved/restored via \begingroup
 \newlength{\rk@mc@y}    % head y level
@@ -330,6 +338,16 @@
   % Apply per-slant minimum override, then reset.
   \ifdim\rk@slant@minlen>\rk@effmod\setlength{\rk@effmod}{\rk@slant@minlen}\fi
   \setlength{\rk@slant@minlen}{0pt}%
+  % Sub-modifier sibling push: if this modifier has sub-modifiers and the preceding
+  % sibling's slant extended past the standard modDepth step, push mc@cur forward
+  % so the sub-modifier connector clears the preceding slant's territory.
+  % (Plain adjectives always step by modDepth, so prev_E − modDepth is the overhang.)
+  \ifblank{#2}{}{%
+    \ifdim\rk@prevmod@E>\rk@modDepth
+      \addtolength{\rk@mc@cur}{\rk@prevmod@E}%
+      \addtolength{\rk@mc@cur}{-\rk@modDepth}%
+    \fi
+  }%
   % Slant: (mc@cur, mc@y) → (mc@cur + E, mc@y − E)
   \setlength{\rk@ta}{\rk@mc@cur}%
   \addtolength{\rk@ta}{\rk@effmod}%    % rk@ta = endpoint x = x_s + E
@@ -340,14 +358,23 @@
     (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
     node[midway, above, sloped,
          inner sep=2pt, outer sep=0pt, font=\rk@font] {#1};%
-  % Advance sibling cursor; extend word baseline only at word-level mod context
-  \addtolength{\rk@mc@cur}{\rk@effmod}%
+  % Advance sibling cursor:
+  %   • Modifier WITH sub-modifiers: advance by full effmod (sub-modifier needs the room).
+  %   • Plain modifier (no sub-modifiers): advance by modDepth only — equal spacing
+  %     regardless of word length; long words just produce deeper slants.
+  \ifblank{#2}{%
+    \addtolength{\rk@mc@cur}{\rk@modDepth}%
+  }{%
+    \addtolength{\rk@mc@cur}{\rk@effmod}%
+  }%
+  \global\rk@prevmod@E=\rk@effmod   % record actual E for the next sibling's push check
   \ifrk@extendbl \rk@extendbase \fi
   % Sub-modifiers: connector branches off at 20% along the parent slant,
   % goes diagonally down-left back to the parent's start x, then child
   % slants continue down-right from that lower anchor point.
   \ifblank{#2}{}{%
     \begingroup
+      \global\rk@prevmod@E=0pt   % reset sibling-push tracking for child modifier level
       % a = max(cap-height, 0.2·E) so child level is always at least one cap-height below parent
       \node[opacity=0, inner sep=0pt, outer sep=0pt, font=\rk@font]
         (rk@capmsr) at (0,0) {M};%
@@ -384,6 +411,7 @@
 \newcommand{\rk@runmods}[1]{%
   \ifblank{#1}{}{%
     \begingroup
+      \global\rk@prevmod@E=0pt   % reset sibling-push tracking for this modifier list
       \rk@extendbltrue   % word-level: baseline extension enabled
       \rk@execmods{#1}%
       % Max-update: preserve any deeper extent propagated by sub-mod groups
@@ -648,9 +676,10 @@
   \setlength{\rk@mc@y}{0pt}%
   \setlength{\rk@mc@d}{0pt}%
   \setlength{\rk@mc@cur}{0pt}%
-  \setlength{\rk@vb@l}{0pt}%
-  \setlength{\rk@vb@r}{0pt}%
-  \setlength{\rk@vb@y}{0pt}%
+  % vb@* are reset and written globally so group boundaries don't restore stale values.
+  \global\rk@vb@l=0pt
+  \global\rk@vb@r=0pt
+  \global\rk@vb@y=0pt
   \setlength{\rk@iobj@xmax}{0pt}%
   \setlength{\rk@nounmodright}{0pt}%
   \setlength{\rk@base@y}{0pt}%
@@ -662,20 +691,30 @@
 
 \NewDocumentEnvironment{rkdiagram}{O{}}{%
   \ifblank{#1}{}{\pgfkeys{/rkdiagram, #1}}%
-  \rk@init@state
-  \begin{tikzpicture}[
-    line width = \rk@lw,
-    baseline   = (rk@origin),
-  ]%
-  \coordinate (rk@origin) at (0,0);
-  % Measure descender depth so placed word nodes clear the baseline lines.
-  \node[anchor=base,opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font]
-    (rk@descmsr) at (0,0) {g};%
-  \pgfextracty{\rk@wordlift}{\pgfpointanchor{rk@descmsr}{south}}%
-  \setlength{\rk@wordlift}{-\rk@wordlift}%
-  \addtolength{\rk@wordlift}{1pt}%
+  \ifrk@intikz
+    % Nested inside \rkCompoundSent: preserve the clause baseline y set by the outer
+    % command, reset everything else.
+    \setlength{\rk@ta}{\rk@base@y}%   save
+    \rk@init@state
+    \setlength{\rk@base@y}{\rk@ta}%   restore
+  \else
+    \rk@init@state
+    \begin{tikzpicture}[
+      line width = \rk@lw,
+      baseline   = (rk@origin),
+    ]%
+    \coordinate (rk@origin) at (0,0);
+    % Measure descender depth so placed word nodes clear the baseline lines.
+    \node[anchor=base,opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font]
+      (rk@descmsr) at (0,0) {g};%
+    \pgfextracty{\rk@wordlift}{\pgfpointanchor{rk@descmsr}{south}}%
+    \setlength{\rk@wordlift}{-\rk@wordlift}%
+    \addtolength{\rk@wordlift}{1pt}%
+  \fi
 }{%
-  \end{tikzpicture}%
+  \ifrk@intikz\else
+    \end{tikzpicture}%
+  \fi
 }
 
 % ============================================================
@@ -708,22 +747,21 @@
     \pgfextracty{\rk@wordlift}{\pgfpointanchor{rk@descmsr}{south}}%
     \setlength{\rk@wordlift}{-\rk@wordlift}\addtolength{\rk@wordlift}{1pt}%
     % ---- Clause 1 at y = 0 ----
-    \rk@init@state
+    % rk@intikz suppresses the tikzpicture wrapper inside \begin{rkdiagram}.
+    \rk@intikztrue
+    \rk@init@state   % reset state; \begin{rkdiagram} in body will do this too (harmless)
     #4%
-    % Save verb 1 x midpoint = (vb@l + vb@r) / 2
-    \setlength{\rk@cmpst@va@x}{\rk@vb@l}%
-    \addtolength{\rk@cmpst@va@x}{\rk@vb@r}%
-    \divide\rk@cmpst@va@x by 2\relax
+    % Save verb 1 x at right edge of verb slot (so dashed line drops from end of verb)
+    \setlength{\rk@cmpst@va@x}{\rk@vb@r}%
     % Save clause 1 lowest y (for auto bridge placement)
     \setlength{\rk@cmpst@saved@miny}{\rk@clause@miny}%
     % ---- Clause 2 at y = -sep ----
+    % Set base@y before #6 so the inner rkdiagram env (intikz branch) preserves it.
     \rk@init@state
     \setlength{\rk@base@y}{-\rk@cmpst@sep}%
     #6%
-    % Save verb 2 x midpoint
-    \setlength{\rk@cmpst@vb@x}{\rk@vb@l}%
-    \addtolength{\rk@cmpst@vb@x}{\rk@vb@r}%
-    \divide\rk@cmpst@vb@x by 2\relax
+    % Save verb 2 x at right edge of verb slot
+    \setlength{\rk@cmpst@vb@x}{\rk@vb@r}%
     % ---- Draw connector ----
     % rk@base@y is still -sep after clause 2; use it for clause-2 verb y.
     % bridge_y: default is -sep/2, but auto-lower if clause 1 modifiers extend past it.
@@ -757,6 +795,7 @@
     % Conjunction label above the bridge midpoint
     \node[above, inner sep=2pt, font=\rk@font]
       at (\the\rk@tc, \the\rk@ta) {\textit{#1}};%
+    \rk@intikzfalse
   \end{tikzpicture}%
 }
 
@@ -775,10 +814,11 @@
   \rk@divfull
   \def\rk@cmpdir{l}%
   \rk@placeslot{#2}{\the\rk@base@y}%
-  % Save verb slot for \rkIObj
-  \setlength{\rk@vb@l}{\rk@sl@l}%
-  \setlength{\rk@vb@r}{\rk@sl@r}%
-  \setlength{\rk@vb@y}{\rk@sl@y}%
+  % Save verb slot globally so \rkCompoundSent can read vb@r after \end{rkdiagram}
+  % closes the environment's implicit group.
+  \global\rk@vb@l=\rk@sl@l
+  \global\rk@vb@r=\rk@sl@r
+  \global\rk@vb@y=\rk@sl@y
   \rk@slot@to@mc
   \rk@runmods{#1}%
 }

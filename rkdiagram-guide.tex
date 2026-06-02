@@ -721,7 +721,151 @@ Multiple tail items (adverb + prepositional phrase) both branch from the horizon
     \rkVerb{dreamed}
   \end{rkdiagram}}
 
+% ---- Infinitives --------------------------------
+\section{Infinitives}
+
+An infinitive (\emph{to + verb}) has two distinct uses:
+
+\begin{itemize}
+  \item \textbf{Noun function} — used as subject, direct object, or predicate nominative, just like a gerund.  The diagram uses the same stepped T-pedestal as \cmd{rkGerund}, but the word \emph{to} is written on the vertical post.  Use \cmd{rkInfinitive} wherever you would use \cmd{rkGerund}: as the word argument of \cmd{rkSubject}, \cmd{rkDObj}, etc.
+  \item \textbf{Modifier function} — used as adjective or adverb.  The diagram looks like a prepositional phrase: a diagonal line with \emph{to} written on it, and the verb on a short horizontal at the bottom.  That horizontal is a full mini-baseline: use \cmd{rkInfObj} to place a direct object, and \cmd{rkAdv}/\cmd{rkPrep} for adverbial modifiers.  Use \cmd{rkInfinitive} inside any modifier list.
+\end{itemize}
+
+\begin{tcolorbox}[codebox]
+\verb|\rkInfinitive[arg]{verb}|
+\end{tcolorbox}
+
+The optional \texttt{arg} carries modifiers of the verb in the noun form; in the modifier form it is tail content (objects, adverbial modifiers) on the mini-baseline.
+
+\subsection*{Noun form — infinitive as subject or object}
+
+\begin{rkexample}{To run is fun.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject{\rkInfinitive{run}}
+  \rkVerb{is}
+  \rkPredNom{fun}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject{\rkInfinitive{run}}
+    \rkVerb{is}
+    \rkPredNom{fun}
+  \end{rkdiagram}}
+
+Infinitive noun with a modifier on the verb:
+
+\begin{rkexample}{To run quickly is fun.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject{%
+    \rkInfinitive[\rkAdv{quickly}]{run}}
+  \rkVerb{is}
+  \rkPredNom{fun}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject{\rkInfinitive[\rkAdv{quickly}]{run}}
+    \rkVerb{is}
+    \rkPredNom{fun}
+  \end{rkdiagram}}
+
+\subsection*{Modifier form — infinitive as adjective or adverb}
+
+Without a tail the shape is a diagonal labeled \emph{to} with the verb on a short horizontal — identical in form to a prepositional phrase.
+
+\begin{rkexample}{She came to win.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject{She}
+  \rkVerb[\rkInfinitive{win}]{came}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb[\rkInfinitive{win}]{came}
+  \end{rkdiagram}}
+
+With tail content, use \cmd{rkInfObj} for a direct object and \cmd{rkAdv}/\cmd{rkPrep} for adverbial modifiers of the infinitive verb:
+
+\begin{rkexample}{He trained to finish the race quickly.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject{He}
+  \rkVerb[%
+    \rkInfinitive[%
+      \rkInfObj[\rkAdj{the}]{race}%
+      \rkAdv{quickly}%
+    ]{finish}%
+  ]{trained}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject{He}
+    \rkVerb[\rkInfinitive[\rkInfObj[\rkAdj{the}]{race}\rkAdv{quickly}]{finish}]{trained}
+  \end{rkdiagram}}
+
 % ---- Manual spacing controls --------------------------------
+% ---- Nominative Absolute --------------------------------
+\section{Nominative Absolute}
+
+A nominative absolute is a noun-plus-participial-phrase that modifies the whole sentence rather than any single word.  In a Reed-Kellogg diagram it floats above the main clause with no connector line.
+
+\begin{tcolorbox}[codebox]
+\verb|\rkNomAbs[noun-mods]{noun}{ptcl-tail}{ptcl-word}|
+\end{tcolorbox}
+
+\begin{itemize}
+  \item \textbf{Call order}: \cmd{rkNomAbs} can be called anywhere inside the diagram environment — it always floats above the main baseline at a fixed height.
+  \item \textbf{Noun modifiers}: the optional \texttt{[noun-mods]} argument takes the same modifier syntax as \cmd{rkSubject}'s modifier list (\cmd{rkAdj}, etc.).
+  \item \textbf{Participial tail}: the \texttt{\{ptcl-tail\}} argument is passed directly to \cmd{rkParticiple} — use \cmd{rkPartObj}, \cmd{rkAdv}, or \cmd{rkPrep} there; pass \texttt{\{\}} for an empty tail.
+  \item \textbf{No participle}: leave \texttt{\{ptcl-word\}} empty for an absolute with an implied \emph{being} (e.g.\ \emph{his work done}).
+\end{itemize}
+
+\begin{rkexample}{The battle over, the soldiers retreated.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject[\rkAdj{The}]{soldiers}
+  \rkVerb{retreated}
+  \rkNomAbs[\rkAdj{The}]{battle}{}{over}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{soldiers}
+    \rkVerb{retreated}
+    \rkNomAbs[\rkAdj{The}]{battle}{}{over}
+  \end{rkdiagram}}
+
+Nominative absolute with a participial object on the tail:
+
+\begin{rkexample}{His duty done, he left.}
+\begin{Verbatim}
+\begin{rkdiagram}
+  \rkSubject{he}
+  \rkVerb{left}
+  \rkNomAbs[\rkAdj{His}]{duty}{%
+    \rkPartObj{done}%
+  }{finished}
+\end{rkdiagram}
+\end{Verbatim}
+\end{rkexample}
+\rksidediagram{%
+  \begin{rkdiagram}
+    \rkSubject{he}
+    \rkVerb{left}
+    \rkNomAbs[\rkAdj{His}]{duty}{\rkPartObj{done}}{finished}
+  \end{rkdiagram}}
+
 \section{Manual Spacing Controls}
 
 Three one-shot commands let you override automatic spacing for a single element; they reset to zero automatically after use.
@@ -795,6 +939,14 @@ Forces the next modifier or prepositional slant to be at least \texttt{len} long
   \end{rkdiagram}}
 
 All three commands work inside sub-clauses and on compound-word platforms as well as the main baseline.
+
+\subsection*{\cmd{rkNomAbsHeight} — nominative absolute height}
+
+By default \cmd{rkNomAbs} floats the absolute phrase at \texttt{subClauseDepth} above the main baseline.  When the participle and its own modifiers are deep, they can crowd the main clause.  Call \cmd{rkNomAbsHeight} immediately before \cmd{rkNomAbs} to override the height for that one phrase; it resets automatically.
+
+\begin{tcolorbox}[codebox]
+\verb|\rkNomAbsHeight{4cm}|
+\end{tcolorbox}
 
 % ---- Structural depth controls --------------------------------
 \section{Structural Depth Controls}
@@ -981,8 +1133,11 @@ The modifier list is a comma-separated sequence of modifier, prep, appositive, o
   \cmd{rkSubClause[rel]\{body\}}                        & Subordinate clause; dashed connector to sub-baseline \\
   \cmd{rkCompound[conj][mA]\{wA\}[mB]\{wB\}}           & Compound element; forked platforms with conjunction \\
   \cmd{rkGerund[mods]\{word\}}                          & Gerund; stepped T-platform (used as word argument of any baseline command or \cmd{rkPrep} object) \\
+  \cmd{rkInfinitive[arg]\{verb\}}                       & Infinitive; noun form (pedestal + \emph{to} on post) when used as word argument; modifier form (diagonal labeled \emph{to} + verb on horizontal) when used in modifier list \\
+  \cmd{rkInfObj[mods]\{word\}}                          & Direct object on the infinitive mini-baseline; only inside \cmd{rkInfinitive}'s tail argument \\
   \cmd{rkParticiple[tail]\{word\}}                      & Participle; hockey-stick modifier of a noun (used inside modifier lists like \cmd{rkAdj}) \\
   \cmd{rkPartObj[mods]\{word\}}                         & Participial object on the tail; only inside \cmd{rkParticiple}'s tail argument \\
+  \cmd{rkNomAbs[noun-mods]\{noun\}\{ptcl-tail\}\{ptcl-word\}} & Nominative absolute; floating phrase above the main clause, no connector \\
   \bottomrule
 \end{tabular}
 
@@ -1005,9 +1160,10 @@ The modifier list is a comma-separated sequence of modifier, prep, appositive, o
   \toprule
   Command & Effect \\
   \midrule
-  \cmd{rkSlotWidth\{len\}} & Minimum line width for the next baseline slot \\
-  \cmd{rkSkip\{len\}}      & Gap in baseline before the next slot \\
-  \cmd{rkSlantLen\{len\}}  & Minimum diagonal length for the next modifier/prep \\
+  \cmd{rkSlotWidth\{len\}}     & Minimum line width for the next baseline slot \\
+  \cmd{rkSkip\{len\}}          & Gap in baseline before the next slot \\
+  \cmd{rkSlantLen\{len\}}      & Minimum diagonal length for the next modifier/prep \\
+  \cmd{rkNomAbsHeight\{len\}}  & Height above main baseline for the next \cmd{rkNomAbs} \\
   \bottomrule
 \end{tabular}
 

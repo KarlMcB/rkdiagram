@@ -711,4 +711,125 @@ take us ashore at so much a head, silver coin of any country.}{%
   \par\textit{Tests: participle modifying the direct object, with prep phrase on tail.}
 }
 
+\testsection{Group 16 — Infinitives}
+
+\testcase{To run is fun.}{%
+  \begin{rkdiagram}
+    \rkSubject{\rkInfinitive{run}}
+    \rkVerb{is}
+    \rkPredNom{fun}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as subject, no mods.}
+}
+
+\testcase{She wants to win.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{wants}
+    \rkDObj{\rkInfinitive{win}}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as direct object, no mods.}
+}
+
+\testcase{To run quickly is fun.}{%
+  \begin{rkdiagram}
+    \rkSubject{\rkInfinitive[\rkAdv{quickly}]{run}}
+    \rkVerb{is}
+    \rkPredNom{fun}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as subject with adverb modifier (adaptive post height).}
+}
+
+\testcase{He wants to run in the race.}{%
+  \begin{rkdiagram}
+    \rkSubject{He}
+    \rkVerb{wants}
+    \rkDObj{\rkInfinitive[\rkPrep[\rkAdj{the}]{in}{race}]{run}}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as direct object with prep phrase modifier on verb.}
+}
+
+\testcase{She came to win a prize.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb[\rkInfinitive{win}]{came}
+    \rkDObj{prize}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as adverbial modifier on verb, no tail.}
+}
+
+\testcase{He found books to read.}{%
+  \begin{rkdiagram}
+    \rkSubject{He}
+    \rkVerb{found}
+    \rkDObj[\rkInfinitive{read}]{books}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as adjectival modifier on direct object.}
+}
+
+\testcase{She came to win the prize.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb[\rkInfinitive[\rkInfObj{prize}]{win}]{came}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive modifier with direct object on mini-baseline.}
+}
+
+\testcase{He trained to finish the race quickly.}{%
+  \begin{rkdiagram}
+    \rkSubject{He}
+    \rkVerb[\rkInfinitive[\rkInfObj[\rkAdj{the}]{race}\rkAdv{quickly}]{finish}]{trained}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive modifier with object and adverb on mini-baseline.}
+}
+
+\testsection{Group 17 — Nominative Absolutes}
+
+\testcase{The battle over, the soldiers retreated.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{soldiers}
+    \rkVerb{retreated}
+    \rkNomAbs[\rkAdj{The}]{battle}{}{over}
+  \end{rkdiagram}
+  \par\textit{Tests: bare nominative absolute with adjective on noun.}
+}
+
+\testcase{The sun setting, they departed.}{%
+  \begin{rkdiagram}
+    \rkSubject{they}
+    \rkVerb{departed}
+    \rkNomAbs[\rkAdj{The}]{sun}{}{setting}
+  \end{rkdiagram}
+  \par\textit{Tests: nominative absolute with adjective on noun.}
+}
+
+\testcase{His work finished, he ran.}{%
+  \begin{rkdiagram}
+    \rkSubject{he}
+    \rkVerb{ran}
+    \rkNomAbs[\rkAdj{His}]{work}{\rkPartObj{done}}{finished}
+  \end{rkdiagram}
+  \par\textit{Tests: NA with participial object on tail.}
+}
+
+\testcase{His staff grasped in his hand, the old man walked the long road slowly.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}\rkAdj{old}]{man}
+    \rkVerb[\rkAdv{slowly}]{walked}
+    \rkDObj[\rkAdj{the}\rkAdj{long}]{road}
+    \rkNomAbsHeight{4cm}
+    \rkNomAbs[\rkAdj{his}]{staff}{\rkPrep[\rkAdj{his}]{in}{hand}}{grasped}
+  \end{rkdiagram}
+  \par\textit{Tests: NA with modifier chains on main clause (vertical clearance).}
+}
+
+\testcase{Her hope gone, she wept.}{%
+  \begin{rkdiagram}
+    \rkSubject{she}
+    \rkVerb{wept}
+    \rkNomAbs[\rkAdj{Her}]{hope}{}{gone}
+  \end{rkdiagram}
+  \par\textit{Tests: NA with no participle (empty ptcl-word, implied being).}
+}
+
 \end{document}

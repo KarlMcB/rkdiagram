@@ -33,6 +33,7 @@
 \newlength{\rk@modgap}     \setlength{\rk@modgap}{0.25cm}
 \newlength{\rk@cmpsep}     \setlength{\rk@cmpsep}{0pt}  % 0pt = auto (use rk@ht)
 \newlength{\rk@subClDepth} \setlength{\rk@subClDepth}{2.5cm}
+\newlength{\rk@gerundpost} \setlength{\rk@gerundpost}{1.2cm}
 \newlength{\rk@lw}         \setlength{\rk@lw}{0.4pt}
 \newcommand{\rk@color}{black}
 \newcommand{\rk@font}{}
@@ -45,6 +46,7 @@
   modgap/.code         = {\setlength{\rk@modgap}{#1}},
   cmpSep/.code         = {\setlength{\rk@cmpsep}{#1}},
   subClauseDepth/.code = {\setlength{\rk@subClDepth}{#1}},
+  gerundPost/.code     = {\setlength{\rk@gerundpost}{#1}},
   linewidth/.code      = {\setlength{\rk@lw}{#1}},
   color/.code          = {\renewcommand{\rk@color}{#1}},
   bridgeY/.code        = {\setlength{\rk@bridgey@override}{#1}},
@@ -103,6 +105,7 @@
 \newlength{\rk@slot@minwidth}  % minimum line width for next slot (0pt = auto)
 \newlength{\rk@slot@skip}      % extra gap inserted before next slot (0pt = none)
 \newlength{\rk@slant@minlen}   % minimum slant length for next modifier/prep (0pt = auto)
+\newlength{\rk@nomabs@height}  % height override for next \rkNomAbs (0pt = use subClDepth)
 
 % Scratch length registers (\newlength = \newdimen, safe for \pgfextractx)
 \newlength{\rk@ta}
@@ -125,6 +128,31 @@
 % so descenders never touch the line.  Measured once per rkdiagram.
 \newlength{\rk@wordlift}
 \newlength{\rk@wlevel}   % scratch: line_y + wordlift, used at each word placement
+
+% Deferred gerund — used when \rkGerund appears as a word argument.
+\newif\ifrk@deferredgrd  \rk@deferredgrdfalse
+\newcommand{\rk@deferredgrd@word}{}
+\newcommand{\rk@deferredgrd@mods}{}
+\NewDocumentCommand{\rk@deferred@Gerund}{O{} m}{%
+  \global\rk@deferredgrdtrue
+  \gdef\rk@deferredgrd@mods{#1}%
+  \gdef\rk@deferredgrd@word{#2}%
+}
+
+% Scratch lengths used during gerund modifier pre-measurement and drawing.
+\newlength{\rk@grd@maxdepth}  % deepest modifier slant found in the pre-scan
+\newlength{\rk@grd@posth}     % computed post height for the current gerund
+\newlength{\rk@grd@fh}        % equilateral-triangle half-base (= apex_height / sqrt(3))
+
+% Deferred infinitive — used when \rkInfinitive appears as a word argument.
+\newif\ifrk@deferredinf  \rk@deferredinffalse
+\newcommand{\rk@deferredinf@word}{}
+\newcommand{\rk@deferredinf@mods}{}
+\NewDocumentCommand{\rk@deferred@Infinitive}{O{} m}{%
+  \global\rk@deferredinftrue
+  \gdef\rk@deferredinf@mods{#1}%
+  \gdef\rk@deferredinf@word{#2}%
+}
 
 % Deferred subclause — used when \rkSubClause appears as a word argument.
 % The drawing is deferred until after the (empty) slot node is placed.
@@ -174,6 +202,8 @@
 \newcommand{\rk@placeslot}[2]{%
   \global\rk@deferredscfalse
   \global\rk@deferredcmpfalse
+  \global\rk@deferredgrdfalse
+  \global\rk@deferredinffalse
   \setlength{\rk@halfsep}{\rk@spacing}%
   \divide\rk@halfsep by 2\relax
   % Apply per-slot skip (extends baseline, advances cursor, then resets).
@@ -185,10 +215,12 @@
   \fi
   % Lift word above the baseline line so descenders clear it.
   \setlength{\rk@wlevel}{#2}\addtolength{\rk@wlevel}{\rk@wordlift}%
-  % Step 1: measure word width and detect deferred \rkSubClause / \rkCompound.
+  % Step 1: measure word width and detect deferred \rkSubClause / \rkCompound / \rkGerund.
   \begingroup
     \let\rkSubClause\rk@deferred@SubClause
     \let\rkCompound\rk@deferred@Compound
+    \let\rkGerund\rk@deferred@Gerund
+    \let\rkInfinitive\rk@deferred@Infinitive
     \node[
       opacity   = 0,
       inner sep = 0pt,
@@ -196,7 +228,15 @@
       font      = \rk@font,
     ] (rk@wnode) at (0, 0) {#1};%
   \endgroup
-  \ifrk@deferredcmp
+  \ifrk@deferredgrd
+    % Gerund: draw stepped-platform structure.
+    \rk@dogerund{#2}%
+    \global\rk@deferredgrdfalse
+  \else\ifrk@deferredinf
+    % Infinitive (noun form): pedestal + "to" post + verb platform.
+    \rk@doinfinitive{#2}%
+    \global\rk@deferredinffalse
+  \else\ifrk@deferredcmp
     % Compound: draw compound structure (rk@x is the compound start).
     \rk@docompound{\rk@cmpdir}%
       {\rk@deferredcmp@conj}%
@@ -249,7 +289,7 @@
       \rk@dosubclause{\rk@deferredsc@rw}{\rk@deferredsc@body}%
       \global\rk@deferredscfalse
     \fi
-  \fi
+  \fi\fi\fi
 }
 
 % Set modifier context from current slot.
@@ -506,10 +546,13 @@
     \ifblank{#1}{}{%
       \begingroup
         \setlength{\rk@mc@y}{\rk@tb}%
-        \pgfextractx{\rk@ta}{\pgfpointanchor{rk@pobjnode}{west}}%
-        \setlength{\rk@mc@cur}{\rk@ta}\addtolength{\rk@mc@cur}{-\rk@halfsep}%
-        \pgfextractx{\rk@ta}{\pgfpointanchor{rk@pobjnode}{east}}%
-        \setlength{\rk@mc@d}{\rk@ta}\addtolength{\rk@mc@d}{\rk@halfsep}%
+        \setlength{\rk@mc@d}{\rk@tc}%          drawn right = line_right
+        % mc@cur = line_left + 10% of line_width  (mirrors \rk@slot@to@mc)
+        \setlength{\rk@halfsep}{\rk@tc}%
+        \addtolength{\rk@halfsep}{-\rk@ta}%     halfsep = line_width
+        \divide\rk@halfsep by 10\relax%          halfsep = 10% of line_width
+        \setlength{\rk@mc@cur}{\rk@ta}%
+        \addtolength{\rk@mc@cur}{\rk@halfsep}%  mc@cur = line_left + 10%
         \rk@execmods{#1}%
         \ifdim\rk@mc@d>\rk@nounmodright\global\rk@nounmodright=\rk@mc@d\fi
       \endgroup
@@ -675,6 +718,7 @@
 \newcommand{\rkSkip}[1]{\setlength{\rk@slot@skip}{#1}}
 \newcommand{\rkSlotWidth}[1]{\setlength{\rk@slot@minwidth}{#1}}
 \newcommand{\rkSlantLen}[1]{\setlength{\rk@slant@minlen}{#1}}
+\newcommand{\rkNomAbsHeight}[1]{\setlength{\rk@nomabs@height}{#1}}
 
 \newcommand{\rk@init@state}{%
   \setlength{\rk@x}{0pt}%
@@ -692,6 +736,7 @@
   \setlength{\rk@slot@minwidth}{0pt}%
   \setlength{\rk@slot@skip}{0pt}%
   \setlength{\rk@slant@minlen}{0pt}%
+  \setlength{\rk@nomabs@height}{0pt}%
   \setlength{\rk@clause@miny}{0pt}%
 }
 
@@ -1073,6 +1118,529 @@
 
 \NewDocumentCommand{\rkSubClause}{O{}m}{%
   \rk@dosubclause{#1}{#2}%
+}
+
+% ============================================================
+% GERUND PRE-SCAN HOOKS
+%
+% These lightweight commands are substituted for \rkAdj, \rkAdv, \rkPrep
+% during a dry-run pass over the gerund's modifier list.  Each one measures
+% the depth its slant would occupy and records the maximum in rk@grd@maxdepth.
+% Sub-modifiers add an extra modDepth level to the depth estimate.
+% ============================================================
+
+% \rk@grd@scanmod[submods]{word}  — covers \rkAdj and \rkAdv
+\NewDocumentCommand{\rk@grd@scanmod}{O{} m}{%
+  \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
+    (rk@grdscan) at (0,0) {#2};%
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@grdscan}{east}}%
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@grdscan}{west}}%
+  \addtolength{\rk@tc}{-\rk@ta}%           rk@tc = node width
+  \pgfextracty{\rk@tb}{\pgfpointanchor{rk@grdscan}{north}}%
+  \pgfextracty{\rk@ta}{\pgfpointanchor{rk@grdscan}{south}}%
+  \addtolength{\rk@tb}{-\rk@ta}%           rk@tb = node height
+  \pgfmathsetlength{\rk@ta}{max(\the\rk@modDepth,(\the\rk@tc+\the\rk@tb)/1.41422+6pt)}%
+  \ifblank{#1}{}{\addtolength{\rk@ta}{\rk@modDepth}}% one extra level for sub-mods
+  \ifdim\rk@ta>\rk@grd@maxdepth\global\rk@grd@maxdepth=\rk@ta\fi
+}
+
+% \rk@grd@scanprep[mods-on-obj]{prep}{obj}  — covers \rkPrep
+\NewDocumentCommand{\rk@grd@scanprep}{O{} m m}{%
+  \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
+    (rk@grdscan) at (0,0) {#2};%
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@grdscan}{east}}%
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@grdscan}{west}}%
+  \addtolength{\rk@tc}{-\rk@ta}%
+  \pgfextracty{\rk@tb}{\pgfpointanchor{rk@grdscan}{north}}%
+  \pgfextracty{\rk@ta}{\pgfpointanchor{rk@grdscan}{south}}%
+  \addtolength{\rk@tb}{-\rk@ta}%
+  \pgfmathsetlength{\rk@ta}{max(\the\rk@modDepth,(\the\rk@tc+\the\rk@tb)/1.41422+6pt)}%
+  \ifdim\rk@ta>\rk@grd@maxdepth\global\rk@grd@maxdepth=\rk@ta\fi
+}
+
+% ============================================================
+% GERUND PLATFORM
+% \rk@dogerund{foot-y}
+%
+% Draws the stepped T-platform for a gerund:
+%   foot  — long horizontal at foot-y (the noun-slot baseline)
+%   post  — vertical from foot centre up by the computed post height
+%   plat  — short horizontal at post top (the word sits here)
+%
+% Post height is computed adaptively: a dry-run pre-scan over the gerund's
+% own modifier list (stored in rk@deferredgrd@mods) finds the deepest slant;
+% the post is made tall enough to keep all modifier slants clear of the foot.
+% rk@gerundpost is the minimum post height (user-configurable floor).
+%
+% Records rk@sl@* on the word platform so \rk@slot@to@mc and subsequent
+% modifier runs attach at the correct level.
+% ============================================================
+
+\newcommand{\rk@dogerund}[1]{%
+  % #1 = foot y (e.g. \the\rk@base@y)
+  \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
+  % --- Pre-scan modifier list to find the deepest slant ---
+  \setlength{\rk@grd@maxdepth}{0pt}%
+  \ifblank{\rk@deferredgrd@mods}{}{%
+    \begingroup
+      \let\rkAdj\rk@grd@scanmod
+      \let\rkAdv\rk@grd@scanmod
+      \let\rkPrep\rk@grd@scanprep
+      \let\rkSubClause\@gobbletwo        % ignore subclauses during scan
+      \let\rkAppos\@gobble               % ignore appositives during scan
+      \rk@execmods{\rk@deferredgrd@mods}%
+    \endgroup
+  }%
+  % Compute post height: at least rk@gerundpost, at least maxdepth + 2*modgap
+  \setlength{\rk@grd@posth}{\rk@gerundpost}%
+  \ifdim\rk@grd@maxdepth>0pt
+    \setlength{\rk@ta}{\rk@grd@maxdepth}%
+    \addtolength{\rk@ta}{\rk@modgap}\addtolength{\rk@ta}{\rk@modgap}%
+    \ifdim\rk@ta>\rk@grd@posth\setlength{\rk@grd@posth}{\rk@ta}\fi
+  \fi
+  % --- Measure gerund word ---
+  \node[opacity=0, inner sep=0pt, outer sep=0pt, font=\rk@font]
+    (rk@grdmsr) at (0,0) {\rk@deferredgrd@word};%
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@grdmsr}{east}}%
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@grdmsr}{west}}%
+  \addtolength{\rk@tc}{-\rk@ta}%             rk@tc = word_width
+  % Update rk@ht from gerund word's text height (same as \rk@placeslot does for any word).
+  % Without this, rk@ht stays at the 2.2ex initial value, making \rk@divfwd draw a
+  % longer slant than equivalent noun subjects produce.
+  \pgfextracty{\rk@ta}{\pgfpointanchor{rk@grdmsr}{north}}%
+  \ifdim\rk@ta>\rk@ht\setlength{\rk@ht}{\rk@ta}\fi
+  % --- Word platform x bounds ---
+  % word_plat_left  = rk@x + halfsep
+  \setlength{\rk@ta}{\rk@x}\addtolength{\rk@ta}{\rk@halfsep}%     rk@ta = word_plat_left
+  % word_plat_right = word_plat_left + word_width + halfsep
+  \addtolength{\rk@tc}{\rk@ta}\addtolength{\rk@tc}{\rk@halfsep}%  rk@tc = word_plat_right
+  % foot_right = word_plat_right + halfsep  (foot wider than platform)
+  \setlength{\rk@effmod}{\rk@tc}\addtolength{\rk@effmod}{\rk@halfsep}%  rk@effmod = foot_right
+  % post_x = midpoint of word platform = midpoint of foot (both share the same centre)
+  \setlength{\rk@tb}{\rk@ta}\addtolength{\rk@tb}{\rk@tc}\divide\rk@tb by 2\relax  % rk@tb = post_x
+  % --- Y coordinates ---
+  % apex_y     = foot_y + halfsep  (top of the two legs; post starts here)
+  % word_plat_y = foot_y + rk@grd@posth
+  \setlength{\rk@wlevel}{#1}\addtolength{\rk@wlevel}{\rk@halfsep}%          rk@wlevel = apex_y
+  \setlength{\rk@grd@maxdepth}{#1}\addtolength{\rk@grd@maxdepth}{\rk@grd@posth}% rk@grd@maxdepth = word_plat_y
+  % --- Draw word platform first (while rk@ta = word_plat_left is still intact) ---
+  \rk@line{(\the\rk@ta, \the\rk@grd@maxdepth) -- (\the\rk@tc, \the\rk@grd@maxdepth)}%
+  % --- Full-width foot and 60°-apart legs ---
+  % The foot spans the original full width.  Two legs branch from the apex
+  % (bottom of the post) at ±30° from vertical (= 60° total), landing on the
+  % baseline at post_x ± halfsep/sqrt(3).  This places an equilateral triangle
+  % with apex at (post_x, apex_y) sitting on the foot line.
+  \pgfmathsetlength{\rk@grd@fh}{\the\rk@halfsep / 1.73205}%  half-base = halfsep/√3
+  % foot_left_leg = post_x - half-base  →  store in rk@ta (word_plat_left no longer needed)
+  \setlength{\rk@ta}{\rk@tb}\addtolength{\rk@ta}{-\rk@grd@fh}%
+  \rk@line{(\the\rk@x, #1) -- (\the\rk@effmod, #1)}%                              full-width foot
+  \rk@line{(\the\rk@ta, #1) -- (\the\rk@tb, \the\rk@wlevel)}%                     left leg
+  \rk@line{(\the\dimexpr\rk@tb+\rk@grd@fh\relax, #1) -- (\the\rk@tb, \the\rk@wlevel)}% right leg
+  \rk@line{(\the\rk@tb, \the\rk@wlevel) -- (\the\rk@tb, \the\rk@grd@maxdepth)}%  post
+  % --- Record slot (rk@tc = word_plat_right still intact) ---
+  % sl@l = post_x so \rk@slot@to@mc starts modifiers to the right of the post.
+  \setlength{\rk@sl@l}{\rk@tb}%
+  \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%
+  \setlength{\rk@sl@y}{\rk@grd@maxdepth}%   word_plat_y
+  % Advance main cursor past word platform
+  \setlength{\rk@x}{\rk@effmod}%
+  % --- Place word on platform (centred at post_x) ---
+  \setlength{\rk@ta}{\rk@grd@maxdepth}\addtolength{\rk@ta}{\rk@wordlift}%  word node y
+  \node[anchor=base, inner sep=0pt, outer sep=0pt, font=\rk@font]
+    at (\the\rk@tb, \the\rk@ta) {\rk@deferredgrd@word};%
+  % --- Run gerund's own modifiers from the word platform ---
+  \ifblank{\rk@deferredgrd@mods}{}{%
+    \rk@slot@to@mc
+    \rk@runmods{\rk@deferredgrd@mods}%
+  }%
+  % --- Update clause miny for bridge placement ---
+  \setlength{\rk@ta}{#1}%
+  \ifdim\rk@ta<\rk@clause@miny\global\rk@clause@miny=\rk@ta\fi
+}
+
+% ============================================================
+% GERUND
+% \rkGerund[mods]{word}
+% Use as the word argument of \rkSubject, \rkDObj, \rkPredNom, etc.
+% The optional [mods] are modifiers of the gerund word itself; they are
+% pre-scanned to compute the post height before drawing begins.
+% ============================================================
+
+\NewDocumentCommand{\rkGerund}{O{} m}{%
+  % Inline fallback (outside diagram context): just typeset the word.
+  \textit{#2}%
+}
+
+% ============================================================
+% INFINITIVE
+%
+% \rkInfinitive[arg]{verb}
+%
+% NOUN FORM (deferred — used as word argument of \rkSubject, \rkDObj, etc.):
+%   Same stepped pedestal as \rkGerund, but "to" is labeled on the
+%   vertical post.  [arg] = modifiers of the verb (pre-scanned for post height).
+%
+% MODIFIER FORM (default — used inside [mods] of \rkSubject, \rkDObj, etc.):
+%   Diagonal labeled "to" (like a prepositional phrase) with the verb on
+%   the horizontal at the bottom.  [arg] = tail content for the verb's
+%   mini-baseline (use \rkInfObj[mods]{word} for a direct object, \rkAdv
+%   and \rkPrep for adverbial modifiers of the infinitive verb).
+% ============================================================
+
+% \rk@doinfinitive{foot-y}
+% Noun form: pedestal + "to" on post + verb on platform.
+\newcommand{\rk@doinfinitive}[1]{%
+  \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
+  % Pre-scan mods for adaptive post height (identical to gerund's pre-scan)
+  \setlength{\rk@grd@maxdepth}{0pt}%
+  \ifblank{\rk@deferredinf@mods}{}{%
+    \begingroup
+      \let\rkAdj\rk@grd@scanmod
+      \let\rkAdv\rk@grd@scanmod
+      \let\rkPrep\rk@grd@scanprep
+      \let\rkSubClause\@gobbletwo
+      \let\rkAppos\@gobble
+      \rk@execmods{\rk@deferredinf@mods}%
+    \endgroup
+  }%
+  \setlength{\rk@grd@posth}{\rk@gerundpost}%
+  \ifdim\rk@grd@maxdepth>0pt
+    \setlength{\rk@ta}{\rk@grd@maxdepth}%
+    \addtolength{\rk@ta}{\rk@modgap}\addtolength{\rk@ta}{\rk@modgap}%
+    \ifdim\rk@ta>\rk@grd@posth\setlength{\rk@grd@posth}{\rk@ta}\fi
+  \fi
+  % Measure verb word
+  \node[opacity=0, inner sep=0pt, outer sep=0pt, font=\rk@font]
+    (rk@infmsr) at (0,0) {\rk@deferredinf@word};%
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@infmsr}{east}}%
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@infmsr}{west}}%
+  \addtolength{\rk@tc}{-\rk@ta}%    rk@tc = verb_width
+  \pgfextracty{\rk@ta}{\pgfpointanchor{rk@infmsr}{north}}%
+  \ifdim\rk@ta>\rk@ht\setlength{\rk@ht}{\rk@ta}\fi
+  % Platform x bounds
+  \setlength{\rk@ta}{\rk@x}\addtolength{\rk@ta}{\rk@halfsep}%          rk@ta = plat_left
+  \addtolength{\rk@tc}{\rk@ta}\addtolength{\rk@tc}{\rk@halfsep}%        rk@tc = plat_right
+  \setlength{\rk@effmod}{\rk@tc}\addtolength{\rk@effmod}{\rk@halfsep}%  rk@effmod = foot_right
+  % post_x = midpoint of platform
+  \setlength{\rk@tb}{\rk@ta}\addtolength{\rk@tb}{\rk@tc}\divide\rk@tb by 2\relax  % rk@tb = post_x
+  % Y coordinates
+  \setlength{\rk@wlevel}{#1}\addtolength{\rk@wlevel}{\rk@halfsep}%                rk@wlevel = apex_y
+  \setlength{\rk@grd@maxdepth}{#1}\addtolength{\rk@grd@maxdepth}{\rk@grd@posth}%  rk@grd@maxdepth = plat_y
+  % Draw platform, foot, and legs (same as gerund)
+  \rk@line{(\the\rk@ta, \the\rk@grd@maxdepth) -- (\the\rk@tc, \the\rk@grd@maxdepth)}%
+  \pgfmathsetlength{\rk@grd@fh}{\the\rk@halfsep / 1.73205}%
+  \setlength{\rk@ta}{\rk@tb}\addtolength{\rk@ta}{-\rk@grd@fh}%
+  \rk@line{(\the\rk@x, #1) -- (\the\rk@effmod, #1)}%
+  \rk@line{(\the\rk@ta, #1) -- (\the\rk@tb, \the\rk@wlevel)}%
+  \rk@line{(\the\dimexpr\rk@tb+\rk@grd@fh\relax, #1) -- (\the\rk@tb, \the\rk@wlevel)}%
+  % Draw post with "to" label to its right
+  \draw[color=\rk@color, line width=\rk@lw]
+    (\the\rk@tb, \the\rk@wlevel) -- (\the\rk@tb, \the\rk@grd@maxdepth)
+    node[midway, right, inner sep=2pt, outer sep=0pt, font=\rk@font] {to};%
+  % Record slot (mirrors gerund: sl@l = post_x)
+  \setlength{\rk@sl@l}{\rk@tb}%
+  \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%
+  \setlength{\rk@sl@y}{\rk@grd@maxdepth}%
+  \setlength{\rk@x}{\rk@effmod}%
+  % Place verb on platform (centred at post_x)
+  \setlength{\rk@ta}{\rk@grd@maxdepth}\addtolength{\rk@ta}{\rk@wordlift}%
+  \node[anchor=base, inner sep=0pt, outer sep=0pt, font=\rk@font]
+    at (\the\rk@tb, \the\rk@ta) {\rk@deferredinf@word};%
+  % Run verb's modifiers from the platform
+  \ifblank{\rk@deferredinf@mods}{}{%
+    \rk@slot@to@mc
+    \rk@runmods{\rk@deferredinf@mods}%
+  }%
+  % Update clause miny
+  \setlength{\rk@ta}{#1}%
+  \ifdim\rk@ta<\rk@clause@miny\global\rk@clause@miny=\rk@ta\fi
+}
+
+% \rk@doinfinitiveMod{tail-content}{verb}
+% Modifier form: diagonal labeled "to" + horizontal with verb + optional tail.
+\newcommand{\rk@doinfinitiveMod}[2]{%
+  \rk@extendbase
+  % Size the slant on the "to" label
+  \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
+    (rk@infmsr) at (0,0) {to};%
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@infmsr}{east}}%
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@infmsr}{west}}%
+  \addtolength{\rk@tc}{-\rk@ta}%
+  \pgfextracty{\rk@tb}{\pgfpointanchor{rk@infmsr}{north}}%
+  \pgfextracty{\rk@ta}{\pgfpointanchor{rk@infmsr}{south}}%
+  \addtolength{\rk@tb}{-\rk@ta}%
+  \pgfmathsetlength{\rk@effmod}{max(\the\rk@modDepth,(\the\rk@tc+\the\rk@tb)/1.41422+6pt)}%
+  \ifdim\rk@slant@minlen>\rk@effmod\setlength{\rk@effmod}{\rk@slant@minlen}\fi
+  \setlength{\rk@slant@minlen}{0pt}%
+  % Sibling push when tail is present
+  \ifblank{#1}{}{%
+    \ifdim\rk@prevmod@E>\rk@modDepth
+      \addtolength{\rk@mc@cur}{\rk@prevmod@E}%
+      \addtolength{\rk@mc@cur}{-\rk@modDepth}%
+    \fi
+  }%
+  % Slant endpoint
+  \setlength{\rk@ta}{\rk@mc@cur}\addtolength{\rk@ta}{\rk@effmod}%  rk@ta = slant_x
+  \setlength{\rk@tb}{\rk@mc@y}\addtolength{\rk@tb}{-\rk@effmod}%   rk@tb = slant_y
+  \ifdim\rk@tb<\rk@clause@miny\global\rk@clause@miny=\rk@tb\fi
+  % Draw slant with "to" label
+  \draw[color=\rk@color, line width=\rk@lw]
+    (\the\rk@mc@cur,\the\rk@mc@y)--(\the\rk@ta,\the\rk@tb)
+    node[midway,above,sloped,inner sep=2pt,outer sep=0pt,font=\rk@font]{to};%
+  % Advance sibling cursor
+  \ifblank{#1}{%
+    \addtolength{\rk@mc@cur}{\rk@modDepth}%
+  }{%
+    \addtolength{\rk@mc@cur}{\rk@effmod}%
+  }%
+  \global\rk@prevmod@E=\rk@effmod
+  \ifrk@extendbl\rk@extendbase\fi
+  % Place verb on horizontal
+  \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
+  \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font]
+    (rk@infvmsr) at (0,0) {#2};%
+  \pgfextractx{\rk@effmod}{\pgfpointanchor{rk@infvmsr}{east}}%
+  \pgfextractx{\rk@tc}    {\pgfpointanchor{rk@infvmsr}{west}}%
+  \addtolength{\rk@effmod}{-\rk@tc}%   rk@effmod = verb_width
+  % line_right = slant_x + halfsep + verb_width + halfsep
+  \setlength{\rk@tc}{\rk@ta}%
+  \addtolength{\rk@tc}{\rk@halfsep}%
+  \addtolength{\rk@tc}{\rk@effmod}%
+  \addtolength{\rk@tc}{\rk@halfsep}%   rk@tc = line_right
+  % With tail: extend for modifier branching room
+  \ifblank{#1}{}{%
+    \addtolength{\rk@tc}{\rk@spacing}%
+  }%
+  % centre_x for verb = (slant_x + line_right) / 2
+  \setlength{\rk@effmod}{\rk@ta}%
+  \addtolength{\rk@effmod}{\rk@tc}%
+  \divide\rk@effmod by 2\relax%        rk@effmod = centre_x
+  % Draw horizontal and place verb
+  \rk@line{(\the\rk@ta,\the\rk@tb)--(\the\rk@tc,\the\rk@tb)}%
+  \setlength{\rk@wlevel}{\rk@tb}\addtolength{\rk@wlevel}{\rk@wordlift}%
+  \node[anchor=base,inner sep=0pt,outer sep=0pt,font=\rk@font]
+    at (\the\rk@effmod,\the\rk@wlevel) {#2};%
+  % Update modifier cursor
+  \setlength{\rk@mc@cur}{\rk@tc}%
+  \ifdim\rk@tc>\rk@mc@d\setlength{\rk@mc@d}{\rk@tc}\fi
+  % Execute tail content on the mini-baseline
+  \ifblank{#1}{}{%
+    \begingroup
+      \setlength{\rk@x}{\rk@tc}%
+      \setlength{\rk@base@y}{\rk@tb}%
+      \setlength{\rk@mc@y}{\rk@tb}%
+      \setlength{\rk@mc@d}{\rk@ta}%
+      % mc@cur = slant_x + 10% of (line_right − slant_x)
+      \setlength{\rk@halfsep}{\rk@tc}\addtolength{\rk@halfsep}{-\rk@ta}%
+      \divide\rk@halfsep by 10\relax%
+      \setlength{\rk@mc@cur}{\rk@ta}\addtolength{\rk@mc@cur}{\rk@halfsep}%
+      \setlength{\rk@ht}{2.2ex}%
+      \setlength{\rk@nounmodright}{\rk@ta}%
+      \global\rk@prevmod@E=0pt
+      #1%
+    \endgroup
+  }%
+}
+
+% \rkInfinitive[arg]{verb}
+% Default definition = modifier form (\rk@doinfinitiveMod).
+% Inside \rk@placeslot, this is replaced by \rk@deferred@Infinitive
+% and the noun form (\rk@doinfinitive) is invoked instead.
+\NewDocumentCommand{\rkInfinitive}{O{} m}{%
+  \rk@doinfinitiveMod{#1}{#2}%
+}
+
+% \rkInfObj[mods]{word}
+% Places a direct object on the infinitive mini-baseline.
+% Only meaningful inside \rkInfinitive's tail-content argument.
+\NewDocumentCommand{\rkInfObj}{O{} m}{%
+  \rk@placeslot{#2}{\the\rk@base@y}%
+  \rk@slot@to@mc
+  \rk@runmods{#1}%
+}
+
+% ============================================================
+% PARTICIPLE
+% \rk@doparticiple{tail-content}{word}
+%
+% Draws the hockey-stick shape for a participle:
+%   diagonal slanting down-right (word rides on it), followed by
+%   a short horizontal stub at the bottom (the elbow).
+%
+% If tail-content is non-empty it executes in a context where the
+% stub is the local baseline.  Use \rkPartObj[mods]{word} to place
+% a participial object; \rkAdv and \rkPrep attach as usual.
+%
+% Used as a modifier (like \rkAdj / \rkAdv) inside the optional
+% [mods] argument of \rkSubject, \rkDObj, etc.
+% ============================================================
+
+\newcommand{\rk@doparticiple}[2]{%
+  % #1 = tail content (may be empty), #2 = participial word on diagonal
+  \rk@extendbase
+  % Measure the participial word to compute effmod (same formula as \rk@domod)
+  \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
+    (rk@ptcmsr) at (0,0) {#2};%
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@ptcmsr}{east}}%
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@ptcmsr}{west}}%
+  \addtolength{\rk@tc}{-\rk@ta}%   rk@tc = node width
+  \pgfextracty{\rk@tb}{\pgfpointanchor{rk@ptcmsr}{north}}%
+  \pgfextracty{\rk@ta}{\pgfpointanchor{rk@ptcmsr}{south}}%
+  \addtolength{\rk@tb}{-\rk@ta}%   rk@tb = node height
+  \pgfmathsetlength{\rk@effmod}{max(\the\rk@modDepth, (\the\rk@tc + \the\rk@tb) / 1.41422 + 6pt)}%
+  \ifdim\rk@slant@minlen>\rk@effmod\setlength{\rk@effmod}{\rk@slant@minlen}\fi
+  \setlength{\rk@slant@minlen}{0pt}%
+  % Sibling-push when tail content is present (mirrors \rk@domod with sub-mods)
+  \ifblank{#1}{}{%
+    \ifdim\rk@prevmod@E>\rk@modDepth
+      \addtolength{\rk@mc@cur}{\rk@prevmod@E}%
+      \addtolength{\rk@mc@cur}{-\rk@modDepth}%
+    \fi
+  }%
+  % Three-segment hockey-stick: 45° main section → short 60° kink → horizontal stub.
+  % k = effmod/5 is the horizontal width of the 60° kink.
+  % Segment 1 (45°): (mc@cur, mc@y) → (mc@cur+E−k, mc@y−E+k)   [word label here]
+  % Segment 2 (22°): continues to   (mc@cur+E,   mc@y−E+k·(1−tan22°))
+  % Segment 3 (0°):  horizontal stub from slant end rightward by halfsep
+  %
+  % Register map after this block:
+  %   rk@ta  = slant_x  (= mc@cur + E)
+  %   rk@wlevel = slant_y (= mc@y − E − k·0.73205)
+  %   rk@tc  = stub_end_x (= slant_x + halfsep)
+  %
+  % k = effmod/5
+  \setlength{\rk@tc}{\rk@effmod}\divide\rk@tc by 5\relax       % rk@tc = k
+  % slant_x = mc@cur + effmod
+  \setlength{\rk@ta}{\rk@mc@cur}\addtolength{\rk@ta}{\rk@effmod}% rk@ta = slant_x
+  % mid_x = slant_x − k
+  \setlength{\rk@halfsep}{\rk@ta}\addtolength{\rk@halfsep}{-\rk@tc}% rk@halfsep = mid_x
+  % mid_y = mc@y − (E − k)
+  \setlength{\rk@tb}{\rk@mc@y}\addtolength{\rk@tb}{-\rk@effmod}\addtolength{\rk@tb}{\rk@tc}% rk@tb = mid_y
+  % slant_y = mid_y − k·tan(22°)  [22° section is shallower than 45°, so less deep]
+  \pgfmathsetlength{\rk@wlevel}{\the\rk@tb - 0.40403 * \the\rk@tc}% rk@wlevel = slant_y
+  \ifdim\rk@wlevel<\rk@clause@miny\global\rk@clause@miny=\rk@wlevel\fi
+  % Draw segments 1 and 2 as plain lines (no label on the draw command).
+  \rk@line{(\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@halfsep, \the\rk@tb)}% 45°
+  \rk@line{(\the\rk@halfsep, \the\rk@tb) -- (\the\rk@ta, \the\rk@wlevel)}%   22°
+  % Place word label on a dummy 45° \path from start → slant_x (same as \rk@domod).
+  % Midpoint = E/2 below the main baseline, preventing overlap for wide words.
+  % rk@tb reused for the 45°-end y = mc@y − E.
+  \setlength{\rk@tb}{\rk@mc@y}\addtolength{\rk@tb}{-\rk@effmod}%
+  \path (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
+    node[midway, above, sloped,
+         inner sep=2pt, outer sep=0pt, font=\rk@font, color=\rk@color] {#2};%
+  % Segment 3: horizontal stub.
+  % Use full spacing when tail content is present so mods have room to branch from
+  % within the stub; use halfsep for a bare participle (no tail).
+  \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
+  \setlength{\rk@tc}{\rk@ta}%
+  \ifblank{#1}{%
+    \addtolength{\rk@tc}{\rk@halfsep}%   bare: short stub
+  }{%
+    \addtolength{\rk@tc}{\rk@spacing}%   with tail: full-spacing stub
+  }%
+  \rk@line{(\the\rk@ta, \the\rk@wlevel) -- (\the\rk@tc, \the\rk@wlevel)}%
+  % Advance sibling cursor
+  \ifblank{#1}{%
+    \addtolength{\rk@mc@cur}{\rk@modDepth}%
+  }{%
+    \addtolength{\rk@mc@cur}{\rk@effmod}%
+  }%
+  \global\rk@prevmod@E=\rk@effmod
+  \ifrk@extendbl\rk@extendbase\fi
+  % Execute tail content (participial object + modifiers of the participle)
+  \ifblank{#1}{}{%
+    \begingroup
+      \setlength{\rk@x}{\rk@tc}%            cursor starts at stub_end_x
+      \setlength{\rk@base@y}{\rk@wlevel}%  base y = slant_y
+      \setlength{\rk@mc@y}{\rk@wlevel}%
+      % mc@d = slant_x: \rk@extendbase fires as modifiers advance past the elbow.
+      % mc@cur = slant_x + halfsep: first modifier branches from the stub midpoint,
+      % leaving the right half of the stub visible past the attachment point.
+      \setlength{\rk@mc@d}{\rk@ta}%
+      \setlength{\rk@mc@cur}{\rk@ta}\addtolength{\rk@mc@cur}{\rk@halfsep}%
+      \setlength{\rk@ht}{2.2ex}%
+      \setlength{\rk@nounmodright}{\rk@ta}%
+      \global\rk@prevmod@E=0pt
+      #1%
+      % The tail hangs below the main baseline — its horizontal extent must NOT inflate
+      % rk@nounmodright, which controls the main-baseline extension before \rk@divfull.
+    \endgroup
+  }%
+}
+
+% \rkParticiple[tail-content]{word}
+% Modifier command: attaches a participle to a noun via the hockey-stick shape.
+\NewDocumentCommand{\rkParticiple}{O{} m}{%
+  \rk@doparticiple{#1}{#2}%
+}
+
+% \rkPartObj[mods]{word}
+% Places a participial object on the horizontal tail of \rkParticiple.
+% Only meaningful inside \rkParticiple's tail-content argument.
+\NewDocumentCommand{\rkPartObj}{O{} m}{%
+  \rk@placeslot{#2}{\the\rk@base@y}%
+  \rk@slot@to@mc
+  \rk@runmods{#1}%
+}
+
+% ============================================================
+% NOMINATIVE ABSOLUTE
+% \rkNomAbs[noun-mods]{noun}{ptcl-tail}{ptcl-word}
+%
+% Draws a nominative absolute phrase floating ABOVE the main
+% clause with no connector.  Call before or after other clause
+% commands — placement is always at a fixed height above y=0.
+%
+% The phrase has two parts:
+%   noun        — placed on a short horizontal baseline
+%   participle  — hangs below the noun via the standard
+%                 hockey-stick (uses \rkParticiple internally)
+%
+%   [noun-mods]  optional modifiers of the noun (e.g. \rkAdj)
+%   {noun}       the noun of the absolute phrase
+%   {ptcl-tail}  tail content for the participle; pass {} for none
+%                (\rkPartObj, \rkAdv, \rkPrep, etc.)
+%   {ptcl-word}  the participial word (pass {} for no participle,
+%                e.g. for a "with implied being" absolute)
+% ============================================================
+
+\newcommand{\rk@donominabs}[4]{%
+  % #1 = noun-mods, #2 = noun, #3 = ptcl-tail, #4 = ptcl-word
+  % NA baseline y: use \rkNomAbsHeight override if set, else subClDepth
+  \ifdim\rk@nomabs@height>0pt
+    \setlength{\rk@tb}{\rk@base@y}\addtolength{\rk@tb}{\rk@nomabs@height}%
+    \setlength{\rk@nomabs@height}{0pt}%
+  \else
+    \setlength{\rk@tb}{\rk@base@y}\addtolength{\rk@tb}{\rk@subClDepth}%
+  \fi
+  % Save outer verb x (mirrors \rk@dosubclause pattern)
+  \global\rk@sc@saved@vb@r=\rk@vb@r
+  \begingroup
+    \setlength{\rk@x}{0pt}%
+    \setlength{\rk@base@y}{\rk@tb}%
+    \setlength{\rk@mc@y}{\rk@tb}%
+    \setlength{\rk@mc@d}{0pt}%
+    \setlength{\rk@mc@cur}{0pt}%
+    \setlength{\rk@ht}{2.2ex}%
+    \setlength{\rk@nounmodright}{0pt}%
+    \global\rk@prevmod@E=0pt
+    % Place noun on the NA baseline
+    \rk@placeslot{#2}{\the\rk@base@y}%
+    \rk@slot@to@mc
+    % Run noun-mods then the participle (empty ptcl-word skips the participle)
+    \ifblank{#4}{%
+      \ifblank{#1}{}{\rk@runmods{#1}}%
+    }{%
+      \rk@runmods{#1,\rkParticiple[#3]{#4}}%
+    }%
+  \endgroup
+  \global\rk@vb@r=\rk@sc@saved@vb@r
+}
+
+% \rkNomAbs[noun-mods]{noun}{ptcl-tail}{ptcl-word}
+\NewDocumentCommand{\rkNomAbs}{O{} m m m}{%
+  \rk@donominabs{#1}{#2}{#3}{#4}%
 }
 
 \endinput

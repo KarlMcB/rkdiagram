@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.24.0 (TeX Live 2026)  (format=lualatex 2026.5.28)  30 MAY 2026 06:53
+This is LuaHBTeX, Version 1.24.0 (TeX Live 2026)  (format=lualatex 2026.5.28)  2 JUN 2026 10:52
  restricted system commands enabled.
 **rkdiagram-guide.tex
 (./rkdiagram-guide.tex
@@ -411,33 +411,50 @@ Package: pgfopts 2014/07/10 v2.1a LaTeX package options with pgfkeys
 \rk@modgap=\skip53
 \rk@cmpsep=\skip54
 \rk@subClDepth=\skip55
-\rk@lw=\skip56
-\rk@x=\skip57
-\rk@ht=\skip58
-\rk@sl@l=\skip59
-\rk@sl@r=\skip60
-\rk@sl@d=\skip61
-\rk@sl@y=\skip62
-\rk@vb@l=\skip63
-\rk@vb@r=\skip64
-\rk@vb@y=\skip65
-\rk@iobj@xmax=\skip66
-\rk@effmod=\skip67
-\rk@mc@y=\skip68
-\rk@mc@d=\skip69
-\rk@mc@cur=\skip70
-\rk@nounmodright=\skip71
-\rk@ta=\skip72
-\rk@tb=\skip73
-\rk@tc=\skip74
-\rk@halfsep=\skip75
-\rk@cmp@textx=\skip76
-\rk@cmp@platright=\skip77
-\rk@cmp@csep=\skip78
-\rk@cmp@basey=\skip79
-\rk@base@y=\skip80
-\rk@wordlift=\skip81
-\rk@wlevel=\skip82
+\rk@gerundpost=\skip56
+\rk@lw=\skip57
+\rk@x=\skip58
+\rk@ht=\skip59
+\rk@clause@miny=\skip60
+\rk@sc@saved@vb@r=\skip61
+\rk@cmpst@saved@miny=\skip62
+\rk@bridgey@override=\skip63
+\rk@sl@l=\skip64
+\rk@sl@r=\skip65
+\rk@sl@d=\skip66
+\rk@sl@y=\skip67
+\rk@vb@l=\skip68
+\rk@vb@r=\skip69
+\rk@vb@y=\skip70
+\rk@iobj@xmax=\skip71
+\rk@effmod=\skip72
+\rk@prevmod@E=\skip73
+\rk@mc@y=\skip74
+\rk@mc@d=\skip75
+\rk@mc@cur=\skip76
+\rk@nounmodright=\skip77
+\rk@slot@minwidth=\skip78
+\rk@slot@skip=\skip79
+\rk@slant@minlen=\skip80
+\rk@ta=\skip81
+\rk@tb=\skip82
+\rk@tc=\skip83
+\rk@halfsep=\skip84
+\rk@cmp@textx=\skip85
+\rk@cmp@platright=\skip86
+\rk@cmp@csep=\skip87
+\rk@cmp@basey=\skip88
+\rk@cmp@wa=\skip89
+\rk@cmp@wb=\skip90
+\rk@base@y=\skip91
+\rk@wordlift=\skip92
+\rk@wlevel=\skip93
+\rk@grd@maxdepth=\skip94
+\rk@grd@posth=\skip95
+\rk@grd@fh=\skip96
+\rk@cmpst@va@x=\skip97
+\rk@cmpst@vb@x=\skip98
+\rk@cmpst@sep=\skip99
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/geometry/geometry.sty
 Package: geometry 2026/03/07 v6.0 Page Geometry
@@ -483,7 +500,7 @@ Lua module: microtype 2026/03/01 v3.2d microtype module.
 Module microtype Info: overwriting function `keepligature' on input line 63
 LaTeX Info: Redefining \lsstyle on input line 779.
 LaTeX Info: Redefining \lslig on input line 779.
-\MT@outer@space=\skip83
+\MT@outer@space=\skip100
 )
 Package microtype Info: Loading configuration file microtype.cfg.
 
@@ -530,8 +547,8 @@ Package: array 2025/09/25 v2.6n Tabular extension package (FMi)
 \ar@mcellbox=\box65
 \extrarowheight=\dimen281
 \NC@list=\toks35
-\extratabsurround=\skip84
-\backup@length=\skip85
+\extratabsurround=\skip101
+\backup@length=\skip102
 \ar@cellbox=\box66
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/fancyvrb/fancyvrb.sty
@@ -652,8 +669,8 @@ Package: ifluatex 2019/10/25 v1.5 ifluatex legacy package. Use iftex instead.
 (/usr/local/texlive/2026/texmf-dist/tex/latex/titlesec/titlesec.sty
 Package: titlesec 2025/01/04 v2.17 Sectioning titles
 \ttl@box=\box83
-\beforetitleunit=\skip86
-\aftertitleunit=\skip87
+\beforetitleunit=\skip103
+\aftertitleunit=\skip104
 \ttl@plus=\dimen289
 \ttl@minus=\dimen290
 \ttl@toksa=\toks40
@@ -764,9 +781,9 @@ Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 84.
 )
-\Hy@SectionHShift=\skip88
+\Hy@SectionHShift=\skip105
 )
-Package hyperref Info: Option `colorlinks' set `true' on input line 33.
+Package hyperref Info: Option `colorlinks' set `true' on input line 29.
  (/usr/local/texlive/2026/texmf-dist/tex/latex/fontspec/fontspec.sty
 Package: fontspec 2025/09/29 v2.9g Font selection for XeLaTeX and LuaLaTeX
 Lua module: fontspec 2025/09/29 v2.9g Font selection for XeLaTeX and LuaLaTeX
@@ -842,26 +859,26 @@ Space].
 (./rkdiagram-guide.aux)
 \openout1 = rkdiagram-guide.aux
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 91.
-LaTeX Font Info:    ... okay on input line 91.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 75.
+LaTeX Font Info:    ... okay on input line 75.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 75.
+LaTeX Font Info:    ... okay on input line 75.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 75.
+LaTeX Font Info:    ... okay on input line 75.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 75.
+LaTeX Font Info:    ... okay on input line 75.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 75.
+LaTeX Font Info:    ... okay on input line 75.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 75.
+LaTeX Font Info:    ... okay on input line 75.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 75.
+LaTeX Font Info:    ... okay on input line 75.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 75.
+LaTeX Font Info:    ... okay on input line 75.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 75.
+LaTeX Font Info:    ... okay on input line 75.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 75.
+LaTeX Font Info:    ... okay on input line 75.
 
 (/usr/local/texlive/2026/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -919,13 +936,13 @@ e
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Info: Redefining \microtypecontext on input line 91.
-Package microtype Info: Applying patch `item' on input line 91.
-Package microtype Info: Applying patch `toc' on input line 91.
-Package microtype Info: Applying patch `eqnum' on input line 91.
-Package microtype Info: Applying patch `footnote' on input line 91.
-Package microtype Info: Applying patch `verbatim' on input line 91.
-LaTeX Info: Redefining \microtypesetup on input line 91.
+LaTeX Info: Redefining \microtypecontext on input line 75.
+Package microtype Info: Applying patch `item' on input line 75.
+Package microtype Info: Applying patch `toc' on input line 75.
+Package microtype Info: Applying patch `eqnum' on input line 75.
+Package microtype Info: Applying patch `footnote' on input line 75.
+Package microtype Info: Applying patch `verbatim' on input line 75.
+LaTeX Info: Redefining \microtypesetup on input line 75.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
@@ -942,7 +959,7 @@ File: mt-LatinModernRoman.cfg 2026/02/26 v1.2 microtype config. file: Latin Mod
 ern Roman (RS)
 )
 \c@lstlisting=\count357
-Package hyperref Info: Link coloring ON on input line 91.
+Package hyperref Info: Link coloring ON on input line 75.
  (./rkdiagram-guide.out) (./rkdiagram-guide.out)
 \@outlinefile=\write5
 
@@ -954,70 +971,70 @@ Package fontspec Info:
 
 \symlegacymaths=\mathgroup4
 LaTeX Font Info:    Overwriting symbol font `legacymaths' in version `bold'
-(Font)                  OT1/cmr/m/n --> OT1/cmr/bx/n on input line 91.
-LaTeX Font Info:    Redeclaring math accent \acute on input line 91.
-LaTeX Font Info:    Redeclaring math accent \grave on input line 91.
-LaTeX Font Info:    Redeclaring math accent \ddot on input line 91.
-LaTeX Font Info:    Redeclaring math accent \tilde on input line 91.
-LaTeX Font Info:    Redeclaring math accent \bar on input line 91.
-LaTeX Font Info:    Redeclaring math accent \breve on input line 91.
-LaTeX Font Info:    Redeclaring math accent \check on input line 91.
-LaTeX Font Info:    Redeclaring math accent \hat on input line 91.
-LaTeX Font Info:    Redeclaring math accent \dot on input line 91.
-LaTeX Font Info:    Redeclaring math accent \mathring on input line 91.
-LaTeX Font Info:    Redeclaring math symbol \colon on input line 91.
-LaTeX Font Info:    Redeclaring math symbol \Gamma on input line 91.
-LaTeX Font Info:    Redeclaring math symbol \Delta on input line 91.
-LaTeX Font Info:    Redeclaring math symbol \Theta on input line 91.
-LaTeX Font Info:    Redeclaring math symbol \Lambda on input line 91.
-LaTeX Font Info:    Redeclaring math symbol \Xi on input line 91.
-LaTeX Font Info:    Redeclaring math symbol \Pi on input line 91.
-LaTeX Font Info:    Redeclaring math symbol \Sigma on input line 91.
-LaTeX Font Info:    Redeclaring math symbol \Upsilon on input line 91.
-LaTeX Font Info:    Redeclaring math symbol \Phi on input line 91.
-LaTeX Font Info:    Redeclaring math symbol \Psi on input line 91.
-LaTeX Font Info:    Redeclaring math symbol \Omega on input line 91.
-LaTeX Font Info:    Redeclaring math symbol \mathdollar on input line 91.
-LaTeX Font Info:    Redeclaring symbol font `operators' on input line 91.
+(Font)                  OT1/cmr/m/n --> OT1/cmr/bx/n on input line 75.
+LaTeX Font Info:    Redeclaring math accent \acute on input line 75.
+LaTeX Font Info:    Redeclaring math accent \grave on input line 75.
+LaTeX Font Info:    Redeclaring math accent \ddot on input line 75.
+LaTeX Font Info:    Redeclaring math accent \tilde on input line 75.
+LaTeX Font Info:    Redeclaring math accent \bar on input line 75.
+LaTeX Font Info:    Redeclaring math accent \breve on input line 75.
+LaTeX Font Info:    Redeclaring math accent \check on input line 75.
+LaTeX Font Info:    Redeclaring math accent \hat on input line 75.
+LaTeX Font Info:    Redeclaring math accent \dot on input line 75.
+LaTeX Font Info:    Redeclaring math accent \mathring on input line 75.
+LaTeX Font Info:    Redeclaring math symbol \colon on input line 75.
+LaTeX Font Info:    Redeclaring math symbol \Gamma on input line 75.
+LaTeX Font Info:    Redeclaring math symbol \Delta on input line 75.
+LaTeX Font Info:    Redeclaring math symbol \Theta on input line 75.
+LaTeX Font Info:    Redeclaring math symbol \Lambda on input line 75.
+LaTeX Font Info:    Redeclaring math symbol \Xi on input line 75.
+LaTeX Font Info:    Redeclaring math symbol \Pi on input line 75.
+LaTeX Font Info:    Redeclaring math symbol \Sigma on input line 75.
+LaTeX Font Info:    Redeclaring math symbol \Upsilon on input line 75.
+LaTeX Font Info:    Redeclaring math symbol \Phi on input line 75.
+LaTeX Font Info:    Redeclaring math symbol \Psi on input line 75.
+LaTeX Font Info:    Redeclaring math symbol \Omega on input line 75.
+LaTeX Font Info:    Redeclaring math symbol \mathdollar on input line 75.
+LaTeX Font Info:    Redeclaring symbol font `operators' on input line 75.
 LaTeX Font Info:    Encoding `OT1' has changed to `TU' for symbol font
-(Font)              `operators' in the math version `normal' on input line 91.
+(Font)              `operators' in the math version `normal' on input line 75.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
 (Font)                  OT1/cmr/m/n --> TU/LatinModernRoman(0)/m/n on input lin
-e 91.
+e 75.
 LaTeX Font Info:    Encoding `OT1' has changed to `TU' for symbol font
-(Font)              `operators' in the math version `bold' on input line 91.
+(Font)              `operators' in the math version `bold' on input line 75.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
 (Font)                  OT1/cmr/bx/n --> TU/LatinModernRoman(0)/m/n on input li
-ne 91.
+ne 75.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
 (Font)                  TU/LatinModernRoman(0)/m/n --> TU/LatinModernRoman(0)/m
-/n on input line 91.
+/n on input line 75.
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
 (Font)                  OT1/cmr/m/it --> TU/LatinModernRoman(0)/m/it on input l
-ine 91.
+ine 75.
 LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
 (Font)                  OT1/cmr/bx/n --> TU/LatinModernRoman(0)/b/n on input li
-ne 91.
+ne 75.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `normal'
-(Font)                  OT1/cmss/m/n --> TU/lmss/m/n on input line 91.
+(Font)                  OT1/cmss/m/n --> TU/lmss/m/n on input line 75.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `normal'
 (Font)                  OT1/cmtt/m/n --> TU/LatinModernMono(0)/m/n on input lin
-e 91.
+e 75.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
 (Font)                  TU/LatinModernRoman(0)/m/n --> TU/LatinModernRoman(0)/b
-/n on input line 91.
+/n on input line 75.
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
 (Font)                  OT1/cmr/bx/it --> TU/LatinModernRoman(0)/b/it on input 
-line 91.
+line 75.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `bold'
-(Font)                  OT1/cmss/bx/n --> TU/lmss/b/n on input line 91.
+(Font)                  OT1/cmss/bx/n --> TU/lmss/b/n on input line 75.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
 (Font)                  OT1/cmtt/m/n --> TU/LatinModernMono(0)/b/n on input lin
-e 91.
+e 75.
 
 
 LaTeX Font Warning: Font shape `TU/LatinModernMono(0)/b/n' undefined
-(Font)              using `TU/LatinModernMono(0)/m/n' instead on input line 95.
+(Font)              using `TU/LatinModernMono(0)/m/n' instead on input line 78.
 
 
 Package microtype Info: Loading generic protrusion settings for font family
@@ -1025,119 +1042,263 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 96.
+(Font)              <12> on input line 79.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 96.
+(Font)              <8> on input line 79.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 96.
+(Font)              <6> on input line 79.
 (/usr/local/texlive/2026/texmf-dist/tex/latex/microtype/mt-cmr.cfg
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
 (RS)
 )
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 98.
+(Font)              <7> on input line 80.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 98.
+(Font)              <5> on input line 80.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <10.95> on input line 106.
+(Font)              <10.95> on input line 88.
 
-Overfull \hbox (64.3845pt too wide) in paragraph at lines 150--164
+Overfull \hbox (179.08574pt too wide) in paragraph at lines 121--137
 [][] 
  []
 
 [1
 
 {/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (13.86797pt too wide) in paragraph at lines 228--228
-[][]
- []
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 187.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 228--228
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 187.
 
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 187.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 187.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 187.
+
+
+Overfull \hbox (2.41382pt too wide) in paragraph at lines 193--193
+[][] 
  []
 
 [2]
-Underfull \hbox (badness 10000) in paragraph at lines 250--250
-[][]
+Overfull \hbox (30.23122pt too wide) in paragraph at lines 213--213
+[][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 250--250
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 256.
 
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 256.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 256.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 256.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 256.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 256.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 256.
+
+[3
+
+]
+Overfull \hbox (93.67247pt too wide) in paragraph at lines 319--319
+[][] 
  []
 
+[4
 
-Overfull \hbox (24.4786pt too wide) in paragraph at lines 274--274
-[][]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 274--274
-
- []
-
-[3]
-Overfull \hbox (13.79797pt too wide) in paragraph at lines 314--314
-[][]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 314--314
-
- []
-
-[4]
-Overfull \hbox (90.3726pt too wide) in paragraph at lines 439--439
-[][]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 439--439
-
+]
+Overfull \hbox (27.61424pt too wide) in paragraph at lines 377--377
+[][] 
  []
 
 [5]
-Overfull \hbox (2.84259pt too wide) in paragraph at lines 468--468
-[][]
+Overfull \hbox (84.61372pt too wide) in paragraph at lines 407--407
+[][] 
+ []
+
+[6
+Missing character: There is no , (U+002C) in font nullfont!
+]
+Overfull \hbox (55.58154pt too wide) in paragraph at lines 474--474
+[][] 
+ []
+
+[7]
+Overfull \hbox (58.87415pt too wide) in paragraph at lines 510--510
+[][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 468--468
-
+Overfull \hbox (116.14949pt too wide) in paragraph at lines 533--533
+[][] 
  []
 
 
-Overfull \hbox (47.81415pt too wide) in paragraph at lines 511--511
-[][]
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 555.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 555.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 555.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 555.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 555.
+
+
+Overfull \hbox (27.09485pt too wide) in paragraph at lines 561--561
+[][] 
+ []
+
+[8]
+Overfull \hbox (60.98512pt too wide) in paragraph at lines 582--582
+[][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 511--511
-
+Overfull \hbox (8.91724pt too wide) in paragraph at lines 603--603
+[][] 
  []
 
-[6]
-Overfull \hbox (111.63727pt too wide) in paragraph at lines 554--554
-[][]
- []
+[9
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 554--554
-
+]
+Overfull \hbox (44.62328pt too wide) in paragraph at lines 670--670
+[][] 
  []
 
 
-Overfull \hbox (104.2578pt too wide) in paragraph at lines 584--584
-[][]
+Overfull \hbox (45.77255pt too wide) in paragraph at lines 693--693
+[][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 584--584
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 711.
 
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 711.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 711.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 711.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 711.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 711.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 711.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 711.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 711.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 711.
+
+
+Overfull \hbox (107.81529pt too wide) in paragraph at lines 722--722
+[][] 
  []
 
-[7] [8] [9] (./rkdiagram-guide.aux)
+[10]
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 769.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 769.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 769.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 769.
+
+
+Package tcolorbox Warning: The upper box part has become overfull on input line
+ 769.
+
+[11
+
+] [12
+
+]
+Overfull \hbox (58.87415pt too wide) in paragraph at lines 860--860
+[][] 
+ []
+
+[13] [14]
+Underfull \hbox (badness 1137) in paragraph at lines 981--982
+[]|\TU/LatinModernRoman(0)/m/n/10.95 Sub-or-di-nate clause; dashed con-nec-tor 
+to sub-
+ []
+
+
+Underfull \hbox (badness 5133) in paragraph at lines 985--986
+[]|\TU/LatinModernRoman(0)/m/n/10.95 Par-ticip-ial ob-ject on the tail; only in-
+side
+ []
+
+
+Overfull \hbox (108.98074pt too wide) in paragraph at lines 992--1000
+[][] 
+ []
+
+[15] [16] (./rkdiagram-guide.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-05-15>
@@ -1147,19 +1308,20 @@ L3 programming layer <2026-05-15>
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 Package rerunfilecheck Info: File `rkdiagram-guide.out' has not changed.
-(rerunfilecheck)             Checksum: 5F98CBEFD00D6F0F5AAEDBC90D91BFE2;2128.
+(rerunfilecheck)             Checksum: 7DFD97B154A324FA0D1CE2C3E28DCAAF;2788.
 )
 
 Here is how much of LuaTeX's memory you used:
- 30603 strings out of 475891
- 125086,1144653 words of node,token memory allocated
- 537 words of node memory still in use:
-   4 hlist, 1 vlist, 1 rule, 1 local_par, 4 glue, 3 kern, 1 penalty, 3 glyph, 7 
-attribute, 62 glue_spec, 7 attribute_list, 2 write nodes
-   avail lists: 1:4,2:3825,3:2164,4:165,5:443,6:59,7:5940,8:3,9:998,10:6,11:333
- 52564 multiletter control sequences out of 65536+600000
- 71 fonts using 6511759 bytes
- 117i,9n,114p,1203b,1168s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 30768 strings out of 475891
+ 125086,1373583 words of node,token memory allocated
+ 590 words of node memory still in use:
+   4 hlist, 1 vlist, 1 rule, 1 local_par, 4 glue, 4 kern, 1 penalty, 3 glyph, 9 
+attribute, 70 glue_spec, 9 attribute_list, 2 write nodes
+   avail lists: 1:4,2:7248,3:3296,4:156,5:391,6:69,7:5553,8:4,9:1367,10:6,11:298
+
+ 52717 multiletter control sequences out of 65536+600000
+ 71 fonts using 6512079 bytes
+ 117i,9n,114p,1203b,1183s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lmmono10-italic.otf
 ></usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lmroman10-bold.otf
 ></usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lmroman10-italic.o
@@ -1170,11 +1332,14 @@ gular.otf></usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lmroman8-
 regular.otf></usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lmroman
 12-regular.otf></usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lmmo
 no12-regular.otf></usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lm
-roman12-bold.otf>
-Output written on rkdiagram-guide.pdf (9 pages, 71939 bytes).
+roman12-bold.otf></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmmi10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmr10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/c
+msy10.pfb>
+Output written on rkdiagram-guide.pdf (16 pages, 127557 bytes).
 
-PDF statistics: 180 PDF objects out of 1000 (max. 8388607)
- 137 compressed objects within 2 object streams
- 25 named destinations out of 1000 (max. 1048576)
- 136 words of extra memory for PDF output out of 10000 (max. 100000000)
+PDF statistics: 244 PDF objects out of 1000 (max. 8388607)
+ 191 compressed objects within 2 object streams
+ 37 named destinations out of 1000 (max. 1048576)
+ 176 words of extra memory for PDF output out of 10000 (max. 100000000)
 

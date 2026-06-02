@@ -592,4 +592,244 @@ take us ashore at so much a head, silver coin of any country.}{%
     3\,cm verb — each resets automatically after its slot.}
 }
 
+% ============================================================
+\testsection{Group 14 — Gerunds}
+% ============================================================
+% A gerund sits on a stepped T-platform: word on a short top line,
+% connected by a vertical post to a longer foot that rests on the
+% noun-slot baseline.
+
+\testcase{Swimming is fun.}{%
+  \begin{rkdiagram}
+    \rkSubject{\rkGerund{Swimming}}
+    \rkVerb{is}
+    \rkPredAdj{fun}
+  \end{rkdiagram}
+  \par\textit{Tests: gerund as subject.}
+}
+
+\testcase{She enjoys swimming.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{enjoys}
+    \rkDObj{\rkGerund{swimming}}
+  \end{rkdiagram}
+  \par\textit{Tests: gerund as direct object.}
+}
+
+\testcase{His hobby is collecting stamps.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{His}]{hobby}
+    \rkVerb{is}
+    \rkPredNom{\rkGerund{collecting}}
+  \end{rkdiagram}
+  \par\textit{Tests: gerund as predicate nominative.}
+}
+
+\testcase{Rapid swimming exhausts him.}{%
+  \begin{rkdiagram}
+    \rkSubject{\rkGerund[\rkAdj{Rapid}]{swimming}}
+    \rkVerb{exhausts}
+    \rkDObj{him}
+  \end{rkdiagram}
+  \par\textit{Tests: gerund as subject with adjective modifier (post auto-height).}
+}
+
+\testcase{She is good at running quickly.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{is}
+    \rkPredAdj[\rkPrep{at}{\rkGerund[\rkAdv{quickly}]{running}}]{good}
+  \end{rkdiagram}
+  \par\textit{Tests: gerund (with adverb modifier) as object of a preposition.}
+}
+
+% ============================================================
+\testsection{Group 15 — Participles}
+% ============================================================
+% A participle functions as an adjective modifying a noun.
+% It sits on a hockey-stick shape: diagonal slanting down-right
+% (word on it) then a short horizontal tail at the elbow.
+% The tail can carry a participial object and/or modifiers.
+
+\testcase{The barking dog scared us.}{%
+  \begin{rkdiagram}
+    \rkSubject[%
+      \rkAdj{The},
+      \rkParticiple{barking}
+    ]{dog}
+    \rkVerb{scared}
+    \rkDObj{us}
+  \end{rkdiagram}
+  \par\textit{Tests: bare participle (no tail) modifying subject noun.}
+}
+
+\testcase{The man running the race smiled.}{%
+  \begin{rkdiagram}
+    \rkSubject[%
+      \rkAdj{The},
+      \rkParticiple[\rkPartObj[\rkAdj{the}]{race}]{running}
+    ]{man}
+    \rkVerb{smiled}
+  \end{rkdiagram}
+  \par\textit{Tests: participle with participial object on horizontal tail.}
+}
+
+\testcase{Exhausted by the climb, she rested.}{%
+  \begin{rkdiagram}
+    \rkSubject[%
+      \rkParticiple[\rkPrep[\rkAdj{the}]{by}{climb}]{Exhausted}
+    ]{she}
+    \rkVerb{rested}
+  \end{rkdiagram}
+  \par\textit{Tests: participle with a prepositional phrase on the tail.}
+}
+
+\testcase{The child sleeping quietly in the corner dreamed.}{%
+  \begin{rkdiagram}
+    \rkSubject[%
+      \rkAdj{The},
+      \rkParticiple[%
+        \rkAdv{quietly},
+        \rkPrep[\rkAdj{the}]{in}{corner}
+      ]{sleeping}
+    ]{child}
+    \rkVerb{dreamed}
+  \end{rkdiagram}
+  \par\textit{Tests: participle with adverb and prepositional phrase on the tail.}
+}
+
+\testcase{The dog chased the cat sitting on the fence.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{dog}
+    \rkVerb{chased}
+    \rkDObj[%
+      \rkAdj{the},
+      \rkParticiple[\rkPrep[\rkAdj{the}]{on}{fence}]{sitting}
+    ]{cat}
+  \end{rkdiagram}
+  \par\textit{Tests: participle modifying the direct object, with prep phrase on tail.}
+}
+
+\testsection{Group 16 — Infinitives}
+
+\testcase{To run is fun.}{%
+  \begin{rkdiagram}
+    \rkSubject{\rkInfinitive{run}}
+    \rkVerb{is}
+    \rkPredNom{fun}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as subject, no mods.}
+}
+
+\testcase{She wants to win.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb{wants}
+    \rkDObj{\rkInfinitive{win}}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as direct object, no mods.}
+}
+
+\testcase{To run quickly is fun.}{%
+  \begin{rkdiagram}
+    \rkSubject{\rkInfinitive[\rkAdv{quickly}]{run}}
+    \rkVerb{is}
+    \rkPredNom{fun}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as subject with adverb modifier (adaptive post height).}
+}
+
+\testcase{He wants to run in the race.}{%
+  \begin{rkdiagram}
+    \rkSubject{He}
+    \rkVerb{wants}
+    \rkDObj{\rkInfinitive[\rkPrep[\rkAdj{the}]{in}{race}]{run}}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as direct object with prep phrase modifier on verb.}
+}
+
+\testcase{She came to win a prize.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb[\rkInfinitive{win}]{came}
+    \rkDObj{prize}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as adverbial modifier on verb, no tail.}
+}
+
+\testcase{He found books to read.}{%
+  \begin{rkdiagram}
+    \rkSubject{He}
+    \rkVerb{found}
+    \rkDObj[\rkInfinitive{read}]{books}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive as adjectival modifier on direct object.}
+}
+
+\testcase{She came to win the prize.}{%
+  \begin{rkdiagram}
+    \rkSubject{She}
+    \rkVerb[\rkInfinitive[\rkInfObj{prize}]{win}]{came}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive modifier with direct object on mini-baseline.}
+}
+
+\testcase{He trained to finish the race quickly.}{%
+  \begin{rkdiagram}
+    \rkSubject{He}
+    \rkVerb[\rkInfinitive[\rkInfObj[\rkAdj{the}]{race}\rkAdv{quickly}]{finish}]{trained}
+  \end{rkdiagram}
+  \par\textit{Tests: infinitive modifier with object and adverb on mini-baseline.}
+}
+
+\testsection{Group 17 — Nominative Absolutes}
+
+\testcase{The battle over, the soldiers retreated.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{soldiers}
+    \rkVerb{retreated}
+    \rkNomAbs[\rkAdj{The}]{battle}{}{over}
+  \end{rkdiagram}
+  \par\textit{Tests: bare nominative absolute with adjective on noun.}
+}
+
+\testcase{The sun setting, they departed.}{%
+  \begin{rkdiagram}
+    \rkSubject{they}
+    \rkVerb{departed}
+    \rkNomAbs[\rkAdj{The}]{sun}{}{setting}
+  \end{rkdiagram}
+  \par\textit{Tests: nominative absolute with adjective on noun.}
+}
+
+\testcase{His work finished, he ran.}{%
+  \begin{rkdiagram}
+    \rkSubject{he}
+    \rkVerb{ran}
+    \rkNomAbs[\rkAdj{His}]{work}{\rkPartObj{done}}{finished}
+  \end{rkdiagram}
+  \par\textit{Tests: NA with participial object on tail.}
+}
+
+\testcase{His staff grasped in his hand, the old man walked the long road slowly.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}\rkAdj{old}]{man}
+    \rkVerb[\rkAdv{slowly}]{walked}
+    \rkDObj[\rkAdj{the}\rkAdj{long}]{road}
+    \rkNomAbsHeight{4cm}
+    \rkNomAbs[\rkAdj{his}]{staff}{\rkPrep[\rkAdj{his}]{in}{hand}}{grasped}
+  \end{rkdiagram}
+  \par\textit{Tests: NA with modifier chains on main clause (vertical clearance).}
+}
+
+\testcase{Her hope gone, she wept.}{%
+  \begin{rkdiagram}
+    \rkSubject{she}
+    \rkVerb{wept}
+    \rkNomAbs[\rkAdj{Her}]{hope}{}{gone}
+  \end{rkdiagram}
+  \par\textit{Tests: NA with no participle (empty ptcl-word, implied being).}
+}
+
 \end{document}

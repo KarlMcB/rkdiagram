@@ -10,3 +10,7 @@
 rk-test.pdf
 *.log
 *.pdf
+*.aux
+rk-test.aux
+rk-test.log
+rk-test.pdf

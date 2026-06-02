@@ -529,10 +529,13 @@
     \ifblank{#1}{}{%
       \begingroup
         \setlength{\rk@mc@y}{\rk@tb}%
-        \pgfextractx{\rk@ta}{\pgfpointanchor{rk@pobjnode}{west}}%
-        \setlength{\rk@mc@cur}{\rk@ta}\addtolength{\rk@mc@cur}{-\rk@halfsep}%
-        \pgfextractx{\rk@ta}{\pgfpointanchor{rk@pobjnode}{east}}%
-        \setlength{\rk@mc@d}{\rk@ta}\addtolength{\rk@mc@d}{\rk@halfsep}%
+        \setlength{\rk@mc@d}{\rk@tc}%          drawn right = line_right
+        % mc@cur = line_left + 10% of line_width  (mirrors \rk@slot@to@mc)
+        \setlength{\rk@halfsep}{\rk@tc}%
+        \addtolength{\rk@halfsep}{-\rk@ta}%     halfsep = line_width
+        \divide\rk@halfsep by 10\relax%          halfsep = 10% of line_width
+        \setlength{\rk@mc@cur}{\rk@ta}%
+        \addtolength{\rk@mc@cur}{\rk@halfsep}%  mc@cur = line_left + 10%
         \rk@execmods{#1}%
         \ifdim\rk@mc@d>\rk@nounmodright\global\rk@nounmodright=\rk@mc@d\fi
       \endgroup
@@ -1182,6 +1185,11 @@
   \pgfextractx{\rk@tc}{\pgfpointanchor{rk@grdmsr}{east}}%
   \pgfextractx{\rk@ta}{\pgfpointanchor{rk@grdmsr}{west}}%
   \addtolength{\rk@tc}{-\rk@ta}%             rk@tc = word_width
+  % Update rk@ht from gerund word's text height (same as \rk@placeslot does for any word).
+  % Without this, rk@ht stays at the 2.2ex initial value, making \rk@divfwd draw a
+  % longer slant than equivalent noun subjects produce.
+  \pgfextracty{\rk@ta}{\pgfpointanchor{rk@grdmsr}{north}}%
+  \ifdim\rk@ta>\rk@ht\setlength{\rk@ht}{\rk@ta}\fi
   % --- Word platform x bounds ---
   % word_plat_left  = rk@x + halfsep
   \setlength{\rk@ta}{\rk@x}\addtolength{\rk@ta}{\rk@halfsep}%     rk@ta = word_plat_left
@@ -1242,6 +1250,131 @@
 \NewDocumentCommand{\rkGerund}{O{} m}{%
   % Inline fallback (outside diagram context): just typeset the word.
   \textit{#2}%
+}
+
+% ============================================================
+% PARTICIPLE
+% \rk@doparticiple{tail-content}{word}
+%
+% Draws the hockey-stick shape for a participle:
+%   diagonal slanting down-right (word rides on it), followed by
+%   a short horizontal stub at the bottom (the elbow).
+%
+% If tail-content is non-empty it executes in a context where the
+% stub is the local baseline.  Use \rkPartObj[mods]{word} to place
+% a participial object; \rkAdv and \rkPrep attach as usual.
+%
+% Used as a modifier (like \rkAdj / \rkAdv) inside the optional
+% [mods] argument of \rkSubject, \rkDObj, etc.
+% ============================================================
+
+\newcommand{\rk@doparticiple}[2]{%
+  % #1 = tail content (may be empty), #2 = participial word on diagonal
+  \rk@extendbase
+  % Measure the participial word to compute effmod (same formula as \rk@domod)
+  \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
+    (rk@ptcmsr) at (0,0) {#2};%
+  \pgfextractx{\rk@tc}{\pgfpointanchor{rk@ptcmsr}{east}}%
+  \pgfextractx{\rk@ta}{\pgfpointanchor{rk@ptcmsr}{west}}%
+  \addtolength{\rk@tc}{-\rk@ta}%   rk@tc = node width
+  \pgfextracty{\rk@tb}{\pgfpointanchor{rk@ptcmsr}{north}}%
+  \pgfextracty{\rk@ta}{\pgfpointanchor{rk@ptcmsr}{south}}%
+  \addtolength{\rk@tb}{-\rk@ta}%   rk@tb = node height
+  \pgfmathsetlength{\rk@effmod}{max(\the\rk@modDepth, (\the\rk@tc + \the\rk@tb) / 1.41422 + 6pt)}%
+  \ifdim\rk@slant@minlen>\rk@effmod\setlength{\rk@effmod}{\rk@slant@minlen}\fi
+  \setlength{\rk@slant@minlen}{0pt}%
+  % Sibling-push when tail content is present (mirrors \rk@domod with sub-mods)
+  \ifblank{#1}{}{%
+    \ifdim\rk@prevmod@E>\rk@modDepth
+      \addtolength{\rk@mc@cur}{\rk@prevmod@E}%
+      \addtolength{\rk@mc@cur}{-\rk@modDepth}%
+    \fi
+  }%
+  % Three-segment hockey-stick: 45° main section → short 60° kink → horizontal stub.
+  % k = effmod/5 is the horizontal width of the 60° kink.
+  % Segment 1 (45°): (mc@cur, mc@y) → (mc@cur+E−k, mc@y−E+k)   [word label here]
+  % Segment 2 (22°): continues to   (mc@cur+E,   mc@y−E+k·(1−tan22°))
+  % Segment 3 (0°):  horizontal stub from slant end rightward by halfsep
+  %
+  % Register map after this block:
+  %   rk@ta  = slant_x  (= mc@cur + E)
+  %   rk@wlevel = slant_y (= mc@y − E − k·0.73205)
+  %   rk@tc  = stub_end_x (= slant_x + halfsep)
+  %
+  % k = effmod/5
+  \setlength{\rk@tc}{\rk@effmod}\divide\rk@tc by 5\relax       % rk@tc = k
+  % slant_x = mc@cur + effmod
+  \setlength{\rk@ta}{\rk@mc@cur}\addtolength{\rk@ta}{\rk@effmod}% rk@ta = slant_x
+  % mid_x = slant_x − k
+  \setlength{\rk@halfsep}{\rk@ta}\addtolength{\rk@halfsep}{-\rk@tc}% rk@halfsep = mid_x
+  % mid_y = mc@y − (E − k)
+  \setlength{\rk@tb}{\rk@mc@y}\addtolength{\rk@tb}{-\rk@effmod}\addtolength{\rk@tb}{\rk@tc}% rk@tb = mid_y
+  % slant_y = mid_y − k·tan(22°)  [22° section is shallower than 45°, so less deep]
+  \pgfmathsetlength{\rk@wlevel}{\the\rk@tb - 0.40403 * \the\rk@tc}% rk@wlevel = slant_y
+  \ifdim\rk@wlevel<\rk@clause@miny\global\rk@clause@miny=\rk@wlevel\fi
+  % Draw segments 1 and 2 as plain lines (no label on the draw command).
+  \rk@line{(\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@halfsep, \the\rk@tb)}% 45°
+  \rk@line{(\the\rk@halfsep, \the\rk@tb) -- (\the\rk@ta, \the\rk@wlevel)}%   22°
+  % Place word label on a dummy 45° \path from start → slant_x (same as \rk@domod).
+  % Midpoint = E/2 below the main baseline, preventing overlap for wide words.
+  % rk@tb reused for the 45°-end y = mc@y − E.
+  \setlength{\rk@tb}{\rk@mc@y}\addtolength{\rk@tb}{-\rk@effmod}%
+  \path (\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@ta, \the\rk@tb)
+    node[midway, above, sloped,
+         inner sep=2pt, outer sep=0pt, font=\rk@font, color=\rk@color] {#2};%
+  % Segment 3: horizontal stub.
+  % Use full spacing when tail content is present so mods have room to branch from
+  % within the stub; use halfsep for a bare participle (no tail).
+  \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
+  \setlength{\rk@tc}{\rk@ta}%
+  \ifblank{#1}{%
+    \addtolength{\rk@tc}{\rk@halfsep}%   bare: short stub
+  }{%
+    \addtolength{\rk@tc}{\rk@spacing}%   with tail: full-spacing stub
+  }%
+  \rk@line{(\the\rk@ta, \the\rk@wlevel) -- (\the\rk@tc, \the\rk@wlevel)}%
+  % Advance sibling cursor
+  \ifblank{#1}{%
+    \addtolength{\rk@mc@cur}{\rk@modDepth}%
+  }{%
+    \addtolength{\rk@mc@cur}{\rk@effmod}%
+  }%
+  \global\rk@prevmod@E=\rk@effmod
+  \ifrk@extendbl\rk@extendbase\fi
+  % Execute tail content (participial object + modifiers of the participle)
+  \ifblank{#1}{}{%
+    \begingroup
+      \setlength{\rk@x}{\rk@tc}%            cursor starts at stub_end_x
+      \setlength{\rk@base@y}{\rk@wlevel}%  base y = slant_y
+      \setlength{\rk@mc@y}{\rk@wlevel}%
+      % mc@d = slant_x: \rk@extendbase fires as modifiers advance past the elbow.
+      % mc@cur = slant_x + halfsep: first modifier branches from the stub midpoint,
+      % leaving the right half of the stub visible past the attachment point.
+      \setlength{\rk@mc@d}{\rk@ta}%
+      \setlength{\rk@mc@cur}{\rk@ta}\addtolength{\rk@mc@cur}{\rk@halfsep}%
+      \setlength{\rk@ht}{2.2ex}%
+      \setlength{\rk@nounmodright}{\rk@ta}%
+      \global\rk@prevmod@E=0pt
+      #1%
+      % The tail hangs below the main baseline — its horizontal extent must NOT inflate
+      % rk@nounmodright, which controls the main-baseline extension before \rk@divfull.
+    \endgroup
+  }%
+}
+
+% \rkParticiple[tail-content]{word}
+% Modifier command: attaches a participle to a noun via the hockey-stick shape.
+\NewDocumentCommand{\rkParticiple}{O{} m}{%
+  \rk@doparticiple{#1}{#2}%
+}
+
+% \rkPartObj[mods]{word}
+% Places a participial object on the horizontal tail of \rkParticiple.
+% Only meaningful inside \rkParticiple's tail-content argument.
+\NewDocumentCommand{\rkPartObj}{O{} m}{%
+  \rk@placeslot{#2}{\the\rk@base@y}%
+  \rk@slot@to@mc
+  \rk@runmods{#1}%
 }
 
 \endinput

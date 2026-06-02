@@ -644,4 +644,71 @@ take us ashore at so much a head, silver coin of any country.}{%
   \par\textit{Tests: gerund (with adverb modifier) as object of a preposition.}
 }
 
+% ============================================================
+\testsection{Group 15 — Participles}
+% ============================================================
+% A participle functions as an adjective modifying a noun.
+% It sits on a hockey-stick shape: diagonal slanting down-right
+% (word on it) then a short horizontal tail at the elbow.
+% The tail can carry a participial object and/or modifiers.
+
+\testcase{The barking dog scared us.}{%
+  \begin{rkdiagram}
+    \rkSubject[%
+      \rkAdj{The},
+      \rkParticiple{barking}
+    ]{dog}
+    \rkVerb{scared}
+    \rkDObj{us}
+  \end{rkdiagram}
+  \par\textit{Tests: bare participle (no tail) modifying subject noun.}
+}
+
+\testcase{The man running the race smiled.}{%
+  \begin{rkdiagram}
+    \rkSubject[%
+      \rkAdj{The},
+      \rkParticiple[\rkPartObj[\rkAdj{the}]{race}]{running}
+    ]{man}
+    \rkVerb{smiled}
+  \end{rkdiagram}
+  \par\textit{Tests: participle with participial object on horizontal tail.}
+}
+
+\testcase{Exhausted by the climb, she rested.}{%
+  \begin{rkdiagram}
+    \rkSubject[%
+      \rkParticiple[\rkPrep[\rkAdj{the}]{by}{climb}]{Exhausted}
+    ]{she}
+    \rkVerb{rested}
+  \end{rkdiagram}
+  \par\textit{Tests: participle with a prepositional phrase on the tail.}
+}
+
+\testcase{The child sleeping quietly in the corner dreamed.}{%
+  \begin{rkdiagram}
+    \rkSubject[%
+      \rkAdj{The},
+      \rkParticiple[%
+        \rkAdv{quietly},
+        \rkPrep[\rkAdj{the}]{in}{corner}
+      ]{sleeping}
+    ]{child}
+    \rkVerb{dreamed}
+  \end{rkdiagram}
+  \par\textit{Tests: participle with adverb and prepositional phrase on the tail.}
+}
+
+\testcase{The dog chased the cat sitting on the fence.}{%
+  \begin{rkdiagram}
+    \rkSubject[\rkAdj{The}]{dog}
+    \rkVerb{chased}
+    \rkDObj[%
+      \rkAdj{the},
+      \rkParticiple[\rkPrep[\rkAdj{the}]{on}{fence}]{sitting}
+    ]{cat}
+  \end{rkdiagram}
+  \par\textit{Tests: participle modifying the direct object, with prep phrase on tail.}
+}
+
 \end{document}

@@ -21,9 +21,19 @@
 \usepackage{xcolor}
 \usepackage{booktabs}
 \usepackage{array}
-\usepackage{fancyvrb}
-\usepackage{tcolorbox}
-\tcbuselibrary{listings, skins, breakable}
+\usepackage{listings}
+\lstset{
+  basicstyle=\small\ttfamily,
+  columns=fullflexible,
+  keepspaces=true,
+  breaklines=false,
+  backgroundcolor=\color{gray!7},
+  frame=single,
+  rulecolor=\color{gray!30},
+  framesep=4pt,
+  xleftmargin=2pt,
+  xrightmargin=2pt,
+}
 \usepackage{adjustbox}
 \usepackage{titlesec}
 \usepackage{hyperref}
@@ -42,35 +52,26 @@
 \titlespacing{\section}{0pt}{18pt}{6pt}
 \titlespacing{\subsection}{0pt}{12pt}{3pt}
 
-% ---- Code box style ----------------------------------------
-\tcbset{
-  codebox/.style={
-    colback=gray!7, colframe=gray!30, arc=3pt, boxrule=0.4pt,
-    left=6pt, right=6pt, top=4pt, bottom=4pt,
-    fontupper=\small\ttfamily,
-  }
-}
-
 % ---- Example environment -----------------------------------
-% Code box occupies 0.54\linewidth; diagram gets the remaining 0.44\linewidth
-% (0.02\linewidth gutter between them).
+% Code listing (lstlisting) occupies 0.54\linewidth; diagram gets the
+% remaining 0.44\linewidth (0.02\linewidth gutter between them).
 %
-% \minipage/\endminipage are called directly (not via \begin/\end) so that
-% LaTeX's environment-nesting checker does not object to the minipage being
-% opened inside rkexample and closed inside \rksidediagram.
+% The minipage is opened in the begin code and closed in the end code so
+% that LaTeX's environment-nesting checker is satisfied and lstlisting's
+% \begin/\end tracking works correctly inside the minipage.  After
+% \end{rkexample} we remain in horizontal mode (closed minipage is a box in
+% the current paragraph), so \rksidediagram's \hspace + second minipage sit
+% flush to the right on the same baseline.
 \newenvironment{rkexample}[1]{%
   \medskip\noindent\textit{``#1''}\par\smallskip
-  \noindent\minipage[t]{0.54\linewidth}%   <- raw call, no env tracking
-    \begin{tcolorbox}[codebox]%
+  \noindent\begin{minipage}[t]{0.54\linewidth}%
 }{%
-  \end{tcolorbox}%
-}% \minipage intentionally left open — \rksidediagram closes it
+  \end{minipage}%
+}%
 
-% \rksidediagram{content} — closes the raw \minipage from rkexample then
-% opens a fresh minipage flush to its right.  adjustbox scales the diagram
-% down only when it exceeds 0.44\linewidth; smaller diagrams are untouched.
+% \rksidediagram{content} — placed flush right of the code minipage.
+% adjustbox scales the diagram down only when it exceeds 0.44\linewidth.
 \newcommand{\rksidediagram}[1]{%
-  \endminipage%                            <- closes the raw \minipage
   \hspace{0.02\linewidth}%
   \begin{minipage}[t]{0.44\linewidth}%
     \vspace{4pt}%
@@ -79,7 +80,7 @@
   \par\medskip%
 }
 
-% Fix: LuaLaTeX + TikZ font-patch recursion inside minipage/tcolorbox groups.
+% Fix: LuaLaTeX + TikZ font-patch recursion inside minipage groups.
 % pgf saves \selectfont as \pgf@selectfontorig; inside grouped environments it can
 % capture the already-patched version, creating an infinite loop at \end{tikzpicture}.
 % Resetting at \begin{document} (after all font patches) breaks the cycle.
@@ -113,8 +114,7 @@ The \texttt{rkdiagram} package typesets traditional Reed-Kellogg sentence diagra
 % ---- Setup -------------------------------------------------
 \section{Loading the Package}
 
-\begin{tcolorbox}[codebox]
-\begin{Verbatim}
+\begin{lstlisting}
 \usepackage[
   spacing        = 1.3cm,
   modDepth       = 1.0cm,
@@ -125,15 +125,14 @@ The \texttt{rkdiagram} package typesets traditional Reed-Kellogg sentence diagra
   font           = \rmfamily,
   color          = black,
 ]{rkdiagram}
-\end{Verbatim}
-\end{tcolorbox}
+\end{lstlisting}
 
 All options are optional; the values above are the defaults.
 Override any option mid-document with \cmd{rkset}:
 
-\begin{tcolorbox}[codebox]
-\verb|\rkset{spacing=1.5cm, color=blue}|
-\end{tcolorbox}
+\begin{lstlisting}
+\rkset{spacing=1.5cm, color=blue}
+\end{lstlisting}
 
 \subsection*{Package options}
 
@@ -159,14 +158,12 @@ Override any option mid-document with \cmd{rkset}:
 
 Every diagram lives inside \texttt{rkdiagram}, which opens a Ti\textit{k}Z picture:
 
-\begin{tcolorbox}[codebox]
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}[spacing=1.5cm]   % optional per-diagram options
   \rkSubject{word}
   \rkVerb{word}
 \end{rkdiagram}
-\end{Verbatim}
-\end{tcolorbox}
+\end{lstlisting}
 
 Words are automatically centred on their baseline lines. The diagram sits on the text baseline and can appear inline or in its own paragraph.
 
@@ -181,12 +178,12 @@ A full vertical bar separates subject from verb. The bar's ascender (above the b
 
 \medskip
 \begin{rkexample}{Dogs bark.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{Dogs}
   \rkVerb{bark}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{\begin{rkdiagram}\rkSubject{Dogs}\rkVerb{bark}\end{rkdiagram}}
 
@@ -196,13 +193,13 @@ A full vertical bar separates subject from verb. The bar's ascender (above the b
 
 \medskip
 \begin{rkexample}{The cat chased the mouse.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject[\rkAdj{The}]{cat}
   \rkVerb{chased}
   \rkDObj[\rkAdj{the}]{mouse}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -217,14 +214,14 @@ A full vertical bar separates subject from verb. The bar's ascender (above the b
 
 \medskip
 \begin{rkexample}{She gave him a gift.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{She}
   \rkVerb{gave}
   \rkIObj{him}
   \rkDObj[\rkAdj{a}]{gift}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -237,13 +234,13 @@ After a linking verb, a back-diagonal divider (\textbackslash) introduces a pred
 
 \medskip
 \begin{rkexample}{He is a teacher.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{He}
   \rkVerb{is}
   \rkPredNom[\rkAdj{a}]{teacher}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -255,15 +252,15 @@ After a linking verb, a back-diagonal divider (\textbackslash) introduces a pred
 
 Modifiers hang below the word they modify on a 45° diagonal. Use \cmd{rkAdj} for adjectives and articles, \cmd{rkAdv} for adverbs. Pass them as the \emph{optional first argument} of the word they modify, comma-separated:
 
-\begin{tcolorbox}[codebox]
-\verb|\rkSubject[\rkAdj{The}, \rkAdj{old}]{dog}|
-\end{tcolorbox}
+\begin{lstlisting}
+\rkSubject[\rkAdj{The}, \rkAdj{old}]{dog}
+\end{lstlisting}
 
 A modifier takes its own optional argument for sub-modifiers, creating chains of diagonals:
 
 \medskip
 \begin{rkexample}{The very old dog barked quite loudly.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject[
     \rkAdj{The},
@@ -271,7 +268,7 @@ A modifier takes its own optional argument for sub-modifiers, creating chains of
   ]{dog}
   \rkVerb[\rkAdv[\rkAdv{quite}]{loudly}]{barked}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}[spacing=1.1cm]
@@ -289,20 +286,20 @@ The \opt{modgap} option adds extra vertical clearance between nested levels (def
 
 \cmd{rkPrep} draws a diagonal with the preposition label, then a horizontal line for the object.
 
-\begin{tcolorbox}[codebox]
-\verb|\rkPrep[mods-on-object]{preposition}{object}|
-\end{tcolorbox}
+\begin{lstlisting}
+\rkPrep[mods-on-object]{preposition}{object}
+\end{lstlisting}
 
 Place it in the modifier list of the word it modifies:
 
 \medskip
 \begin{rkexample}{The cat sat on the mat.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject[\rkAdj{The}]{cat}
   \rkVerb[\rkPrep[\rkAdj{the}]{on}{mat}]{sat}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -314,7 +311,7 @@ Prepositional phrases nest freely — a prep modifying the object of another pre
 
 \medskip
 \begin{rkexample}{The book on the shelf in the corner is mine.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject[
     \rkAdj{The},
@@ -326,7 +323,7 @@ Prepositional phrases nest freely — a prep modifying the object of another pre
   \rkVerb{is}
   \rkPredNom{mine}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}[spacing=1.1cm]
@@ -344,9 +341,9 @@ Prepositional phrases nest freely — a prep modifying the object of another pre
 
 \cmd{rkCompound} joins two words or phrases with a conjunction. The full signature is:
 
-\begin{tcolorbox}[codebox]
-\verb|\rkCompound[conj][mods_a]{word_a}[mods_b]{word_b}|
-\end{tcolorbox}
+\begin{lstlisting}
+\rkCompound[conj][mods_a]{word_a}[mods_b]{word_b}
+\end{lstlisting}
 
 \begin{itemize}\setlength\itemsep{2pt}
   \item \texttt{[conj]} — conjunction label (default: \textit{and})
@@ -358,12 +355,12 @@ Each word sits on its own horizontal platform. The platforms are connected by co
 
 \medskip
 \begin{rkexample}{John and Mary sang.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{\rkCompound[and]{John}{Mary}}
   \rkVerb{sang}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -377,7 +374,7 @@ Modifiers on each compound word go in the optional modifier-list arguments:
 
 \medskip
 \begin{rkexample}{He painted the wall but not the ceiling.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{He}
   \rkVerb{painted}
@@ -387,7 +384,7 @@ Modifiers on each compound word go in the optional modifier-list arguments:
       [\rkAdj{the}]{ceiling}
   }
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}[spacing=1.1cm]
@@ -403,7 +400,7 @@ Pass \cmd{rkCompound} as the object argument of \cmd{rkPrep} to fork the preposi
 
 \medskip
 \begin{rkexample}{...with brass rings in their ears and fraud in their hearts...}
-\begin{Verbatim}
+\begin{lstlisting}
 \rkPrep{with}{
   \rkCompound[and]
     [\rkAdj{brass}, \rkPrep[\rkAdj{their}]{in}{ears}]
@@ -411,7 +408,7 @@ Pass \cmd{rkCompound} as the object argument of \cmd{rkPrep} to fork the preposi
     [\rkPrep[\rkAdj{their}]{in}{hearts}]
     {fraud}
 }
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}[spacing=1.0cm,cmpSep=1.4cm]
@@ -432,14 +429,12 @@ Use \opt{cmpSep} when modifiers on the compound words are deep and need extra ve
 
 Use \cmd{rkCompoundSent} \emph{standalone} (not inside \texttt{rkdiagram}) to diagram two independent clauses in a single picture, connected by a dashed-line bridge with the coordinating conjunction. Each clause body must be wrapped in its own \texttt{rkdiagram} environment:
 
-\begin{tcolorbox}[codebox]
-\begin{Verbatim}
+\begin{lstlisting}
 \rkCompoundSent[conj][sep][opts1]
   {\begin{rkdiagram}body1\end{rkdiagram}}
   [opts2]
   {\begin{rkdiagram}body2\end{rkdiagram}}
-\end{Verbatim}
-\end{tcolorbox}
+\end{lstlisting}
 
 \begin{itemize}\setlength\itemsep{2pt}
   \item \texttt{[conj]} — conjunction (default: \textit{and})
@@ -452,7 +447,7 @@ The connector drops a dashed vertical from each clause's verb to a midpoint brid
 
 \medskip
 \begin{rkexample}{Dogs bark and cats purr.}
-\begin{Verbatim}
+\begin{lstlisting}
 \rkCompoundSent[and][2.5cm]
   {\begin{rkdiagram}
      \rkSubject{Dogs}
@@ -462,7 +457,7 @@ The connector drops a dashed vertical from each clause's verb to a midpoint brid
      \rkSubject{Cats}
      \rkVerb{purr}
    \end{rkdiagram}}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \rkCompoundSent[and][2.5cm]
@@ -476,7 +471,7 @@ The connector drops a dashed vertical from each clause's verb to a midpoint brid
 
 \medskip
 \begin{rkexample}{My brother, the doctor, arrived.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject[
     \rkAdj{My},
@@ -484,7 +479,7 @@ The connector drops a dashed vertical from each clause's verb to a midpoint brid
   ]{brother}
   \rkVerb{arrived}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -497,13 +492,13 @@ The connector drops a dashed vertical from each clause's verb to a midpoint brid
 
 \cmd{rkSubClause} draws a complete sub-baseline below the main one, connected by a dashed vertical. It appears in the modifier list of the word it modifies. The optional argument is the relative or subordinating word placed first on the sub-baseline; it doubles as the grammatical subject, so do \emph{not} add a separate \cmd{rkSubject} call for it.
 
-\begin{tcolorbox}[codebox]
-\verb|\rkSubClause[rel-word]{body}|
-\end{tcolorbox}
+\begin{lstlisting}
+\rkSubClause[rel-word]{body}
+\end{lstlisting}
 
 \medskip
 \begin{rkexample}{The man who wore the hat left.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject[
     \rkAdj{The},
@@ -514,7 +509,7 @@ The connector drops a dashed vertical from each clause's verb to a midpoint brid
   ]{man}
   \rkVerb{left}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}[spacing=1.1cm]
@@ -532,7 +527,7 @@ A noun clause as direct object — the sub-clause body starts directly with \cmd
 
 \medskip
 \begin{rkexample}{She knows that he lied.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{She}
   \rkVerb{knows}
@@ -543,7 +538,7 @@ A noun clause as direct object — the sub-clause body starts directly with \cmd
     }
   }
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -556,21 +551,21 @@ A noun clause as direct object — the sub-clause body starts directly with \cmd
 
 A \emph{gerund} is a verb form used as a noun. It sits on a stepped T-platform: a full-width horizontal foot at the noun-slot baseline, two short angled legs rising to an apex, a vertical post, and a short word-platform at the top. Use \cmd{rkGerund} as the \emph{word argument} of any baseline command (\cmd{rkSubject}, \cmd{rkDObj}, \cmd{rkPredNom}, etc.) or as the object of \cmd{rkPrep}.
 
-\begin{tcolorbox}[codebox]
-\verb|\rkGerund[mods]{word}|
-\end{tcolorbox}
+\begin{lstlisting}
+\rkGerund[mods]{word}
+\end{lstlisting}
 
 The optional \texttt{[mods]} argument holds modifiers of the gerund itself (adjectives, prepositional phrases, etc.). The package pre-scans the list to compute a post height tall enough to keep all modifier slants clear of the foot. Use the \opt{gerundPost} option (default \texttt{1.2cm}) to set a minimum post height globally.
 
 \medskip
 \begin{rkexample}{Swimming is fun.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{\rkGerund{Swimming}}
   \rkVerb{is}
   \rkPredAdj{fun}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -583,7 +578,7 @@ Gerund with its own modifiers — the post height adjusts automatically:
 
 \medskip
 \begin{rkexample}{Rapid swimming exhausts him.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{
     \rkGerund[\rkAdj{Rapid}]{swimming}
@@ -591,7 +586,7 @@ Gerund with its own modifiers — the post height adjusts automatically:
   \rkVerb{exhausts}
   \rkDObj{him}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -604,7 +599,7 @@ Gerund as the object of a preposition:
 
 \medskip
 \begin{rkexample}{She is good at running quickly.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{She}
   \rkVerb{is}
@@ -612,7 +607,7 @@ Gerund as the object of a preposition:
     \rkPrep{at}{\rkGerund[\rkAdv{quickly}]{running}}
   ]{good}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}[spacing=1.1cm]
@@ -626,26 +621,24 @@ Gerund as the object of a preposition:
 
 A \emph{participle} functions as an adjective modifying a noun. It is drawn with a hockey-stick shape: a 45° diagonal (word label above it), a short shallower transition, and a horizontal stub. Use \cmd{rkParticiple} inside a modifier list — the same position as \cmd{rkAdj}.
 
-\begin{tcolorbox}[codebox]
-\verb|\rkParticiple[tail]{word}|
-\end{tcolorbox}
+\begin{lstlisting}
+\rkParticiple[tail]{word}
+\end{lstlisting}
 
 Without a tail argument the shape is simply the angled line with word label — enough for a bare participial adjective. With a tail, the horizontal stub serves as a mini-baseline for a participial direct object and/or modifiers of the participle:
 
-\begin{tcolorbox}[codebox]
-\begin{Verbatim}
+\begin{lstlisting}
 % Participial object on the tail:
 \rkPartObj[mods]{word}
 
 % Adverb or prep phrase modifying the participle, also on the tail:
 \rkAdv{quickly}
 \rkPrep[obj-mods]{prep}{obj}
-\end{Verbatim}
-\end{tcolorbox}
+\end{lstlisting}
 
 \medskip
 \begin{rkexample}{The barking dog scared us.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject[
     \rkAdj{The},
@@ -654,7 +647,7 @@ Without a tail argument the shape is simply the angled line with word label — 
   \rkVerb{scared}
   \rkDObj{us}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -667,7 +660,7 @@ Participle with a participial object (\cmd{rkPartObj}) on the tail:
 
 \medskip
 \begin{rkexample}{The man running the race smiled.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject[
     \rkAdj{The},
@@ -677,7 +670,7 @@ Participle with a participial object (\cmd{rkPartObj}) on the tail:
   ]{man}
   \rkVerb{smiled}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}[spacing=1.1cm]
@@ -692,7 +685,7 @@ Participle with a prepositional phrase on the tail (the traditional passive-part
 
 \medskip
 \begin{rkexample}{Exhausted by the climb, she rested.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject[
     \rkParticiple[
@@ -701,7 +694,7 @@ Participle with a prepositional phrase on the tail (the traditional passive-part
   ]{she}
   \rkVerb{rested}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}[spacing=1.1cm]
@@ -715,7 +708,7 @@ Multiple tail items (adverb + prepositional phrase) both branch from the horizon
 
 \medskip
 \begin{rkexample}{The child sleeping quietly in the corner dreamed.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject[
     \rkAdj{The},
@@ -726,7 +719,7 @@ Multiple tail items (adverb + prepositional phrase) both branch from the horizon
   ]{child}
   \rkVerb{dreamed}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}[spacing=1.1cm]
@@ -750,22 +743,22 @@ An infinitive (\emph{to + verb}) has two distinct uses:
   \item \textbf{Modifier function} — used as adjective or adverb.  The diagram looks like a prepositional phrase: a diagonal line with \emph{to} written on it, and the verb on a short horizontal at the bottom.  That horizontal is a full mini-baseline: use \cmd{rkInfObj} to place a direct object, and \cmd{rkAdv}/\cmd{rkPrep} for adverbial modifiers.  Use \cmd{rkInfinitive} inside any modifier list.
 \end{itemize}
 
-\begin{tcolorbox}[codebox]
-\verb|\rkInfinitive[arg]{verb}|
-\end{tcolorbox}
+\begin{lstlisting}
+\rkInfinitive[arg]{verb}
+\end{lstlisting}
 
 The optional \texttt{arg} carries modifiers of the verb in the noun form; in the modifier form it is tail content (objects, adverbial modifiers) on the mini-baseline.
 
 \subsection*{Noun form — infinitive as subject or object}
 
 \begin{rkexample}{To run is fun.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{\rkInfinitive{run}}
   \rkVerb{is}
   \rkPredNom{fun}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -777,14 +770,14 @@ The optional \texttt{arg} carries modifiers of the verb in the noun form; in the
 Infinitive noun with a modifier on the verb:
 
 \begin{rkexample}{To run quickly is fun.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{%
     \rkInfinitive[\rkAdv{quickly}]{run}}
   \rkVerb{is}
   \rkPredNom{fun}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -798,12 +791,12 @@ Infinitive noun with a modifier on the verb:
 Without a tail the shape is a diagonal labeled \emph{to} with the verb on a short horizontal — identical in form to a prepositional phrase.
 
 \begin{rkexample}{She came to win.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{She}
   \rkVerb[\rkInfinitive{win}]{came}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -814,7 +807,7 @@ Without a tail the shape is a diagonal labeled \emph{to} with the verb on a shor
 With tail content, use \cmd{rkInfObj} for a direct object and \cmd{rkAdv}/\cmd{rkPrep} for adverbial modifiers of the infinitive verb:
 
 \begin{rkexample}{He trained to finish the race quickly.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{He}
   \rkVerb[%
@@ -824,7 +817,7 @@ With tail content, use \cmd{rkInfObj} for a direct object and \cmd{rkAdv}/\cmd{r
     ]{finish}%
   ]{trained}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -838,9 +831,9 @@ With tail content, use \cmd{rkInfObj} for a direct object and \cmd{rkAdv}/\cmd{r
 
 A nominative absolute is a noun-plus-participial-phrase that modifies the whole sentence rather than any single word.  In a Reed-Kellogg diagram it floats above the main clause with no connector line.
 
-\begin{tcolorbox}[codebox]
-\verb|\rkNomAbs[noun-mods]{noun}{ptcl-tail}{ptcl-word}|
-\end{tcolorbox}
+\begin{lstlisting}
+\rkNomAbs[noun-mods]{noun}{ptcl-tail}{ptcl-word}
+\end{lstlisting}
 
 \begin{itemize}
   \item \textbf{Call order}: \cmd{rkNomAbs} can be called anywhere inside the diagram environment — it always floats above the main baseline at a fixed height.
@@ -850,13 +843,13 @@ A nominative absolute is a noun-plus-participial-phrase that modifies the whole 
 \end{itemize}
 
 \begin{rkexample}{The battle over, the soldiers retreated.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject[\rkAdj{The}]{soldiers}
   \rkVerb{retreated}
   \rkNomAbs[\rkAdj{The}]{battle}{}{over}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -868,7 +861,7 @@ A nominative absolute is a noun-plus-participial-phrase that modifies the whole 
 Nominative absolute with a participial object on the tail:
 
 \begin{rkexample}{His duty done, he left.}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{he}
   \rkVerb{left}
@@ -876,7 +869,7 @@ Nominative absolute with a participial object on the tail:
     \rkPartObj{done}%
   }{finished}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -889,13 +882,11 @@ Nominative absolute with a participial object on the tail:
 
 Three one-shot commands let you override automatic spacing for a single element; they reset to zero automatically after use.
 
-\begin{tcolorbox}[codebox]
-\begin{Verbatim}
+\begin{lstlisting}
 \rkSlotWidth{len}   % min line width for the NEXT baseline slot
 \rkSkip{len}        % gap in baseline BEFORE the next slot
 \rkSlantLen{len}    % min diagonal length for the NEXT modifier/prep
-\end{Verbatim}
-\end{tcolorbox}
+\end{lstlisting}
 
 \subsection*{\cmd{rkSlotWidth} — minimum word line length}
 
@@ -903,13 +894,13 @@ Forces the next slot's baseline line to be at least \texttt{len} wide, regardles
 
 \medskip
 \begin{rkexample}{Dogs bark. (4 cm subject line)}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSlotWidth{4cm}
   \rkSubject{Dogs}
   \rkVerb{bark}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -922,13 +913,13 @@ Inserts a gap of \texttt{len} in the baseline \emph{before} the next slot. The g
 
 \medskip
 \begin{rkexample}{Dogs bark. (1.5 cm gap before verb)}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{Dogs}
   \rkSkip{1.5cm}
   \rkVerb{bark}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -941,7 +932,7 @@ Forces the next modifier or prepositional slant to be at least \texttt{len} long
 
 \medskip
 \begin{rkexample}{The cat sat on the mat. (longer prep slant)}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject[\rkAdj{The}]{cat}
   \rkVerb[
@@ -949,7 +940,7 @@ Forces the next modifier or prepositional slant to be at least \texttt{len} long
     \rkPrep[\rkAdj{the}]{on}{mat}
   ]{sat}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}
@@ -963,22 +954,20 @@ All three commands work inside sub-clauses and on compound-word platforms as wel
 
 By default \cmd{rkNomAbs} floats the absolute phrase at \texttt{subClauseDepth} above the main baseline.  When the participle and its own modifiers are deep, they can crowd the main clause.  Call \cmd{rkNomAbsHeight} immediately before \cmd{rkNomAbs} to override the height for that one phrase; it resets automatically.
 
-\begin{tcolorbox}[codebox]
-\verb|\rkNomAbsHeight{4cm}|
-\end{tcolorbox}
+\begin{lstlisting}
+\rkNomAbsHeight{4cm}
+\end{lstlisting}
 
 % ---- Structural depth controls --------------------------------
 \section{Structural Depth Controls}
 
 The global options \opt{modDepth}, \opt{subClauseDepth}, and \opt{cmpSep} control the vertical geometry of the diagram. Any of them can be changed per-diagram by passing options to the \texttt{rkdiagram} environment, or mid-document with \cmd{rkset}:
 
-\begin{tcolorbox}[codebox]
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}[modDepth=1.5cm, subClauseDepth=3cm]
   ...
 \end{rkdiagram}
-\end{Verbatim}
-\end{tcolorbox}
+\end{lstlisting}
 
 \subsection*{\opt{modDepth} — modifier spacing and slant depth}
 
@@ -986,12 +975,12 @@ Controls two related things simultaneously. For plain adjectives and adverbs (no
 
 \medskip
 \begin{rkexample}{Deeper slants (modDepth=1.6cm)}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}[modDepth=1.6cm]
   \rkSubject[\rkAdj{The}]{cat}
   \rkVerb[\rkPrep[\rkAdj{the}]{on}{mat}]{sat}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}[modDepth=1.6cm]
@@ -1005,7 +994,7 @@ Controls how far below the main baseline a subordinate clause is drawn. Increase
 
 \medskip
 \begin{rkexample}{Deeper sub-clause (subClauseDepth=3.5cm)}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}[subClauseDepth=3.5cm]
   \rkSubject[
     \rkAdj{The},
@@ -1016,7 +1005,7 @@ Controls how far below the main baseline a subordinate clause is drawn. Increase
   ]{man}
   \rkVerb{left}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}[spacing=1.1cm,subClauseDepth=3.5cm]
@@ -1036,14 +1025,14 @@ Sets the minimum vertical half-gap between the two platforms of a compound eleme
 
 \medskip
 \begin{rkexample}{Extra separation (cmpSep=1.0cm)}
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}[cmpSep=1.0cm]
   \rkSubject{
     \rkCompound[and]{John}{Mary}
   }
   \rkVerb{sang}
 \end{rkdiagram}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \begin{rkdiagram}[cmpSep=1.0cm]
@@ -1055,19 +1044,17 @@ Sets the minimum vertical half-gap between the two platforms of a compound eleme
 
 By default \cmd{rkCompoundSent} places the horizontal bridge halfway between the two baselines, automatically lowering it if clause\,1 modifiers extend into that region. Use \opt{bridgeY} (a negative length, measured from clause\,1's baseline) to pin the bridge at an exact position:
 
-\begin{tcolorbox}[codebox]
-\begin{Verbatim}
+\begin{lstlisting}
 \rkCompoundSent[and][3cm][bridgeY=-1.8cm]
   {\begin{rkdiagram}\rkSubject{Dogs}\rkVerb{bark}\end{rkdiagram}}
   {\begin{rkdiagram}\rkSubject{Cats}\rkVerb{purr}\end{rkdiagram}}
-\end{Verbatim}
-\end{tcolorbox}
+\end{lstlisting}
 
 Pass \opt{bridgeY} in the first per-clause options argument. Setting it to \texttt{0pt} restores automatic placement.
 
 \medskip
 \begin{rkexample}{Bridge pinned at $-1.2$\,cm}
-\begin{Verbatim}
+\begin{lstlisting}
 \rkCompoundSent[and][2.5cm]
   [bridgeY=-1.2cm]
   {\begin{rkdiagram}
@@ -1076,7 +1063,7 @@ Pass \opt{bridgeY} in the first per-clause options argument. Setting it to \text
   {\begin{rkdiagram}
      \rkSubject{Cats} \rkVerb{purr}
    \end{rkdiagram}}
-\end{Verbatim}
+\end{lstlisting}
 \end{rkexample}
 \rksidediagram{%
   \rkCompoundSent[and][2.5cm]
@@ -1091,8 +1078,7 @@ Pass \opt{bridgeY} in the first per-clause options argument. Setting it to \text
 \textit{``The tall woman in the red coat gave her young daughter a very old book.''}
 
 \medskip
-\begin{tcolorbox}[codebox]
-\begin{Verbatim}
+\begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject[
     \rkAdj{The}, \rkAdj{tall},
@@ -1102,8 +1088,7 @@ Pass \opt{bridgeY} in the first per-clause options argument. Setting it to \text
   \rkIObj[\rkAdj{her}, \rkAdj{young}]{daughter}
   \rkDObj[\rkAdj{a}, \rkAdj[\rkAdv{very}]{old}]{book}
 \end{rkdiagram}
-\end{Verbatim}
-\end{tcolorbox}
+\end{lstlisting}
 
 \medskip
 \begin{rkdiagram}[spacing=1.3cm]

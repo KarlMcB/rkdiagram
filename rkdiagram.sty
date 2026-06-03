@@ -85,6 +85,16 @@
 % Right edge of the indirect-object platform (global; checked after \rk@doiobj)
 \newlength{\rk@iobj@xmax}
 
+% Saved verb word text (for re-centering after \rkIObj widens the slot)
+\newcommand{\rk@vb@word}{}
+
+% Saved subject word + slot bounds (for re-centering when noun-mod overhang widens the slot)
+\newcommand{\rk@subj@word}{}
+\newlength{\rk@subj@l}
+\newlength{\rk@subj@r}
+% Set true when an appositive is placed on the subject (suppresses re-centering).
+\newif\ifrk@subj@appos  \rk@subj@apposfalse
+
 % Effective mod depth for a single modifier (may exceed \rk@modDepth for wide words)
 \newlength{\rk@effmod}
 
@@ -315,6 +325,19 @@
   \ifdim\rk@nounmodright>\rk@x
     \rk@line{(\the\rk@x, \the\rk@base@y) -- (\the\rk@nounmodright, \the\rk@base@y)}%
     \setlength{\rk@x}{\rk@nounmodright}%
+    % Re-centre subject word in the now-wider slot [subj@l … rk@x].
+    % Skip if an appositive is present — the word is correctly left-positioned
+    % and the appositive text occupies the right portion of the slot.
+    \ifrk@subj@appos\else\ifblank{\rk@subj@word}{}{%
+      \setlength{\rk@tb}{\rk@base@y}\addtolength{\rk@tb}{\rk@ht}\addtolength{\rk@tb}{4pt}%
+      \fill[white] (\the\rk@subj@l, \the\rk@base@y) rectangle (\the\rk@subj@r, \the\rk@tb);%
+      \setlength{\rk@ta}{\rk@subj@l}\addtolength{\rk@ta}{\rk@x}\divide\rk@ta by 2\relax
+      \setlength{\rk@wlevel}{\rk@base@y}\addtolength{\rk@wlevel}{\rk@wordlift}%
+      \node[anchor=base, inner sep=0pt, outer sep=0pt, font=\rk@font]
+        at (\the\rk@ta, \the\rk@wlevel) {\rk@subj@word};%
+      \rk@line{(\the\rk@subj@l, \the\rk@base@y) -- (\the\rk@x, \the\rk@base@y)}%
+      \gdef\rk@subj@word{}%
+    }\fi
   \fi
   \setlength{\rk@ta}{\rk@ht}%
   \addtolength{\rk@ta}{0.18cm}%
@@ -622,6 +645,21 @@
   \ifdim\rk@iobj@xmax>\rk@x
     \rk@line{(\the\rk@x, \the\rk@vb@y) -- (\the\rk@iobj@xmax, \the\rk@vb@y)}%
     \setlength{\rk@x}{\rk@iobj@xmax}%
+    % Re-centre verb word in the now-wider slot [vb@l … rk@x].
+    % Erase the old (off-centre) text with a white rectangle, then place the word
+    % at the correct new centre and redraw the baseline on top.
+    \ifblank{\rk@vb@word}{}{%
+      % White rectangle covering the old verb text (above the baseline).
+      \setlength{\rk@tb}{\rk@vb@y}\addtolength{\rk@tb}{\rk@ht}\addtolength{\rk@tb}{4pt}%
+      \fill[white] (\the\rk@vb@l, \the\rk@vb@y) rectangle (\the\rk@vb@r, \the\rk@tb);%
+      % Place verb word at new centre.
+      \setlength{\rk@ta}{\rk@vb@l}\addtolength{\rk@ta}{\rk@x}\divide\rk@ta by 2\relax
+      \setlength{\rk@wlevel}{\rk@vb@y}\addtolength{\rk@wlevel}{\rk@wordlift}%
+      \node[anchor=base, inner sep=0pt, outer sep=0pt, font=\rk@font]
+        at (\the\rk@ta, \the\rk@wlevel) {\rk@vb@word};%
+      % Redraw baseline (white fill covered it).
+      \rk@line{(\the\rk@vb@l, \the\rk@vb@y) -- (\the\rk@x, \the\rk@vb@y)}%
+    }%
   \fi
 }
 
@@ -630,6 +668,7 @@
 % ============================================================
 
 \newcommand{\rk@doappos}[1]{%
+  \global\rk@subj@appostrue
   % Place in parens to the right of whatever the current drawn edge is
   \setlength{\rk@halfsep}{\rk@spacing}%
   \divide\rk@halfsep by 2\relax
@@ -730,6 +769,11 @@
   \global\rk@vb@l=0pt
   \global\rk@vb@r=0pt
   \global\rk@vb@y=0pt
+  \gdef\rk@vb@word{}%
+  \gdef\rk@subj@word{}%
+  \global\rk@subj@l=0pt
+  \global\rk@subj@r=0pt
+  \global\rk@subj@apposfalse
   \setlength{\rk@iobj@xmax}{0pt}%
   \setlength{\rk@nounmodright}{0pt}%
   \setlength{\rk@base@y}{0pt}%
@@ -856,7 +900,10 @@
 
 \NewDocumentCommand{\rkSubject}{O{}m}{%
   \def\rk@cmpdir{r}%
+  \gdef\rk@subj@word{#2}%
   \rk@placeslot{#2}{\the\rk@base@y}%
+  \global\rk@subj@l=\rk@sl@l
+  \global\rk@subj@r=\rk@sl@r
   \rk@slot@to@mc
   \rk@runmods{#1}%
 }
@@ -864,6 +911,7 @@
 \NewDocumentCommand{\rkVerb}{O{}m}{%
   \rk@divfull
   \def\rk@cmpdir{l}%
+  \gdef\rk@vb@word{#2}%
   \rk@placeslot{#2}{\the\rk@base@y}%
   % Save verb slot globally so \rkCompoundSent can read vb@r after \end{rkdiagram}
   % closes the environment's implicit group.
@@ -1457,6 +1505,11 @@
   \rk@placeslot{#2}{\the\rk@base@y}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
+  % \rk@runmods restores mc@cur (group boundary). Advance past the object slot so
+  % subsequent tail modifiers (e.g. \rkAdv) don't stack with the object's modifiers.
+  \ifdim\rk@x>\rk@mc@cur\setlength{\rk@mc@cur}{\rk@x}\fi
+  \ifdim\rk@nounmodright>\rk@mc@cur\setlength{\rk@mc@cur}{\rk@nounmodright}\fi
+  \ifdim\rk@x>\rk@mc@d\setlength{\rk@mc@d}{\rk@x}\fi
 }
 
 % ============================================================
@@ -1497,31 +1550,32 @@
       \addtolength{\rk@mc@cur}{-\rk@modDepth}%
     \fi
   }%
-  % Three-segment hockey-stick: 45° main section → short 60° kink → horizontal stub.
-  % k = effmod/5 is the horizontal width of the 60° kink.
+  % Hockey-stick shape: 45° slant → bezier curve → horizontal stub.
+  % k = effmod/5 is the horizontal width of the curve.
   % Segment 1 (45°): (mc@cur, mc@y) → (mc@cur+E−k, mc@y−E+k)   [word label here]
-  % Segment 2 (22°): continues to   (mc@cur+E,   mc@y−E+k·(1−tan22°))
+  % Curve (out=-45, in=180): from above to  (mc@cur+E, slant_y)
   % Segment 3 (0°):  horizontal stub from slant end rightward by halfsep
   %
   % Register map after this block:
   %   rk@ta  = slant_x  (= mc@cur + E)
-  %   rk@wlevel = slant_y (= mc@y − E − k·0.73205)
+  %   rk@wlevel = slant_y (= mid_y − k·tan22°; matches natural arc endpoint)
   %   rk@tc  = stub_end_x (= slant_x + halfsep)
   %
   % k = effmod/5
   \setlength{\rk@tc}{\rk@effmod}\divide\rk@tc by 5\relax       % rk@tc = k
   % slant_x = mc@cur + effmod
   \setlength{\rk@ta}{\rk@mc@cur}\addtolength{\rk@ta}{\rk@effmod}% rk@ta = slant_x
-  % mid_x = slant_x − k
+  % mid_x = slant_x − k  (where 45° line ends and curve begins)
   \setlength{\rk@halfsep}{\rk@ta}\addtolength{\rk@halfsep}{-\rk@tc}% rk@halfsep = mid_x
   % mid_y = mc@y − (E − k)
   \setlength{\rk@tb}{\rk@mc@y}\addtolength{\rk@tb}{-\rk@effmod}\addtolength{\rk@tb}{\rk@tc}% rk@tb = mid_y
-  % slant_y = mid_y − k·tan(22°)  [22° section is shallower than 45°, so less deep]
+  % slant_y = mid_y − k·tan(22°)  (≈ natural arc endpoint for out=-45,in=180 over width k)
   \pgfmathsetlength{\rk@wlevel}{\the\rk@tb - 0.40403 * \the\rk@tc}% rk@wlevel = slant_y
   \ifdim\rk@wlevel<\rk@clause@miny\global\rk@clause@miny=\rk@wlevel\fi
-  % Draw segments 1 and 2 as plain lines (no label on the draw command).
+  % Draw 45° slant then bezier curve to the stub (no label on these draw commands).
   \rk@line{(\the\rk@mc@cur, \the\rk@mc@y) -- (\the\rk@halfsep, \the\rk@tb)}% 45°
-  \rk@line{(\the\rk@halfsep, \the\rk@tb) -- (\the\rk@ta, \the\rk@wlevel)}%   22°
+  \draw[color=\rk@color, line width=\rk@lw]
+    (\the\rk@halfsep, \the\rk@tb) to[out=-45, in=180] (\the\rk@ta, \the\rk@wlevel);% curve
   % Place word label on a dummy 45° \path from start → slant_x (same as \rk@domod).
   % Midpoint = E/2 below the main baseline, preventing overlap for wide words.
   % rk@tb reused for the 45°-end y = mc@y − E.
@@ -1582,6 +1636,11 @@
   \rk@placeslot{#2}{\the\rk@base@y}%
   \rk@slot@to@mc
   \rk@runmods{#1}%
+  % Advance mc@cur past the object slot so subsequent tail modifiers don't
+  % stack with the object's own modifiers (same fix as \rkInfObj).
+  \ifdim\rk@x>\rk@mc@cur\setlength{\rk@mc@cur}{\rk@x}\fi
+  \ifdim\rk@nounmodright>\rk@mc@cur\setlength{\rk@mc@cur}{\rk@nounmodright}\fi
+  \ifdim\rk@x>\rk@mc@d\setlength{\rk@mc@d}{\rk@x}\fi
 }
 
 % ============================================================

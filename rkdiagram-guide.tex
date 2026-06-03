@@ -16,12 +16,24 @@
 
 \usepackage{geometry}
 \geometry{margin=1.1in, top=1.0in, bottom=1.1in}
+\usepackage{ccicons}
+%\usepackage{graphix}
+\usepackage{hyperref}
+\usepackage{hyperxmp}
+\usepackage{csquotes}
 \usepackage{microtype}
 \usepackage{parskip}
 \usepackage{xcolor}
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{listings}
+\usepackage[
+type={CC},
+modifier={by-nc-sa},
+version={4.0},
+]{doclicense}
+
+
 \lstset{
   basicstyle=\small\ttfamily,
   columns=fullflexible,
@@ -36,7 +48,7 @@
 }
 \usepackage{adjustbox}
 \usepackage{titlesec}
-\usepackage{hyperref}
+%\usepackage{hyperref}
 \hypersetup{colorlinks=true, linkcolor=black, urlcolor=black}
 
 % ---- Fonts -------------------------------------------------
@@ -97,7 +109,7 @@
 \begin{center}
   {\LARGE\bfseries The \texttt{rkdiagram} Package}\\[6pt]
   {\large Reed-Kellogg Sentence Diagrams for \LaTeX}\\[4pt]
-  {\small Version 1.3 \quad\textbullet\quad Requires Lua\LaTeX}
+  {\small Version 1.0}
 \end{center}
 
 \bigskip
@@ -105,11 +117,11 @@
 % ---- Introduction ------------------------------------------
 \section{Introduction}
 
-The \texttt{rkdiagram} package typesets traditional Reed-Kellogg sentence diagrams in \LaTeX. Tag each word with a command describing its grammatical role; the package computes the layout and draws everything with Ti\textit{k}Z.
+The \texttt{rkdiagram} package typesets traditional Reed-Kellogg sentence diagrams in \LaTeX.  Each word is tagged with a command describing its grammatical role; the package computes the layout and draws everything with Ti\textit{k}Z. No natural language parsing or processing occurs. The user should have a working knowledge of parts of speech for best results.
 
-\textbf{Features:} baselines, dividers, modifier diagonals, prepositional phrases, appositives, compound elements (including compound objects of prepositions), subordinate clauses, compound sentences, gerunds, and participles.
+\textbf{Features:} baselines, dividers, modifier diagonals, prepositional phrases, appositives, compound elements (including compound objects of prepositions), subordinate clauses, compound sentences, gerunds, and participles. Basic spacing and placement controls are available.
 
-\textbf{Requirements:} Lua\LaTeX\ plus \texttt{tikz}, \texttt{xparse}, \texttt{etoolbox}, and \texttt{pgfopts} — all in a standard TeX Live or MiKTeX installation.
+\textbf{Requirements:} Written using Lua\LaTeX\ (but should work with any modern \LaTeX engine) plus \texttt{tikz}, \texttt{xparse}, \texttt{etoolbox}, and \texttt{pgfopts}.
 
 % ---- Setup -------------------------------------------------
 \section{Loading the Package}
@@ -127,7 +139,7 @@ The \texttt{rkdiagram} package typesets traditional Reed-Kellogg sentence diagra
 ]{rkdiagram}
 \end{lstlisting}
 
-All options are optional; the values above are the defaults.
+The optional values above are the defaults.
 Override any option mid-document with \cmd{rkset}:
 
 \begin{lstlisting}
@@ -246,6 +258,7 @@ After a linking verb, a back-diagonal divider (\textbackslash) introduces a pred
   \begin{rkdiagram}
     \rkSubject{He}\rkVerb{is}\rkPredNom[\rkAdj{a}]{teacher}
   \end{rkdiagram}}
+\newpage
 
 % ---- Modifiers ---------------------------------------------
 \section{Modifiers}
@@ -253,7 +266,10 @@ After a linking verb, a back-diagonal divider (\textbackslash) introduces a pred
 Modifiers hang below the word they modify on a 45° diagonal. Use \cmd{rkAdj} for adjectives and articles, \cmd{rkAdv} for adverbs. Pass them as the \emph{optional first argument} of the word they modify, comma-separated:
 
 \begin{lstlisting}
-\rkSubject[\rkAdj{The}, \rkAdj{old}]{dog}
+\rkSubject[
+  \rkAdj{The},
+  \rkAdj{old}
+]{dog}
 \end{lstlisting}
 
 A modifier takes its own optional argument for sub-modifiers, creating chains of diagonals:
@@ -266,7 +282,9 @@ A modifier takes its own optional argument for sub-modifiers, creating chains of
     \rkAdj{The},
     \rkAdj[\rkAdv{very}]{old}
   ]{dog}
-  \rkVerb[\rkAdv[\rkAdv{quite}]{loudly}]{barked}
+  \rkVerb[
+    \rkAdv[\rkAdv{quite}]{loudly}
+  ]{barked}
 \end{rkdiagram}
 \end{lstlisting}
 \end{rkexample}
@@ -279,7 +297,7 @@ A modifier takes its own optional argument for sub-modifiers, creating chains of
 The \opt{modgap} option adds extra vertical clearance between nested levels (default 0.25\,cm), preventing crowding when modifier chains are deep.
 
 \textbf{Modifier spacing:} plain adjectives and adverbs (no sub-modifiers) advance the sibling cursor by exactly \opt{modDepth}, giving even horizontal spacing regardless of label width. Their slant lines are still sized to fit the word — long labels simply extend past the slant ends, matching hand-drawn convention. Modifiers that carry sub-modifiers (e.g.\ \cmd{rkAdj[\cmd{rkAdv}\{very\}]\{old\}}) use the word-fit formula so the slant is long enough to keep the sub-modifier connector clear of the next sibling. Use \opt{modDepth} to control the global step between plain modifiers.
-
+\newpage
 
 % ---- Prepositional phrases ---------------------------------
 \section{Prepositional Phrases}
@@ -297,7 +315,9 @@ Place it in the modifier list of the word it modifies:
 \begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject[\rkAdj{The}]{cat}
-  \rkVerb[\rkPrep[\rkAdj{the}]{on}{mat}]{sat}
+  \rkVerb[
+    \rkPrep[\rkAdj{the}]{on}{mat}
+  ]{sat}
 \end{rkdiagram}
 \end{lstlisting}
 \end{rkexample}
@@ -393,6 +413,7 @@ Modifiers on each compound word go in the optional modifier-list arguments:
   \end{rkdiagram}}
 
 Modifiers placed in the list (e.g.\ \cmd{rkAdj}, \cmd{rkAdv}, \cmd{rkDObj}) draw as proper diagonals on each word's platform. Slot commands like \cmd{rkDObj} inside a per-word modifier list attach a direct object to that compound word's platform line.
+\newpage
 
 \subsection*{Compound object of a preposition}
 
@@ -403,7 +424,10 @@ Pass \cmd{rkCompound} as the object argument of \cmd{rkPrep} to fork the preposi
 \begin{lstlisting}
 \rkPrep{with}{
   \rkCompound[and]
-    [\rkAdj{brass}, \rkPrep[\rkAdj{their}]{in}{ears}]
+    [
+      \rkAdj{brass},
+      \rkPrep[\rkAdj{their}]{in}{ears}
+    ]
     {rings}
     [\rkPrep[\rkAdj{their}]{in}{hearts}]
     {fraud}
@@ -444,6 +468,7 @@ Use \cmd{rkCompoundSent} \emph{standalone} (not inside \texttt{rkdiagram}) to di
 \end{itemize}
 
 The connector drops a dashed vertical from each clause's verb to a midpoint bridge, draws a short horizontal line there, and labels it with the conjunction.
+\newpage
 
 \medskip
 \begin{rkexample}{Dogs bark and cats purr.}
@@ -495,6 +520,7 @@ The connector drops a dashed vertical from each clause's verb to a midpoint brid
 \begin{lstlisting}
 \rkSubClause[rel-word]{body}
 \end{lstlisting}
+\newpage
 
 \medskip
 \begin{rkexample}{The man who wore the hat left.}
@@ -556,6 +582,7 @@ A \emph{gerund} is a verb form used as a noun. It sits on a stepped T-platform: 
 \end{lstlisting}
 
 The optional \texttt{[mods]} argument holds modifiers of the gerund itself (adjectives, prepositional phrases, etc.). The package pre-scans the list to compute a post height tall enough to keep all modifier slants clear of the foot. Use the \opt{gerundPost} option (default \texttt{1.2cm}) to set a minimum post height globally.
+\newpage
 
 \medskip
 \begin{rkexample}{Swimming is fun.}
@@ -604,7 +631,9 @@ Gerund as the object of a preposition:
   \rkSubject{She}
   \rkVerb{is}
   \rkPredAdj[
-    \rkPrep{at}{\rkGerund[\rkAdv{quickly}]{running}}
+    \rkPrep{at}{
+      \rkGerund[\rkAdv{quickly}]{running}
+    }
   ]{good}
 \end{rkdiagram}
 \end{lstlisting}
@@ -619,7 +648,7 @@ Gerund as the object of a preposition:
 % ---- Participles --------------------------------------------
 \section{Participles}
 
-A \emph{participle} functions as an adjective modifying a noun. It is drawn with a hockey-stick shape: a 45° diagonal (word label above it), a short shallower transition, and a horizontal stub. Use \cmd{rkParticiple} inside a modifier list — the same position as \cmd{rkAdj}.
+A \emph{participle} functions as an adjective modifying a noun. It is drawn with a hockey-stick shape: a 45° diagonal (word label above it), a smooth curve at the elbow, and a horizontal stub. Use \cmd{rkParticiple} inside a modifier list — the same position as \cmd{rkAdj}.
 
 \begin{lstlisting}
 \rkParticiple[tail]{word}
@@ -768,12 +797,14 @@ The optional \texttt{arg} carries modifiers of the verb in the noun form; in the
   \end{rkdiagram}}
 
 Infinitive noun with a modifier on the verb:
+\newpage
 
 \begin{rkexample}{To run quickly is fun.}
 \begin{lstlisting}
 \begin{rkdiagram}
-  \rkSubject{%
-    \rkInfinitive[\rkAdv{quickly}]{run}}
+  \rkSubject{
+    \rkInfinitive[\rkAdv{quickly}]{run}
+  }
   \rkVerb{is}
   \rkPredNom{fun}
 \end{rkdiagram}
@@ -810,11 +841,11 @@ With tail content, use \cmd{rkInfObj} for a direct object and \cmd{rkAdv}/\cmd{r
 \begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject{He}
-  \rkVerb[%
-    \rkInfinitive[%
-      \rkInfObj[\rkAdj{the}]{race}%
-      \rkAdv{quickly}%
-    ]{finish}%
+  \rkVerb[
+    \rkInfinitive[
+      \rkInfObj[\rkAdj{the}]{race}
+      \rkAdv{quickly}
+    ]{finish}
   ]{trained}
 \end{rkdiagram}
 \end{lstlisting}
@@ -865,9 +896,9 @@ Nominative absolute with a participial object on the tail:
 \begin{rkdiagram}
   \rkSubject{he}
   \rkVerb{left}
-  \rkNomAbs[\rkAdj{His}]{duty}{%
-    \rkPartObj{done}%
-  }{finished}
+  \rkNomAbs[\rkAdj{His}]{duty}{
+    \rkPartObj{}
+  }{done}
 \end{rkdiagram}
 \end{lstlisting}
 \end{rkexample}
@@ -875,7 +906,7 @@ Nominative absolute with a participial object on the tail:
   \begin{rkdiagram}
     \rkSubject{he}
     \rkVerb{left}
-    \rkNomAbs[\rkAdj{His}]{duty}{\rkPartObj{done}}{finished}
+    \rkNomAbs[\rkAdj{His}]{duty}{\rkPartObj{}}{done}
   \end{rkdiagram}}
 
 \section{Manual Spacing Controls}
@@ -991,6 +1022,7 @@ Controls two related things simultaneously. For plain adjectives and adverbs (no
 \subsection*{\opt{subClauseDepth} — vertical drop to sub-baseline}
 
 Controls how far below the main baseline a subordinate clause is drawn. Increase it when deep modifier chains on the main clause would overlap the sub-clause.
+\newpage
 
 \medskip
 \begin{rkexample}{Deeper sub-clause (subClauseDepth=3.5cm)}
@@ -1046,11 +1078,18 @@ By default \cmd{rkCompoundSent} places the horizontal bridge halfway between the
 
 \begin{lstlisting}
 \rkCompoundSent[and][3cm][bridgeY=-1.8cm]
-  {\begin{rkdiagram}\rkSubject{Dogs}\rkVerb{bark}\end{rkdiagram}}
-  {\begin{rkdiagram}\rkSubject{Cats}\rkVerb{purr}\end{rkdiagram}}
+  {\begin{rkdiagram}
+     \rkSubject{Dogs}
+     \rkVerb{bark}
+   \end{rkdiagram}}
+  {\begin{rkdiagram}
+     \rkSubject{Cats}
+     \rkVerb{purr}
+   \end{rkdiagram}}
 \end{lstlisting}
 
 Pass \opt{bridgeY} in the first per-clause options argument. Setting it to \texttt{0pt} restores automatic placement.
+\newpage
 
 \medskip
 \begin{rkexample}{Bridge pinned at $-1.2$\,cm}
@@ -1081,12 +1120,22 @@ Pass \opt{bridgeY} in the first per-clause options argument. Setting it to \text
 \begin{lstlisting}
 \begin{rkdiagram}
   \rkSubject[
-    \rkAdj{The}, \rkAdj{tall},
-    \rkPrep[\rkAdj{the}, \rkAdj{red}]{in}{coat}
+    \rkAdj{The},
+    \rkAdj{tall},
+    \rkPrep[
+      \rkAdj{the},
+      \rkAdj{red}
+    ]{in}{coat}
   ]{woman}
   \rkVerb{gave}
-  \rkIObj[\rkAdj{her}, \rkAdj{young}]{daughter}
-  \rkDObj[\rkAdj{a}, \rkAdj[\rkAdv{very}]{old}]{book}
+  \rkIObj[
+    \rkAdj{her},
+    \rkAdj{young}
+  ]{daughter}
+  \rkDObj[
+    \rkAdj{a},
+    \rkAdj[\rkAdv{very}]{old}
+  ]{book}
 \end{rkdiagram}
 \end{lstlisting}
 
@@ -1110,7 +1159,7 @@ All baseline commands share the signature \cmd{rkXxx[modifier-list]\{word(s)\}}.
 The modifier list is a comma-separated sequence of modifier, prep, appositive, or sub-clause calls.
 
 \medskip
-\begin{tabular}{@{}lp{8.5cm}@{}}
+\begin{tabular}{@{}p{7cm}p{8cm}@{}}
   \toprule
   Command & Role \\
   \midrule
@@ -1126,7 +1175,7 @@ The modifier list is a comma-separated sequence of modifier, prep, appositive, o
 \subsection*{Modifier and structural commands}
 
 \medskip
-\begin{tabular}{@{}lp{8.5cm}@{}}
+\begin{tabular}{@{}p{7cm}p{8cm}@{}}
   \toprule
   Command & Role \\
   \midrule
@@ -1148,7 +1197,7 @@ The modifier list is a comma-separated sequence of modifier, prep, appositive, o
 \subsection*{Compound sentence}
 
 \medskip
-\begin{tabular}{@{}lp{8.5cm}@{}}
+\begin{tabular}{@{}p{7cm}p{8cm}@{}}
   \toprule
   Command & Role \\
   \midrule
@@ -1160,7 +1209,7 @@ The modifier list is a comma-separated sequence of modifier, prep, appositive, o
 \subsection*{Manual spacing (one-shot)}
 
 \medskip
-\begin{tabular}{@{}lp{8.5cm}@{}}
+\begin{tabular}{@{}p{7cm}p{8cm}@{}}
   \toprule
   Command & Effect \\
   \midrule
@@ -1176,7 +1225,7 @@ The modifier list is a comma-separated sequence of modifier, prep, appositive, o
 These are standard package options (see §2) but can also be passed to any \texttt{rkdiagram} environment or to \cmd{rkset} mid-document:
 
 \medskip
-\begin{tabular}{@{}lp{8.5cm}@{}}
+\begin{tabular}{@{}p{7cm}p{8cm}@{}}
   \toprule
   Option & Effect \\
   \midrule
@@ -1191,7 +1240,7 @@ These are standard package options (see §2) but can also be passed to any \text
 \subsection*{Global configuration}
 
 \medskip
-\begin{tabular}{@{}lp{8.5cm}@{}}
+\begin{tabular}{@{}p{7cm}p{8cm}@{}}
   \toprule
   Command & Effect \\
   \midrule
@@ -1202,7 +1251,7 @@ These are standard package options (see §2) but can also be passed to any \text
 \bigskip
 \noindent\rule{\linewidth}{0.4pt}
 \smallskip
-\noindent{\small Compile with \texttt{lualatex}.
-Test suite: \texttt{rk-test.tex}.}
+\vspace{1in}
+\doclicenseThis%
 
 \end{document}

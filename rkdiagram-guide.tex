@@ -109,7 +109,9 @@ version={4.0},
 \begin{center}
   {\LARGE\bfseries The \texttt{rkdiagram} Package}\\[6pt]
   {\large Reed-Kellogg Sentence Diagrams for \LaTeX}\\[4pt]
-  {\small Version 1.0}
+  {\small Version 1.0} - June 2026\\
+  \copyright \ Karl McBurnett\\
+  kfm5634@gmail.com
 \end{center}
 
 \bigskip
@@ -117,11 +119,13 @@ version={4.0},
 % ---- Introduction ------------------------------------------
 \section{Introduction}
 
-The \texttt{rkdiagram} package typesets traditional Reed-Kellogg sentence diagrams in \LaTeX.  Each word is tagged with a command describing its grammatical role; the package computes the layout and draws everything with Ti\textit{k}Z. No natural language parsing or processing occurs. The user should have a working knowledge of parts of speech for best results.
+The \texttt{rkdiagram} package typesets traditional Reed-Kellogg sentence diagrams in \LaTeX.  Each word is tagged with a command describing its grammatical role; the package computes the layout and draws everything with Ti\textit{k}Z. No natural language parsing or processing occurs. The user should have a working knowledge of parts of speech for best results. A number of parts of speech are not included but may be in future versions. Reed-Kellogg sentence diagrams are a particularly American phenomenon which are now sparingly used in secondary schools and almost completely absent in linguistic studies. Because of this it seemed to me to be an interesting but harmless project - useful to a small number of educators but unlikely to be the lynch pin to someone else's endeavors.
 
 \textbf{Features:} baselines, dividers, modifier diagonals, prepositional phrases, appositives, compound elements (including compound objects of prepositions), subordinate clauses, compound sentences, gerunds, and participles. Basic spacing and placement controls are available.
 
-\textbf{Requirements:} Written using Lua\LaTeX\ (but should work with any modern \LaTeX engine) plus \texttt{tikz}, \texttt{xparse}, \texttt{etoolbox}, and \texttt{pgfopts}.
+\textbf{Requirements:} Written using Lua\LaTeX\ (but should work with any modern \LaTeX \ engine) plus \texttt{tikz}, \texttt{xparse}, \texttt{etoolbox}, and \texttt{pgfopts}.
+
+\textbf{AI Acknowledgement:} While I directed the development of this package, the majority of it and its documentation was written using Claude Sonnet 4.6 LLM as a learning exercise for myself in AI software development. 
 
 % ---- Setup -------------------------------------------------
 \section{Loading the Package}
@@ -1247,6 +1251,284 @@ These are standard package options (see §2) but can also be passed to any \text
   \cmd{rkset\{key=val,\ldots\}} & Override any package option mid-document \\
   \bottomrule
 \end{tabular}
+
+
+\section{rkdiagram Macro Reference}
+
+This section describes every public macro provided by the \texttt{rkdiagram} package.
+Internal helpers (names beginning with \texttt{\textbackslash rk@}) are not listed.
+
+% ------------------------------------------------------------------
+\subsection*{Environment}
+% ------------------------------------------------------------------
+
+\paragraph{\texttt{\textbackslash begin\{rkdiagram\}[\textit{opts}] \ldots\ \textbackslash end\{rkdiagram\}}}
+The main diagramming environment.  Opens a \texttt{tikzpicture} and initialises
+all internal registers.  The optional \textit{opts} argument accepts any
+\texttt{rkdiagram} key--value pair (same as \cmd{rkset}), allowing per-diagram
+overrides of global defaults.  All baseline commands, modifier commands, and
+structural commands must appear inside this environment (or inside a body
+argument of \cmd{rkCompoundSent}).
+
+% ------------------------------------------------------------------
+\subsection*{Compound sentence}
+% ------------------------------------------------------------------
+
+\paragraph{\cmd{rkCompoundSent[\textit{conj}][\textit{sep}][\textit{opts1}]\{\textit{body1}\}[\textit{opts2}]\{\textit{body2}\}}}
+Draws two independent clauses in a single \texttt{tikzpicture} connected by a
+dashed bridge bearing the coordinating conjunction.
+
+\medskip
+\begin{tabular}{@{}p{3.5cm}p{11.5cm}@{}}
+  \toprule
+  Argument & Meaning \\
+  \midrule
+  \textit{conj}  & Conjunction label rendered in italics above the bridge (default: \emph{and}) \\
+  \textit{sep}   & Vertical distance between the two baselines (default: \texttt{3cm}) \\
+  \textit{opts1} & Per-diagram \texttt{rkdiagram} options applied to clause 1 \\
+  \textit{body1} & Complete first clause, wrapped in its own \texttt{rkdiagram} environment \\
+  \textit{opts2} & Per-diagram options applied to clause 2 \\
+  \textit{body2} & Complete second clause, wrapped in its own \texttt{rkdiagram} environment \\
+  \bottomrule
+\end{tabular}
+
+\medskip\noindent
+The bridge y-position is computed automatically (midway between the baselines,
+lowered if clause-1 modifiers extend into that region) but can be overridden
+with the \opt{bridgeY} key.
+
+% ------------------------------------------------------------------
+\subsection*{Baseline commands}
+% ------------------------------------------------------------------
+
+All six baseline commands share the optional/mandatory signature
+\cmd{rkXxx[\textit{mods}]\{\textit{word}\}}.  The \textit{mods} argument is a
+comma-separated list of modifier, prep-phrase, appositive, or subordinate-clause
+calls.
+
+\paragraph{\cmd{rkSubject[\textit{mods}]\{\textit{word}\}}}
+Places the subject word on the main baseline and draws a full vertical divider
+to its right.  \textit{word} may itself be \cmd{rkGerund}, \cmd{rkInfinitive},
+or \cmd{rkCompound}.  \textit{mods} attaches adjective/article slants below the
+subject's platform.
+
+\paragraph{\cmd{rkVerb[\textit{mods}]\{\textit{word}\}}}
+Places the verb word immediately to the right of the full vertical divider.
+\textit{word} may be \cmd{rkCompound} for a compound verb.  \textit{mods}
+attaches adverb and prepositional-phrase slants below the verb's platform.
+
+\paragraph{\cmd{rkDObj[\textit{mods}]\{\textit{word}\}}}
+Draws a short vertical bar and places the direct-object word to its right.
+\textit{word} may be \cmd{rkGerund}, \cmd{rkInfinitive}, or \cmd{rkCompound}.
+\textit{mods} attaches adjective slants below the object's platform.
+
+\paragraph{\cmd{rkPredNom[\textit{mods}]\{\textit{word}\}}}
+Draws a back-diagonal divider (\textbackslash) and places the predicate
+nominative to its right.  \textit{word} may be \cmd{rkCompound}.
+\textit{mods} attaches adjective slants below the platform.
+
+\paragraph{\cmd{rkPredAdj[\textit{mods}]\{\textit{word}\}}}
+Identical in structure to \cmd{rkPredNom}; use this command when the
+predicate word is an adjective to distinguish it semantically.
+
+\paragraph{\cmd{rkIObj[\textit{mods}]\{\textit{word}\}}}
+Draws the indirect-object platform: a short diagonal drops below the
+midpoint of the verb slot, then a horizontal line extends to the right
+bearing the object word.  Does not advance the main baseline cursor.
+\textit{mods} attaches slants below the indirect-object platform.
+
+% ------------------------------------------------------------------
+\subsection*{Modifier commands}
+% ------------------------------------------------------------------
+
+\paragraph{\cmd{rkAdj[\textit{submods}]\{\textit{word}\}}}
+Draws a 45° slant descending to the right from the current attachment
+cursor, with \textit{word} labelled above the slant.  Used for adjectives,
+articles, and any word that modifies a noun.  The optional \textit{submods}
+list attaches further modifiers (adverbs modifying the adjective, etc.)
+branching off the parent slant at a lower level.
+
+\paragraph{\cmd{rkAdv[\textit{submods}]\{\textit{word}\}}}
+Identical in geometry to \cmd{rkAdj}; use this command when the modifying
+word is an adverb.  Attaches to verbs, adjectives, or other adverbs via the
+same 45° slant.  \textit{submods} may contain nested \cmd{rkAdv} or
+\cmd{rkPrep} calls.
+
+\paragraph{\cmd{rkPrep[\textit{obj-mods}]\{\textit{prep}\}\{\textit{obj}\}}}
+Draws a 45° slant labelled with \textit{prep}, then a horizontal line
+bearing \textit{obj}.  \textit{obj-mods} attaches adjective/article slants
+below the object's horizontal.  \textit{obj} may be \cmd{rkCompound} for a
+compound object of the preposition.
+
+% ------------------------------------------------------------------
+\subsection*{Compound structures}
+% ------------------------------------------------------------------
+
+\paragraph{\cmd{rkCompound[\textit{conj}][\textit{mA}]\{\textit{wA}\}[\textit{mB}]\{\textit{wB}\}}}
+When used as the \textit{word} argument of any baseline command or as the
+object of \cmd{rkPrep}, draws a forked compound platform: two parallel
+horizontal rails connected to the slot's attachment point by convergence
+slants, with a dashed vertical bar and the conjunction label between them.
+
+\medskip
+\begin{tabular}{@{}p{3.5cm}p{11.5cm}@{}}
+  \toprule
+  Argument & Meaning \\
+  \midrule
+  \textit{conj} & Conjunction rendered in italics on the bar (default: \emph{and}) \\
+  \textit{mA}   & Modifier list for the upper word \textit{wA} \\
+  \textit{wA}   & First (upper) compound element \\
+  \textit{mB}   & Modifier list for the lower word \textit{wB} \\
+  \textit{wB}   & Second (lower) compound element \\
+  \bottomrule
+\end{tabular}
+
+\medskip\noindent
+Compound subjects fork to the right (convergence on the right); compound
+verbs, objects, and predicate words fork to the left (convergence on the
+left).  The direction is determined automatically by which baseline command
+contains the \cmd{rkCompound} call.
+
+% ------------------------------------------------------------------
+\subsection*{Appositives}
+% ------------------------------------------------------------------
+
+\paragraph{\cmd{rkAppos\{\textit{content}\}}}
+Places \textit{content} in parentheses immediately to the right of the
+current slot on the same baseline.  Intended for use inside the
+\textit{mods} argument of \cmd{rkSubject}, \cmd{rkDObj}, etc.
+Adjective and adverb modifiers nested inside \textit{content} are rendered
+inline (not as slants) so the appositive reads as ordinary text.
+
+% ------------------------------------------------------------------
+\subsection*{Subordinate clauses}
+% ------------------------------------------------------------------
+
+\paragraph{\cmd{rkSubClause[\textit{rel}]\{\textit{body}\}}}
+Draws a dashed vertical connector from the current modifier attachment
+point down to a sub-baseline, then executes \textit{body} as a complete
+miniature clause at that level.  The optional \textit{rel} argument places
+a relative pronoun or subordinating conjunction word on the sub-baseline
+before the body.  \textit{body} may contain \cmd{rkSubject}, \cmd{rkVerb},
+\cmd{rkDObj}, etc.
+
+% ------------------------------------------------------------------
+\subsection*{Gerunds}
+% ------------------------------------------------------------------
+
+\paragraph{\cmd{rkGerund[\textit{mods}]\{\textit{word}\}}}
+Used as the \textit{word} argument of any baseline command or as the object
+of \cmd{rkPrep}.  Draws the standard gerund pedestal: a full-width
+horizontal foot at the slot's baseline level, two legs forming an
+equilateral triangle, a vertical post rising from the apex, and a short
+word platform at the top.  The post height is computed adaptively so that
+all modifier slants in \textit{mods} clear the foot.
+
+% ------------------------------------------------------------------
+\subsection*{Infinitives}
+% ------------------------------------------------------------------
+
+\paragraph{\cmd{rkInfinitive[\textit{arg}]\{\textit{verb}\}}}
+Has two distinct forms depending on context.
+
+\textbf{Noun form} (used as the \textit{word} argument of \cmd{rkSubject},
+\cmd{rkDObj}, etc.): draws the same stepped pedestal as \cmd{rkGerund} but
+labels the vertical post with \emph{to}.  \textit{arg} is the modifier list
+for the infinitive verb on the platform.
+
+\textbf{Modifier form} (used inside a \textit{mods} list): draws a 45°
+slant labelled \emph{to}, then a horizontal mini-baseline bearing
+\textit{verb}.  \textit{arg} is the tail content for the mini-baseline:
+use \cmd{rkInfObj} to attach a direct object and \cmd{rkAdv}/\cmd{rkPrep}
+for further modifiers of the infinitive verb.
+
+\paragraph{\cmd{rkInfObj[\textit{mods}]\{\textit{word}\}}}
+Places a direct object on the infinitive mini-baseline.  Valid only inside
+the \textit{arg} (tail-content) argument of \cmd{rkInfinitive} when used
+in modifier form.  \textit{mods} attaches adjective slants below the
+object's platform.
+
+% ------------------------------------------------------------------
+\subsection*{Participles}
+% ------------------------------------------------------------------
+
+\paragraph{\cmd{rkParticiple[\textit{tail}]\{\textit{word}\}}}
+A modifier command (used inside modifier lists like \cmd{rkAdj}) that draws
+the hockey-stick shape for a participial phrase: a 45° slant with
+\textit{word} labelled above it, a smooth curve at the elbow, and a short
+horizontal stub.  The optional \textit{tail} argument executes on the stub
+baseline; use \cmd{rkPartObj} to add a participial object and
+\cmd{rkAdv}/\cmd{rkPrep} for modifiers of the participle.
+
+\paragraph{\cmd{rkPartObj[\textit{mods}]\{\textit{word}\}}}
+Places a direct object on the participial tail.  Valid only inside the
+\textit{tail} argument of \cmd{rkParticiple}.  \textit{mods} attaches
+adjective slants below the object's platform.
+
+% ------------------------------------------------------------------
+\subsection*{Nominative absolute}
+% ------------------------------------------------------------------
+
+\paragraph{\cmd{rkNomAbs[\textit{noun-mods}]\{\textit{noun}\}\{\textit{ptcl-tail}\}\{\textit{ptcl-word}\}}}
+Draws a nominative absolute phrase floating above the main clause with no
+connector.
+
+\medskip
+\begin{tabular}{@{}p{3.5cm}p{11.5cm}@{}}
+  \toprule
+  Argument & Meaning \\
+  \midrule
+  \textit{noun-mods}  & Modifier list for the noun (adjectives, articles, etc.) \\
+  \textit{noun}       & The noun of the absolute phrase \\
+  \textit{ptcl-tail}  & Tail content for the participle (\cmd{rkPartObj}, \cmd{rkAdv}, \cmd{rkPrep}, etc.); pass \texttt{\{\}} for none \\
+  \textit{ptcl-word}  & The participial word; pass \texttt{\{\}} to omit the participle entirely \\
+  \bottomrule
+\end{tabular}
+
+\medskip\noindent
+By default the phrase sits \opt{subClauseDepth} above the main baseline.
+Precede the call with \cmd{rkNomAbsHeight\{\textit{len}\}} to override the
+height for that one phrase.
+
+% ------------------------------------------------------------------
+\subsection*{Spacing override commands}
+% ------------------------------------------------------------------
+
+Each command below is \emph{one-shot}: it takes effect for the very next
+applicable operation, then resets automatically to its default.
+
+\medskip
+\begin{tabular}{@{}p{5.5cm}p{9.5cm}@{}}
+  \toprule
+  Command & Effect \\
+  \midrule
+  \cmd{rkSlotWidth\{\textit{len}\}} &
+    Sets a minimum width for the next baseline slot's horizontal line.
+    Useful when a short word would otherwise produce an unusually narrow platform. \\
+  \cmd{rkSkip\{\textit{len}\}} &
+    Inserts a gap of \textit{len} in the baseline before the next slot is drawn.
+    Useful for pausing the baseline to accommodate a wide structure beneath it. \\
+  \cmd{rkSlantLen\{\textit{len}\}} &
+    Sets a minimum length for the next modifier or prepositional-phrase slant.
+    Useful when a very short word would produce a slant too small to read. \\
+  \cmd{rkNomAbsHeight\{\textit{len}\}} &
+    Overrides the height above the main baseline for the very next \cmd{rkNomAbs} call.
+    When \texttt{0pt} (the default), \opt{subClauseDepth} is used. \\
+  \bottomrule
+\end{tabular}
+
+% ------------------------------------------------------------------
+\subsection*{Global configuration}
+% ------------------------------------------------------------------
+
+\paragraph{\cmd{rkset\{\textit{key=val,\ldots}\}}}
+Applies any package key--value option mid-document, overriding the defaults
+set at load time.  The same keys accepted as package options (see \S2 and
+the Structural Depth Controls chapter) are all valid here:
+\opt{font}, \opt{color}, \opt{linewidth}, \opt{spacing}, \opt{modDepth},
+\opt{modgap}, \opt{cmpSep}, \opt{subClauseDepth}, \opt{gerundPost},
+\opt{bridgeY}.  Changes persist from the point of the call onwards; scope
+them inside a \LaTeX\ group to limit their effect to a single diagram.
 
 \bigskip
 \noindent\rule{\linewidth}{0.4pt}

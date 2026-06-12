@@ -153,6 +153,7 @@
 \newlength{\rk@grd@maxdepth}  % deepest modifier slant found in the pre-scan
 \newlength{\rk@grd@posth}     % computed post height for the current gerund
 \newlength{\rk@grd@fh}        % equilateral-triangle half-base (= apex_height / sqrt(3))
+\newlength{\rk@grd@wordw}     % saved gerund word width (for stepped-shape geometry)
 
 % Deferred infinitive — used when \rkInfinitive appears as a word argument.
 \newif\ifrk@deferredinf  \rk@deferredinffalse
@@ -236,7 +237,7 @@
       inner sep = 0pt,
       outer sep = 0pt,
       font      = \rk@font,
-    ] (rk@wnode) at (0, 0) {#1};%
+    ] (rk@wnode) at (0, 0) {\phantom{#1}};%
   \endgroup
   \ifrk@deferredgrd
     % Gerund: draw stepped-platform structure.
@@ -389,7 +390,7 @@
 \newcommand{\rk@domod}[2]{%
   \rk@extendbase
   \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
-    (rk@modmsr) at (0,0) {#1};%
+    (rk@modmsr) at (0,0) {\phantom{#1}};%
   % Measure width (east − west)
   \pgfextractx{\rk@tc}{\pgfpointanchor{rk@modmsr}{east}}%
   \pgfextractx{\rk@ta}{\pgfpointanchor{rk@modmsr}{west}}%
@@ -441,7 +442,7 @@
       \global\rk@prevmod@E=0pt   % reset sibling-push tracking for child modifier level
       % a = max(cap-height, 0.2·E) so child level is always at least one cap-height below parent
       \node[opacity=0, inner sep=0pt, outer sep=0pt, font=\rk@font]
-        (rk@capmsr) at (0,0) {M};%
+        (rk@capmsr) at (0,0) {\phantom{M}};%
       \pgfextracty{\rk@halfsep}{\pgfpointanchor{rk@capmsr}{north}}%
       \pgfextracty{\rk@ta}{\pgfpointanchor{rk@capmsr}{south}}%
       \addtolength{\rk@halfsep}{-\rk@ta}%   % rk@halfsep = cap-height of font
@@ -495,7 +496,7 @@
   \rk@extendbase
   % Measure prep label to size the slant (same formula as \rk@domod)
   \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
-    (rk@prepmsr) at (0,0) {#2};%
+    (rk@prepmsr) at (0,0) {\phantom{#2}};%
   \pgfextractx{\rk@tc}{\pgfpointanchor{rk@prepmsr}{east}}%
   \pgfextractx{\rk@ta}{\pgfpointanchor{rk@prepmsr}{west}}%
   \addtolength{\rk@tc}{-\rk@ta}%   % rk@tc = nodeWidth
@@ -522,7 +523,7 @@
   \global\rk@deferredcmpfalse
   \begingroup
     \let\rkCompound\rk@deferred@Compound
-    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@pobjnode) at (0,0) {#3};%
+    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@pobjnode) at (0,0) {\phantom{#3}};%
   \endgroup
   \ifrk@deferredcmp
     % Compound object: fork centred on slant end (rk@ta, rk@tb)
@@ -539,7 +540,7 @@
     % Normal single object: measure then place centred on horizontal from slant end.
     % rk@ta = slant_end_x, rk@tb = slant_end_y (preserved throughout).
     \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font]
-      (rk@pobjnode) at (0,0) {#3};%
+      (rk@pobjnode) at (0,0) {\phantom{#3}};%
     % word_width = east − west of measurement node
     \pgfextractx{\rk@effmod}{\pgfpointanchor{rk@pobjnode}{east}}%
     \pgfextractx{\rk@tc}    {\pgfpointanchor{rk@pobjnode}{west}}%
@@ -610,7 +611,7 @@
     \divide\rk@halfsep by 2\relax
     % Measure word width, compute line_right, centre word on platform.
     \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font]
-      (rk@iobjnode) at (0,0) {#2};%
+      (rk@iobjnode) at (0,0) {\phantom{#2}};%
     \pgfextractx{\rk@effmod}{\pgfpointanchor{rk@iobjnode}{east}}%
     \pgfextractx{\rk@tc}    {\pgfpointanchor{rk@iobjnode}{west}}%
     \addtolength{\rk@effmod}{-\rk@tc}%      rk@effmod = word_width
@@ -801,7 +802,7 @@
     \coordinate (rk@origin) at (0,0);
     % Measure descender depth so placed word nodes clear the baseline lines.
     \node[anchor=base,opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font]
-      (rk@descmsr) at (0,0) {g};%
+      (rk@descmsr) at (0,0) {\phantom{g}};%
     \pgfextracty{\rk@wordlift}{\pgfpointanchor{rk@descmsr}{south}}%
     \setlength{\rk@wordlift}{-\rk@wordlift}%
     \addtolength{\rk@wordlift}{1pt}%
@@ -838,7 +839,7 @@
     \coordinate (rk@origin) at (0,0);
     % Measure descender depth once for both clauses.
     \node[anchor=base,opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font]
-      (rk@descmsr) at (0,0) {g};%
+      (rk@descmsr) at (0,0) {\phantom{g}};%
     \pgfextracty{\rk@wordlift}{\pgfpointanchor{rk@descmsr}{south}}%
     \setlength{\rk@wordlift}{-\rk@wordlift}\addtolength{\rk@wordlift}{1pt}%
     % ---- Clause 1 at y = 0 ----
@@ -902,6 +903,10 @@
   \def\rk@cmpdir{r}%
   \gdef\rk@subj@word{#2}%
   \rk@placeslot{#2}{\the\rk@base@y}%
+  % If the subject word sits on an elevated platform (gerund/infinitive), the
+  % \rk@divfull re-centering would render its \rkGerund/\rkInfinitive fallback
+  % as plain text at the baseline.  Suppress it by clearing \rk@subj@word.
+  \ifdim\rk@sl@y>\rk@base@y\gdef\rk@subj@word{}\fi
   \global\rk@subj@l=\rk@sl@l
   \global\rk@subj@r=\rk@sl@r
   \rk@slot@to@mc
@@ -992,7 +997,7 @@
   \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
   % Measure conjunction width; expand csep so rotated label fits inside the bar
   \begingroup
-    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@conjN)at(0,0){\textit{#2}};%
+    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@conjN)at(0,0){\phantom{\textit{#2}}};%
   \endgroup
   \pgfextractx{\rk@tc}{\pgfpointanchor{rk@conjN}{east}}%
   \pgfextractx{\rk@tb}{\pgfpointanchor{rk@conjN}{west}}%
@@ -1005,8 +1010,8 @@
   % Measure word widths (inline-mod context suppresses any embedded modifier draws)
   \begingroup
     \let\rkAdj\rk@inline@mod\let\rkAdv\rk@inline@mod\let\rkPrep\rk@inline@prep
-    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@cmpA)at(0,0){#4};%
-    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@cmpB)at(0,0){#6};%
+    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@cmpA)at(0,0){\phantom{#4}};%
+    \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font](rk@cmpB)at(0,0){\phantom{#6}};%
   \endgroup
   \pgfextractx{\rk@effmod}{\pgfpointanchor{rk@cmpA}{east}}%
   \pgfextractx{\rk@tb}    {\pgfpointanchor{rk@cmpA}{west}}%
@@ -1180,7 +1185,7 @@
 % \rk@grd@scanmod[submods]{word}  — covers \rkAdj and \rkAdv
 \NewDocumentCommand{\rk@grd@scanmod}{O{} m}{%
   \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
-    (rk@grdscan) at (0,0) {#2};%
+    (rk@grdscan) at (0,0) {\phantom{#2}};%
   \pgfextractx{\rk@tc}{\pgfpointanchor{rk@grdscan}{east}}%
   \pgfextractx{\rk@ta}{\pgfpointanchor{rk@grdscan}{west}}%
   \addtolength{\rk@tc}{-\rk@ta}%           rk@tc = node width
@@ -1195,7 +1200,7 @@
 % \rk@grd@scanprep[mods-on-obj]{prep}{obj}  — covers \rkPrep
 \NewDocumentCommand{\rk@grd@scanprep}{O{} m m}{%
   \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
-    (rk@grdscan) at (0,0) {#2};%
+    (rk@grdscan) at (0,0) {\phantom{#2}};%
   \pgfextractx{\rk@tc}{\pgfpointanchor{rk@grdscan}{east}}%
   \pgfextractx{\rk@ta}{\pgfpointanchor{rk@grdscan}{west}}%
   \addtolength{\rk@tc}{-\rk@ta}%
@@ -1248,55 +1253,69 @@
   \fi
   % --- Measure gerund word ---
   \node[opacity=0, inner sep=0pt, outer sep=0pt, font=\rk@font]
-    (rk@grdmsr) at (0,0) {\rk@deferredgrd@word};%
+    (rk@grdmsr) at (0,0) {\phantom{\rk@deferredgrd@word}};%
   \pgfextractx{\rk@tc}{\pgfpointanchor{rk@grdmsr}{east}}%
   \pgfextractx{\rk@ta}{\pgfpointanchor{rk@grdmsr}{west}}%
   \addtolength{\rk@tc}{-\rk@ta}%             rk@tc = word_width
+  \setlength{\rk@grd@wordw}{\rk@tc}%         save word_width for geometry and angle
   % Update rk@ht from gerund word's text height (same as \rk@placeslot does for any word).
   % Without this, rk@ht stays at the 2.2ex initial value, making \rk@divfwd draw a
   % longer slant than equivalent noun subjects produce.
   \pgfextracty{\rk@ta}{\pgfpointanchor{rk@grdmsr}{north}}%
   \ifdim\rk@ta>\rk@ht\setlength{\rk@ht}{\rk@ta}\fi
-  % --- Word platform x bounds ---
-  % word_plat_left  = rk@x + halfsep
-  \setlength{\rk@ta}{\rk@x}\addtolength{\rk@ta}{\rk@halfsep}%     rk@ta = word_plat_left
-  % word_plat_right = word_plat_left + word_width + halfsep
-  \addtolength{\rk@tc}{\rk@ta}\addtolength{\rk@tc}{\rk@halfsep}%  rk@tc = word_plat_right
-  % foot_right = word_plat_right + halfsep  (foot wider than platform)
-  \setlength{\rk@effmod}{\rk@tc}\addtolength{\rk@effmod}{\rk@halfsep}%  rk@effmod = foot_right
-  % post_x = midpoint of word platform = midpoint of foot (both share the same centre)
+  % --- X layout: shelf centred on post_x (triangle apex at shelf midpoint) ---
+  % shelf_left  = rk@x + halfsep
+  \setlength{\rk@ta}{\rk@x}\addtolength{\rk@ta}{\rk@halfsep}%           rk@ta = shelf_left
+  % upper_post_x / shelf_right = shelf_left + word_width
+  \setlength{\rk@tc}{\rk@ta}\addtolength{\rk@tc}{\rk@grd@wordw}%         rk@tc = upper_post_x
+  % foot_right = upper_post_x + halfsep
+  \setlength{\rk@effmod}{\rk@tc}\addtolength{\rk@effmod}{\rk@halfsep}%   rk@effmod = foot_right
+  % post_x = midpoint of shelf
   \setlength{\rk@tb}{\rk@ta}\addtolength{\rk@tb}{\rk@tc}\divide\rk@tb by 2\relax  % rk@tb = post_x
   % --- Y coordinates ---
-  % apex_y     = foot_y + halfsep  (top of the two legs; post starts here)
-  % word_plat_y = foot_y + rk@grd@posth
-  \setlength{\rk@wlevel}{#1}\addtolength{\rk@wlevel}{\rk@halfsep}%          rk@wlevel = apex_y
-  \setlength{\rk@grd@maxdepth}{#1}\addtolength{\rk@grd@maxdepth}{\rk@grd@posth}% rk@grd@maxdepth = word_plat_y
-  % --- Draw word platform first (while rk@ta = word_plat_left is still intact) ---
-  \rk@line{(\the\rk@ta, \the\rk@grd@maxdepth) -- (\the\rk@tc, \the\rk@grd@maxdepth)}%
-  % --- Full-width foot and 60°-apart legs ---
-  % The foot spans the original full width.  Two legs branch from the apex
-  % (bottom of the post) at ±30° from vertical (= 60° total), landing on the
-  % baseline at post_x ± halfsep/sqrt(3).  This places an equilateral triangle
-  % with apex at (post_x, apex_y) sitting on the foot line.
-  \pgfmathsetlength{\rk@grd@fh}{\the\rk@halfsep / 1.73205}%  half-base = halfsep/√3
-  % foot_left_leg = post_x - half-base  →  store in rk@ta (word_plat_left no longer needed)
-  \setlength{\rk@ta}{\rk@tb}\addtolength{\rk@ta}{-\rk@grd@fh}%
-  \rk@line{(\the\rk@x, #1) -- (\the\rk@effmod, #1)}%                              full-width foot
-  \rk@line{(\the\rk@ta, #1) -- (\the\rk@tb, \the\rk@wlevel)}%                     left leg
+  % shelf_y = foot_y + grd@posth
+  \setlength{\rk@grd@maxdepth}{#1}\addtolength{\rk@grd@maxdepth}{\rk@grd@posth}%
+  % apex_y = foot_y + (2/3)*halfsep
+  \setlength{\rk@wlevel}{#1}%
+  \pgfmathsetlength{\rk@grd@fh}{\the\rk@halfsep * 2 / 3}%
+  \addtolength{\rk@wlevel}{\rk@grd@fh}%   rk@wlevel = apex_y
+  % --- Triangle: full-width foot and scaled legs ---
+  \pgfmathsetlength{\rk@grd@fh}{\the\rk@halfsep * 2 / 3 / 1.73205}%  half-base
+  \rk@line{(\the\rk@x, #1) -- (\the\rk@effmod, #1)}%                              foot
+  \rk@line{(\the\dimexpr\rk@tb-\rk@grd@fh\relax, #1) -- (\the\rk@tb, \the\rk@wlevel)}% left leg
   \rk@line{(\the\dimexpr\rk@tb+\rk@grd@fh\relax, #1) -- (\the\rk@tb, \the\rk@wlevel)}% right leg
-  \rk@line{(\the\rk@tb, \the\rk@wlevel) -- (\the\rk@tb, \the\rk@grd@maxdepth)}%  post
-  % --- Record slot (rk@tc = word_plat_right still intact) ---
-  % sl@l = post_x so \rk@slot@to@mc starts modifiers to the right of the post.
-  \setlength{\rk@sl@l}{\rk@tb}%
-  \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%
-  \setlength{\rk@sl@y}{\rk@grd@maxdepth}%   word_plat_y
-  % Advance main cursor past word platform
+  % --- Lower post: triangle apex to shelf_y (centred on shelf) ---
+  \rk@line{(\the\rk@tb, \the\rk@wlevel) -- (\the\rk@tb, \the\rk@grd@maxdepth)}%
+  % Repurpose rk@wlevel → top_y = shelf_y + halfsep
+  \setlength{\rk@wlevel}{\rk@grd@maxdepth}\addtolength{\rk@wlevel}{\rk@halfsep}%
+  % --- Step shape (0,0 = top of lower post): lower shelf (-4,0)→(+4,0),
+  %     step vertical (-4,0)→(-4,+2), top shelf (-8,+2)→(-4,+2) ---
+  % Lower shelf: shelf_left to shelf_right at shelf_y
+  \rk@line{(\the\rk@ta, \the\rk@grd@maxdepth) -- (\the\rk@tc, \the\rk@grd@maxdepth)}%
+  % Step vertical: at shelf_left, from shelf_y up to top_y
+  \rk@line{(\the\rk@ta, \the\rk@grd@maxdepth) -- (\the\rk@ta, \the\rk@wlevel)}%
+  % Top shelf: extends LEFT from shelf_left by word_width/2 at top_y
+  \setlength{\rk@grd@fh}{\rk@grd@wordw}\divide\rk@grd@fh by 2\relax
+  \setlength{\rk@grd@fh}{\dimexpr\rk@ta-\rk@grd@fh\relax}%   rk@grd@fh = top_shelf_left
+  \rk@line{(\the\rk@grd@fh, \the\rk@wlevel) -- (\the\rk@ta, \the\rk@wlevel)}%
+  % --- Record slot (modifiers attach from shelf level) ---
+  % sl@l = post_x so \rk@slot@to@mc starts modifier slants right of the lower post.
+  \setlength{\rk@sl@l}{\rk@tb}%    post_x
+  \setlength{\rk@sl@r}{\rk@tc}\setlength{\rk@sl@d}{\rk@tc}%  shelf_right
+  \setlength{\rk@sl@y}{\rk@grd@maxdepth}%  shelf_y
+  % Advance main cursor
   \setlength{\rk@x}{\rk@effmod}%
-  % --- Place word on platform (centred at post_x) ---
-  \setlength{\rk@ta}{\rk@grd@maxdepth}\addtolength{\rk@ta}{\rk@wordlift}%  word node y
-  \node[anchor=base, inner sep=0pt, outer sep=0pt, font=\rk@font]
-    at (\the\rk@tb, \the\rk@ta) {\rk@deferredgrd@word};%
-  % --- Run gerund's own modifiers from the word platform ---
+  % --- Diagonal word: end anchored at (shelf_right, shelf_y), start raised to
+  %     2*halfsep above the shelf so its baseline clears the top-shelf corner ---
+  % mid_x = (top_shelf_left + shelf_right)/2
+  \addtolength{\rk@grd@fh}{\rk@tc}\divide\rk@grd@fh by 2\relax%  rk@grd@fh = mid_x
+  % mid_y = shelf_y + halfsep  (half of the 2*halfsep rise)
+  \setlength{\rk@ta}{\rk@grd@maxdepth}\addtolength{\rk@ta}{\rk@halfsep}%  rk@ta = mid_y
+  % angle: drop = 2*halfsep over run = 1.5 * word_width
+  \pgfmathsetmacro{\rk@grd@angle}{atan2(-2 * \strip@pt\rk@halfsep, \strip@pt\rk@grd@wordw * 1.5)}%
+  \node[anchor=base, rotate=\rk@grd@angle, inner sep=0pt, outer sep=0pt, font=\rk@font]
+    at (\the\rk@grd@fh, \the\rk@ta) {\rk@deferredgrd@word};%
+  % --- Run gerund's own modifiers from the shelf ---
   \ifblank{\rk@deferredgrd@mods}{}{%
     \rk@slot@to@mc
     \rk@runmods{\rk@deferredgrd@mods}%
@@ -1359,7 +1378,7 @@
   \fi
   % Measure verb word
   \node[opacity=0, inner sep=0pt, outer sep=0pt, font=\rk@font]
-    (rk@infmsr) at (0,0) {\rk@deferredinf@word};%
+    (rk@infmsr) at (0,0) {\phantom{\rk@deferredinf@word}};%
   \pgfextractx{\rk@tc}{\pgfpointanchor{rk@infmsr}{east}}%
   \pgfextractx{\rk@ta}{\pgfpointanchor{rk@infmsr}{west}}%
   \addtolength{\rk@tc}{-\rk@ta}%    rk@tc = verb_width
@@ -1371,12 +1390,14 @@
   \setlength{\rk@effmod}{\rk@tc}\addtolength{\rk@effmod}{\rk@halfsep}%  rk@effmod = foot_right
   % post_x = midpoint of platform
   \setlength{\rk@tb}{\rk@ta}\addtolength{\rk@tb}{\rk@tc}\divide\rk@tb by 2\relax  % rk@tb = post_x
-  % Y coordinates
-  \setlength{\rk@wlevel}{#1}\addtolength{\rk@wlevel}{\rk@halfsep}%                rk@wlevel = apex_y
+  % Y coordinates — triangle scaled to 2/3
+  \setlength{\rk@wlevel}{#1}%
+  \pgfmathsetlength{\rk@grd@fh}{\the\rk@halfsep * 2 / 3}%    tri height = 2/3 * halfsep
+  \addtolength{\rk@wlevel}{\rk@grd@fh}%                        rk@wlevel = apex_y
   \setlength{\rk@grd@maxdepth}{#1}\addtolength{\rk@grd@maxdepth}{\rk@grd@posth}%  rk@grd@maxdepth = plat_y
   % Draw platform, foot, and legs (same as gerund)
   \rk@line{(\the\rk@ta, \the\rk@grd@maxdepth) -- (\the\rk@tc, \the\rk@grd@maxdepth)}%
-  \pgfmathsetlength{\rk@grd@fh}{\the\rk@halfsep / 1.73205}%
+  \pgfmathsetlength{\rk@grd@fh}{\the\rk@halfsep * 2 / 3 / 1.73205}%  half-base = (2/3)*halfsep/√3
   \setlength{\rk@ta}{\rk@tb}\addtolength{\rk@ta}{-\rk@grd@fh}%
   \rk@line{(\the\rk@x, #1) -- (\the\rk@effmod, #1)}%
   \rk@line{(\the\rk@ta, #1) -- (\the\rk@tb, \the\rk@wlevel)}%
@@ -1410,7 +1431,7 @@
   \rk@extendbase
   % Size the slant on the "to" label
   \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
-    (rk@infmsr) at (0,0) {to};%
+    (rk@infmsr) at (0,0) {\phantom{to}};%
   \pgfextractx{\rk@tc}{\pgfpointanchor{rk@infmsr}{east}}%
   \pgfextractx{\rk@ta}{\pgfpointanchor{rk@infmsr}{west}}%
   \addtolength{\rk@tc}{-\rk@ta}%
@@ -1446,7 +1467,7 @@
   % Place verb on horizontal
   \setlength{\rk@halfsep}{\rk@spacing}\divide\rk@halfsep by 2\relax
   \node[opacity=0,inner sep=0pt,outer sep=0pt,font=\rk@font]
-    (rk@infvmsr) at (0,0) {#2};%
+    (rk@infvmsr) at (0,0) {\phantom{#2}};%
   \pgfextractx{\rk@effmod}{\pgfpointanchor{rk@infvmsr}{east}}%
   \pgfextractx{\rk@tc}    {\pgfpointanchor{rk@infvmsr}{west}}%
   \addtolength{\rk@effmod}{-\rk@tc}%   rk@effmod = verb_width
@@ -1533,7 +1554,7 @@
   \rk@extendbase
   % Measure the participial word to compute effmod (same formula as \rk@domod)
   \node[opacity=0, inner sep=2pt, outer sep=0pt, font=\rk@font]
-    (rk@ptcmsr) at (0,0) {#2};%
+    (rk@ptcmsr) at (0,0) {\phantom{#2}};%
   \pgfextractx{\rk@tc}{\pgfpointanchor{rk@ptcmsr}{east}}%
   \pgfextractx{\rk@ta}{\pgfpointanchor{rk@ptcmsr}{west}}%
   \addtolength{\rk@tc}{-\rk@ta}%   rk@tc = node width

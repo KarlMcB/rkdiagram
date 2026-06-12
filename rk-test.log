@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=latex 2026.5.28)  11 JUN 2026 14:58
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=latex 2026.5.28)  12 JUN 2026 10:49
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -382,53 +382,55 @@ Package: pgfopts 2014/07/10 v2.1a LaTeX package options with pgfkeys
 \rk@cmpsep=\skip54
 \rk@subClDepth=\skip55
 \rk@gerundpost=\skip56
-\rk@lw=\skip57
-\rk@x=\skip58
-\rk@ht=\skip59
-\rk@clause@miny=\skip60
-\rk@sc@saved@vb@r=\skip61
-\rk@cmpst@saved@miny=\skip62
-\rk@bridgey@override=\skip63
-\rk@sl@l=\skip64
-\rk@sl@r=\skip65
-\rk@sl@d=\skip66
-\rk@sl@y=\skip67
-\rk@vb@l=\skip68
-\rk@vb@r=\skip69
-\rk@vb@y=\skip70
-\rk@iobj@xmax=\skip71
-\rk@subj@l=\skip72
-\rk@subj@r=\skip73
-\rk@effmod=\skip74
-\rk@prevmod@E=\skip75
-\rk@mc@y=\skip76
-\rk@mc@d=\skip77
-\rk@mc@cur=\skip78
-\rk@nounmodright=\skip79
-\rk@slot@minwidth=\skip80
-\rk@slot@skip=\skip81
-\rk@slant@minlen=\skip82
-\rk@nomabs@height=\skip83
-\rk@ta=\skip84
-\rk@tb=\skip85
-\rk@tc=\skip86
-\rk@halfsep=\skip87
-\rk@cmp@textx=\skip88
-\rk@cmp@platright=\skip89
-\rk@cmp@csep=\skip90
-\rk@cmp@basey=\skip91
-\rk@cmp@wa=\skip92
-\rk@cmp@wb=\skip93
-\rk@base@y=\skip94
-\rk@wordlift=\skip95
-\rk@wlevel=\skip96
-\rk@grd@maxdepth=\skip97
-\rk@grd@posth=\skip98
-\rk@grd@fh=\skip99
-\rk@grd@wordw=\skip100
-\rk@cmpst@va@x=\skip101
-\rk@cmpst@vb@x=\skip102
-\rk@cmpst@sep=\skip103
+\rk@grd@posth@force=\skip57
+\rk@grd@shelfext=\skip58
+\rk@lw=\skip59
+\rk@x=\skip60
+\rk@ht=\skip61
+\rk@clause@miny=\skip62
+\rk@sc@saved@vb@r=\skip63
+\rk@cmpst@saved@miny=\skip64
+\rk@bridgey@override=\skip65
+\rk@sl@l=\skip66
+\rk@sl@r=\skip67
+\rk@sl@d=\skip68
+\rk@sl@y=\skip69
+\rk@vb@l=\skip70
+\rk@vb@r=\skip71
+\rk@vb@y=\skip72
+\rk@iobj@xmax=\skip73
+\rk@subj@l=\skip74
+\rk@subj@r=\skip75
+\rk@effmod=\skip76
+\rk@prevmod@E=\skip77
+\rk@mc@y=\skip78
+\rk@mc@d=\skip79
+\rk@mc@cur=\skip80
+\rk@nounmodright=\skip81
+\rk@slot@minwidth=\skip82
+\rk@slot@skip=\skip83
+\rk@slant@minlen=\skip84
+\rk@nomabs@height=\skip85
+\rk@ta=\skip86
+\rk@tb=\skip87
+\rk@tc=\skip88
+\rk@halfsep=\skip89
+\rk@cmp@textx=\skip90
+\rk@cmp@platright=\skip91
+\rk@cmp@csep=\skip92
+\rk@cmp@basey=\skip93
+\rk@cmp@wa=\skip94
+\rk@cmp@wb=\skip95
+\rk@base@y=\skip96
+\rk@wordlift=\skip97
+\rk@wlevel=\skip98
+\rk@grd@maxdepth=\skip99
+\rk@grd@posth=\skip100
+\rk@grd@fh=\skip101
+\rk@grd@wordw=\skip102
+\rk@cmpst@va@x=\skip103
+\rk@cmpst@vb@x=\skip104
+\rk@cmpst@sep=\skip105
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/geometry/geometry.sty
 Package: geometry 2026/03/07 v6.0 Page Geometry
@@ -492,7 +494,7 @@ File: microtype-pdftex.def 2026/03/01 v3.2d Definitions specific to pdftex (RS)
 
 LaTeX Info: Redefining \lsstyle on input line 944.
 LaTeX Info: Redefining \lslig on input line 944.
-\MT@outer@space=\skip104
+\MT@outer@space=\skip106
 )
 Package microtype Info: Loading configuration file microtype.cfg.
 
@@ -606,16 +608,15 @@ LaTeX Font Warning: Font shape `OMS/cmtt/m/it' undefined
 (Font)              using `OMS/cmsy/m/n' instead
 (Font)              for symbol `textbackslash' on input line 532.
 
-[8] [9] [10] [11] [12] [13] [14]
-Missing character: There is no , in font nullfont!
-[15]
-Missing character: There is no , in font nullfont!
-Missing character: There is no , in font nullfont!
-
-Overfull \hbox (1125.9323pt too wide) in paragraph at lines 1160--1160
-[][] 
+[8] [9]
+Overfull \hbox (70.85834pt too wide) in paragraph at lines 659--659
+[]\OT1/cmr/m/it/12 Tests: both gerund con-trols com-bined. Re-set both with \OM
+S/cmtt/m/it/12 n\OT1/cmtt/m/it/12 rkset\OMS/cmtt/m/it/12 f\OT1/cmtt/m/it/12 ger
+undPostH=0pt, gerundShelfExt=0pt\OMS/cmtt/m/it/12 g
  []
 
+[10] [11] [12] [13] [14] [15]
+Missing character: There is no , in font nullfont!
 [16] [17] (./rk-test.aux)
  ***********
 LaTeX2e <2025-11-01>
@@ -627,12 +628,12 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 15441 strings out of 467341
- 312471 string characters out of 5415365
- 914045 words of memory out of 5000000
- 44314 multiletter control sequences out of 15000+600000
+ 15442 strings out of 467341
+ 312466 string characters out of 5415365
+ 817942 words of memory out of 5000000
+ 44315 multiletter control sequences out of 15000+600000
  631561 words of font info for 54 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 117i,6n,121p,1004b,1715s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 117i,6n,121p,1004b,1166s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on rk-test.dvi (17 pages, 435648 bytes).
+Output written on rk-test.dvi (17 pages, 383296 bytes).

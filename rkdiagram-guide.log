@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.24.0 (TeX Live 2026)  (format=lualatex 2026.5.28)  3 JUN 2026 13:05
+This is LuaHBTeX, Version 1.24.0 (TeX Live 2026)  (format=lualatex 2026.5.28)  12 JUN 2026 10:46
  restricted system commands enabled.
 **rkdiagram-guide.tex
 (./rkdiagram-guide.tex
@@ -412,52 +412,55 @@ Package: pgfopts 2014/07/10 v2.1a LaTeX package options with pgfkeys
 \rk@cmpsep=\skip54
 \rk@subClDepth=\skip55
 \rk@gerundpost=\skip56
-\rk@lw=\skip57
-\rk@x=\skip58
-\rk@ht=\skip59
-\rk@clause@miny=\skip60
-\rk@sc@saved@vb@r=\skip61
-\rk@cmpst@saved@miny=\skip62
-\rk@bridgey@override=\skip63
-\rk@sl@l=\skip64
-\rk@sl@r=\skip65
-\rk@sl@d=\skip66
-\rk@sl@y=\skip67
-\rk@vb@l=\skip68
-\rk@vb@r=\skip69
-\rk@vb@y=\skip70
-\rk@iobj@xmax=\skip71
-\rk@subj@l=\skip72
-\rk@subj@r=\skip73
-\rk@effmod=\skip74
-\rk@prevmod@E=\skip75
-\rk@mc@y=\skip76
-\rk@mc@d=\skip77
-\rk@mc@cur=\skip78
-\rk@nounmodright=\skip79
-\rk@slot@minwidth=\skip80
-\rk@slot@skip=\skip81
-\rk@slant@minlen=\skip82
-\rk@nomabs@height=\skip83
-\rk@ta=\skip84
-\rk@tb=\skip85
-\rk@tc=\skip86
-\rk@halfsep=\skip87
-\rk@cmp@textx=\skip88
-\rk@cmp@platright=\skip89
-\rk@cmp@csep=\skip90
-\rk@cmp@basey=\skip91
-\rk@cmp@wa=\skip92
-\rk@cmp@wb=\skip93
-\rk@base@y=\skip94
-\rk@wordlift=\skip95
-\rk@wlevel=\skip96
-\rk@grd@maxdepth=\skip97
-\rk@grd@posth=\skip98
-\rk@grd@fh=\skip99
-\rk@cmpst@va@x=\skip100
-\rk@cmpst@vb@x=\skip101
-\rk@cmpst@sep=\skip102
+\rk@grd@posth@force=\skip57
+\rk@grd@shelfext=\skip58
+\rk@lw=\skip59
+\rk@x=\skip60
+\rk@ht=\skip61
+\rk@clause@miny=\skip62
+\rk@sc@saved@vb@r=\skip63
+\rk@cmpst@saved@miny=\skip64
+\rk@bridgey@override=\skip65
+\rk@sl@l=\skip66
+\rk@sl@r=\skip67
+\rk@sl@d=\skip68
+\rk@sl@y=\skip69
+\rk@vb@l=\skip70
+\rk@vb@r=\skip71
+\rk@vb@y=\skip72
+\rk@iobj@xmax=\skip73
+\rk@subj@l=\skip74
+\rk@subj@r=\skip75
+\rk@effmod=\skip76
+\rk@prevmod@E=\skip77
+\rk@mc@y=\skip78
+\rk@mc@d=\skip79
+\rk@mc@cur=\skip80
+\rk@nounmodright=\skip81
+\rk@slot@minwidth=\skip82
+\rk@slot@skip=\skip83
+\rk@slant@minlen=\skip84
+\rk@nomabs@height=\skip85
+\rk@ta=\skip86
+\rk@tb=\skip87
+\rk@tc=\skip88
+\rk@halfsep=\skip89
+\rk@cmp@textx=\skip90
+\rk@cmp@platright=\skip91
+\rk@cmp@csep=\skip92
+\rk@cmp@basey=\skip93
+\rk@cmp@wa=\skip94
+\rk@cmp@wb=\skip95
+\rk@base@y=\skip96
+\rk@wordlift=\skip97
+\rk@wlevel=\skip98
+\rk@grd@maxdepth=\skip99
+\rk@grd@posth=\skip100
+\rk@grd@fh=\skip101
+\rk@grd@wordw=\skip102
+\rk@cmpst@va@x=\skip103
+\rk@cmpst@vb@x=\skip104
+\rk@cmpst@sep=\skip105
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/geometry/geometry.sty
 Package: geometry 2026/03/07 v6.0 Page Geometry
@@ -612,7 +615,7 @@ Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 84.
 )
-\Hy@SectionHShift=\skip103
+\Hy@SectionHShift=\skip106
 ) (/usr/local/texlive/2026/texmf-dist/tex/latex/hyperxmp/hyperxmp.sty
 Package: hyperxmp 2024/03/17 v5.13 Store hyperref metadata in XMP format
 \hyxmp@aep@toks=\toks37
@@ -690,7 +693,7 @@ Lua module: microtype 2026/03/01 v3.2d microtype module.
 Module microtype Info: overwriting function `keepligature' on input line 63
 LaTeX Info: Redefining \lsstyle on input line 779.
 LaTeX Info: Redefining \lslig on input line 779.
-\MT@outer@space=\skip104
+\MT@outer@space=\skip107
 )
 Package microtype Info: Loading configuration file microtype.cfg.
 
@@ -728,8 +731,8 @@ Package: array 2025/09/25 v2.6n Tabular extension package (FMi)
 \ar@mcellbox=\box65
 \extrarowheight=\dimen285
 \NC@list=\toks42
-\extratabsurround=\skip105
-\backup@length=\skip106
+\extratabsurround=\skip108
+\backup@length=\skip109
 \ar@cellbox=\box66
 )
 (/usr/local/texlive/2026/texmf-dist/tex/latex/listings/listings.sty
@@ -779,12 +782,12 @@ Package: calc 2025/03/01 v4.3b Infix arithmetic (KKT,FJ)
 \calc@Bcount=\count343
 \calc@Adimen=\dimen290
 \calc@Bdimen=\dimen291
-\calc@Askip=\skip107
-\calc@Bskip=\skip108
+\calc@Askip=\skip110
+\calc@Bskip=\skip111
 LaTeX Info: Redefining \setlength on input line 86.
 LaTeX Info: Redefining \addtolength on input line 87.
 \calc@Ccount=\count344
-\calc@Cskip=\skip109
+\calc@Cskip=\skip112
 ))
 (/usr/local/texlive/2026/texmf-dist/tex/generic/xstring/xstring.sty
 (/usr/local/texlive/2026/texmf-dist/tex/generic/xstring/xstring.tex
@@ -802,7 +805,7 @@ Package: verbatim 2024-01-22 v1.5x LaTeX2e package for verbatim enhancements
 \verbatim@line=\toks45
 \verbatim@in@stream=\read3
 )
-\doclicense@hsize=\skip110
+\doclicense@hsize=\skip113
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/doclicense/doclicense-english.ldf
 File: doclicense-english.ldf 
@@ -856,8 +859,8 @@ Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
 ) (/usr/local/texlive/2026/texmf-dist/tex/latex/titlesec/titlesec.sty
 Package: titlesec 2025/01/04 v2.17 Sectioning titles
 \ttl@box=\box71
-\beforetitleunit=\skip111
-\aftertitleunit=\skip112
+\beforetitleunit=\skip114
+\aftertitleunit=\skip115
 \ttl@plus=\dimen306
 \ttl@minus=\dimen307
 \ttl@toksa=\toks46
@@ -1145,224 +1148,234 @@ LaTeX Font Info:    External font `cmex10' loaded for size
  [1
 
 {/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 196--204
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 198--206
 []  [] 
  []
 
 [2]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 211--225
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 213--227
 []  [] 
  []
 
 
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 232--245
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 234--247
 []  [] 
  []
 
 
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 252--264
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 254--266
 []  [] 
  []
 
 [3]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 282--299
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 284--301
 []  [] 
  []
 
 [4]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 318--332
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 320--334
 []  [] 
  []
 
 
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 337--359
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 339--361
 []  [] 
  []
 
 [5]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 381--393
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 383--395
 []  [] 
  []
 
 
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 400--417
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 402--419
 []  [] 
  []
 
 [6]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 427--451
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 429--453
 []  [] 
  []
 
 [7
 Missing character: There is no , (U+002C) in font nullfont!
 ]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 478--494
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 480--496
 []  [] 
  []
 
 
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 502--517
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 504--519
 []  [] 
  []
 
 [8]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 530--554
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 532--556
 []  [] 
  []
 
 
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 559--577
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 561--579
 []  [] 
  []
 
 [9]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 592--606
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 594--608
 []  [] 
  []
 
 
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 611--627
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 613--629
 []  [] 
  []
 
 
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 632--650
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 634--652
+[]  [] 
+ []
+
+
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 665--683
 []  [] 
  []
 
 [10]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 673--690
-[]  [] 
- []
-
-
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 695--715
-[]  [] 
- []
-
-
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 720--738
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 696--716
 []  [] 
  []
 
 [11]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 743--767
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 739--756
 []  [] 
  []
 
 
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 787--801
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 761--781
+[]  [] 
+ []
+
+
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 786--804
 []  [] 
  []
 
 [12]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 806--822
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 809--833
 []  [] 
  []
 
 
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 828--840
-[]  [] 
- []
-
-
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 844--861
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 853--867
 []  [] 
  []
 
 [13]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 880--894
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 872--888
 []  [] 
  []
 
 
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 898--914
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 894--906
+[]  [] 
+ []
+
+
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 910--927
 []  [] 
  []
 
 [14]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 931--943
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 946--960
 []  [] 
  []
 
 
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 950--962
-[]  [] 
- []
-
-
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 969--984
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 964--980
 []  [] 
  []
 
 [15]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 1012--1024
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 997--1009
+[]  [] 
+ []
+
+
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 1016--1028
+[]  [] 
+ []
+
+
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 1035--1050
 []  [] 
  []
 
 [16]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 1032--1056
-[]  [] 
- []
-
-
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 1063--1077
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 1078--1090
 []  [] 
  []
 
 [17]
-Overfull \hbox (0.43088pt too wide) in paragraph at lines 1099--1115
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 1098--1122
+[]  [] 
+ []
+
+
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 1129--1143
 []  [] 
  []
 
 [18]
-Underfull \hbox (badness 1596) in paragraph at lines 1196--1197
+Overfull \hbox (0.43088pt too wide) in paragraph at lines 1165--1181
+[]  [] 
+ []
+
+[19]
+Underfull \hbox (badness 1596) in paragraph at lines 1262--1263
 []|\TU/LatinModernRoman(0)/m/n/10.95 Par-ticip-ial ob-ject on the tail; only in-
 side
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1197--1197
+Underfull \hbox (badness 10000) in paragraph at lines 1263--1263
 []|\TU/LatinModernMono(0)/b/n/10.95 \rkNomAbs[noun-mods]{noun}{ptcl-
  []
 
 
-Overfull \hbox (111.26315pt too wide) in paragraph at lines 1208--1208
+Overfull \hbox (111.26315pt too wide) in paragraph at lines 1274--1274
 []|\TU/LatinModernMono(0)/b/n/10.95 \rkCompoundSent[conj][sep][opts1]{body1}[opt
 s2]{body2}| 
  []
 
 
-Underfull \hbox (badness 2689) in paragraph at lines 1223--1224
+Underfull \hbox (badness 2689) in paragraph at lines 1289--1290
 []|\TU/LatinModernRoman(0)/m/n/10.95 Height above main base-line for the next
  []
 
-[19]
+[20]
 
 LaTeX Font Warning: Font shape `TU/LatinModernMono(0)/b/it' undefined
-(Font)              using `TU/LatinModernMono(0)/b/n' instead on input line 126
-5.
+(Font)              using `TU/LatinModernMono(0)/b/n' instead on input line 133
+4.
 
-
-Overfull \hbox (8.44066pt too wide) in paragraph at lines 1278--1280
+[21]
+Overfull \hbox (8.44066pt too wide) in paragraph at lines 1347--1349
 [][]\TU/LatinModernMono(0)/b/it/10.95 \rkCompoundSent[conj][sep][opts1]{body1}[o
 pts2]{body2}[] \TU/LatinModernRoman(0)/m/n/10.95 Draws two in-de-pen-dent clause
 s
  []
 
-[20] [21] [22]
-Underfull \hbox (badness 1888) in paragraph at lines 1512--1514
+[22] [23]
+Underfull \hbox (badness 1888) in paragraph at lines 1581--1583
 []|\TU/LatinModernRoman(0)/m/n/10.95 Sets a min-i-mum length for the next mod-i-
 fier or
  []
 
-[23]
-<doclicense-CC-by-nc-sa-88x31.pdf, id=579, 90.3375pt x 31.61812pt>
+[24]
+<doclicense-CC-by-nc-sa-88x31.pdf, id=609, 90.3375pt x 31.61812pt>
 File: doclicense-CC-by-nc-sa-88x31.pdf Graphic file (type pdf)
 <use doclicense-CC-by-nc-sa-88x31.pdf>
 Package luatex.def Info: doclicense-CC-by-nc-sa-88x31.pdf  used on input line 1
-537.
+606.
 (luatex.def)             Requested size: 109.49997pt x 38.32507pt.
  (/usr/local/texlive/2026/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
 File: se-pdfdoc.def 2019/11/29 v1.12 stringenc: PDFDocEncoding
@@ -1370,7 +1383,7 @@ File: se-pdfdoc.def 2019/11/29 v1.12 stringenc: PDFDocEncoding
 (/usr/local/texlive/2026/texmf-dist/tex/generic/stringenc/se-utf32be.def
 File: se-utf32be.def 2019/11/29 v1.12 stringenc: UTF-32BE
 )
-[24</usr/local/texlive/2026/texmf-dist/tex/latex/doclicense/images/doclicense-CC
+[25</usr/local/texlive/2026/texmf-dist/tex/latex/doclicense/images/doclicense-CC
 -by-nc-sa-88x31.pdf>] (./rkdiagram-guide.aux)
  ***********
 LaTeX2e <2025-11-01>
@@ -1385,14 +1398,14 @@ Package rerunfilecheck Info: File `rkdiagram-guide.out' has not changed.
 )
 
 Here is how much of LuaTeX's memory you used:
- 30028 strings out of 475891
- 125086,1373583 words of node,token memory allocated
- 625 words of node memory still in use:
+ 30101 strings out of 475891
+ 195499,1373583 words of node,token memory allocated
+ 635 words of node memory still in use:
    4 hlist, 1 vlist, 1 rule, 1 local_par, 4 glue, 4 kern, 1 penalty, 3 glyph, 10
- attribute, 75 glue_spec, 10 attribute_list, 2 write, 1 pdf_action nodes
-   avail lists: 1:11,2:5057,3:2123,4:997,5:1348,6:109,7:7928,8:4,9:3731,10:10,11
-:495
- 51512 multiletter control sequences out of 65536+600000
+ attribute, 77 glue_spec, 10 attribute_list, 2 write, 1 pdf_action nodes
+   avail lists: 1:10,2:5254,3:2129,4:995,5:1397,6:109,7:8139,8:8,9:3773,10:10,11
+:503
+ 51558 multiletter control sequences out of 65536+600000
  60 fonts using 5689215 bytes
  117i,9n,114p,1203b,1292s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/opentype/public/lm/lmmono10-italic.otf
@@ -1408,10 +1421,10 @@ man12-bold.otf></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/c
 m/cmmi10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/
 cmr10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cms
 y10.pfb>
-Output written on rkdiagram-guide.pdf (24 pages, 207334 bytes).
+Output written on rkdiagram-guide.pdf (25 pages, 207889 bytes).
 
-PDF statistics: 670 PDF objects out of 1000 (max. 8388607)
- 605 compressed objects within 7 object streams
- 414 named destinations out of 1000 (max. 1048576)
+PDF statistics: 701 PDF objects out of 1000 (max. 8388607)
+ 635 compressed objects within 7 object streams
+ 441 named destinations out of 1000 (max. 1048576)
  205 words of extra memory for PDF output out of 10000 (max. 100000000)
 

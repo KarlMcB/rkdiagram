@@ -33,7 +33,9 @@
 \newlength{\rk@modgap}     \setlength{\rk@modgap}{0.25cm}
 \newlength{\rk@cmpsep}     \setlength{\rk@cmpsep}{0pt}  % 0pt = auto (use rk@ht)
 \newlength{\rk@subClDepth} \setlength{\rk@subClDepth}{2.5cm}
-\newlength{\rk@gerundpost} \setlength{\rk@gerundpost}{1.2cm}
+\newlength{\rk@gerundpost}  \setlength{\rk@gerundpost}{1.2cm}
+\newlength{\rk@grd@posth@force} \setlength{\rk@grd@posth@force}{0pt}  % 0 = adaptive
+\newlength{\rk@grd@shelfext}    \setlength{\rk@grd@shelfext}{0pt}     % extra lower-shelf width
 \newlength{\rk@lw}         \setlength{\rk@lw}{0.4pt}
 \newcommand{\rk@color}{black}
 \newcommand{\rk@font}{}
@@ -45,8 +47,10 @@
   modDepth/.code       = {\setlength{\rk@modDepth}{#1}},
   modgap/.code         = {\setlength{\rk@modgap}{#1}},
   cmpSep/.code         = {\setlength{\rk@cmpsep}{#1}},
-  subClauseDepth/.code = {\setlength{\rk@subClDepth}{#1}},
-  gerundPost/.code     = {\setlength{\rk@gerundpost}{#1}},
+  subClauseDepth/.code  = {\setlength{\rk@subClDepth}{#1}},
+  gerundPost/.code      = {\setlength{\rk@gerundpost}{#1}},
+  gerundPostH/.code     = {\setlength{\rk@grd@posth@force}{#1}},
+  gerundShelfExt/.code  = {\setlength{\rk@grd@shelfext}{#1}},
   linewidth/.code      = {\setlength{\rk@lw}{#1}},
   color/.code          = {\renewcommand{\rk@color}{#1}},
   bridgeY/.code        = {\setlength{\rk@bridgey@override}{#1}},
@@ -1245,11 +1249,15 @@
     \endgroup
   }%
   % Compute post height: at least rk@gerundpost, at least maxdepth + 2*modgap
-  \setlength{\rk@grd@posth}{\rk@gerundpost}%
-  \ifdim\rk@grd@maxdepth>0pt
-    \setlength{\rk@ta}{\rk@grd@maxdepth}%
-    \addtolength{\rk@ta}{\rk@modgap}\addtolength{\rk@ta}{\rk@modgap}%
-    \ifdim\rk@ta>\rk@grd@posth\setlength{\rk@grd@posth}{\rk@ta}\fi
+  \ifdim\rk@grd@posth@force>0pt
+    \setlength{\rk@grd@posth}{\rk@grd@posth@force}%   forced override
+  \else
+    \setlength{\rk@grd@posth}{\rk@gerundpost}%
+    \ifdim\rk@grd@maxdepth>0pt
+      \setlength{\rk@ta}{\rk@grd@maxdepth}%
+      \addtolength{\rk@ta}{\rk@modgap}\addtolength{\rk@ta}{\rk@modgap}%
+      \ifdim\rk@ta>\rk@grd@posth\setlength{\rk@grd@posth}{\rk@ta}\fi
+    \fi
   \fi
   % --- Measure gerund word ---
   \node[opacity=0, inner sep=0pt, outer sep=0pt, font=\rk@font]
@@ -1268,8 +1276,11 @@
   \setlength{\rk@ta}{\rk@x}\addtolength{\rk@ta}{\rk@halfsep}%           rk@ta = shelf_left
   % upper_post_x / shelf_right = shelf_left + word_width
   \setlength{\rk@tc}{\rk@ta}\addtolength{\rk@tc}{\rk@grd@wordw}%         rk@tc = upper_post_x
-  % foot_right = upper_post_x + halfsep
-  \setlength{\rk@effmod}{\rk@tc}\addtolength{\rk@effmod}{\rk@halfsep}%   rk@effmod = foot_right
+  % foot_right = upper_post_x + halfsep + shelfext
+  \setlength{\rk@effmod}{\rk@tc}\addtolength{\rk@effmod}{\rk@halfsep}%
+  \addtolength{\rk@effmod}{\rk@grd@shelfext}%                              rk@effmod = foot_right
+  % extend lower shelf right end by shelfext too
+  \addtolength{\rk@tc}{\rk@grd@shelfext}%                                  rk@tc = lower shelf right
   % post_x = midpoint of shelf
   \setlength{\rk@tb}{\rk@ta}\addtolength{\rk@tb}{\rk@tc}\divide\rk@tb by 2\relax  % rk@tb = post_x
   % --- Y coordinates ---
@@ -1294,8 +1305,8 @@
   \rk@line{(\the\rk@ta, \the\rk@grd@maxdepth) -- (\the\rk@tc, \the\rk@grd@maxdepth)}%
   % Step vertical: at shelf_left, from shelf_y up to top_y
   \rk@line{(\the\rk@ta, \the\rk@grd@maxdepth) -- (\the\rk@ta, \the\rk@wlevel)}%
-  % Top shelf: extends LEFT from shelf_left by word_width/2 at top_y
-  \setlength{\rk@grd@fh}{\rk@grd@wordw}\divide\rk@grd@fh by 2\relax
+  % Top shelf: extends LEFT from shelf_left by word_width * 3/8 at top_y (3/4 of former width/2)
+  \pgfmathsetlength{\rk@grd@fh}{\the\rk@grd@wordw * 3 / 8}%
   \setlength{\rk@grd@fh}{\dimexpr\rk@ta-\rk@grd@fh\relax}%   rk@grd@fh = top_shelf_left
   \rk@line{(\the\rk@grd@fh, \the\rk@wlevel) -- (\the\rk@ta, \the\rk@wlevel)}%
   % --- Record slot (modifiers attach from shelf level) ---

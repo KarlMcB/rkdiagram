@@ -614,6 +614,53 @@
   \par\textit{Tests: gerund (with adverb modifier) as object of a preposition.}
 }
 
+\testcase{Swimming is fun. (forced post height via gerundPostH)}{%
+  \begin{rkdiagram}
+    \rkset{gerundPostH=2.5cm}
+    \rkSubject{
+      \rkGerund{Swimming}
+    }
+    \rkVerb{is}
+    \rkPredAdj{fun}
+  \end{rkdiagram}
+  \par\textit{Tests: \texttt{\textbackslash rkset\{gerundPostH=2.5cm\}} forces the vertical bar
+    to 2.5\,cm regardless of word height or modifiers.  Reset with
+    \texttt{gerundPostH=0pt} to restore adaptive behaviour.}
+}
+
+\testcase{Rapid swimming exhausts him. (extended lower shelf via gerundShelfExt)}{%
+  \begin{rkdiagram}
+    \rkset{gerundShelfExt=1.5cm}
+    \rkSubject{
+      \rkGerund[
+        \rkAdj{Rapid}
+      ]{swimming}
+    }
+    \rkVerb{exhausts}
+    \rkDObj{him}
+  \end{rkdiagram}
+  \par\textit{Tests: \texttt{\textbackslash rkset\{gerundShelfExt=1.5cm\}} extends the lower
+    shelf and triangle foot 1.5\,cm to the right, giving modifier slants more room.}
+}
+
+\testcase{Rapid swimming exhausts him. (both gerundPostH and gerundShelfExt combined)}{%
+  \begin{rkdiagram}
+    \rkset{gerundPostH=2.0cm, gerundShelfExt=1.0cm}
+    \rkSubject{
+      \rkGerund[
+        \rkAdj{Rapid}
+      ]{swimming}
+    }
+    \rkVerb{exhausts}
+    \rkDObj{him}
+  \end{rkdiagram}
+  \par\textit{Tests: both gerund controls combined.  Reset both with
+    \texttt{\textbackslash rkset\{gerundPostH=0pt, gerundShelfExt=0pt\}} afterwards.}
+}
+
+% Reset gerund overrides after Group 12 tests
+\rkset{gerundPostH=0pt, gerundShelfExt=0pt}
+
 % ============================================================
 \testsection{Group 13 — Participles}
 % ============================================================
